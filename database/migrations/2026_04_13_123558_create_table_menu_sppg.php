@@ -9,11 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+public function up(): void
     {
         Schema::create('menusppg', function (Blueprint $table) {
-            $table->id();
+            $table->id('id_menu');
+            $table->unsignedBigInteger('id_sppg'); 
+            $table->string('nama_menu');
+            $table->string('foto_menu')->nullable();
             $table->timestamps();
+
+            $table->foreign('id_sppg')->references('id_sppg')->on('sppg')->cascadeOnDelete();
         });
     }
 
