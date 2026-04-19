@@ -19,11 +19,6 @@ class User extends Authenticatable
         'updated_at' => 'datetime',
     ];
 
-    public function getAuthIdentifierName()
-    {
-        return 'username';
-    }
-
     public function isAdminDinkes()
     {
         return $this->role === 'admin_dinkes';
