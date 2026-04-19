@@ -1,58 +1,92 @@
 <?php
-// app/Http/Controllers/Auth/LoginController.php
 
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    /**
+     * Show the application's login form.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showLoginForm()
     {
         return view('login');
     }
 
+    /**
+     * Handle a login request to the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        Log::info('Login attempt with request data present: ' . ($request->all() ? 'Yes' : 'No'));
+
+        $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+        $username = $request->input('username');
+        $password = $request->input('password');
+        $remember = $request->filled('remember');
 
-            dd($user);
-            
-            // Check if user is active
-            if ($user->status !== 'aktif') {
-                Auth::logout();
-                return back()->withErrors(['username' => 'Akun Anda tidak aktif.'])->onlyInput('username');
-            }
+        // Custom authentication for username-based login
+        $user = User::where('username', $username)->first();
 
+        if ($user && Hash::check($password, $user->password)) {
+            Auth::login($user, $remember);
             $request->session()->regenerate();
-            
-            // Redirect based on role
-            if ($user->isAdminDinkes()) {
-                return redirect()->intended('/dashboard/admin');
+
+            Log::info('User logged in successfully: ' . $user->username);
+
+            // Redirect based on user role
+            if ($user->role === 'admin_dinkes') {
+                return redirect()->intended(route('admin.dashboard'));
+            } elseif ($user->role === 'operator_sppg') {
+                return redirect()->intended(route('sppg.index'));
             } else {
-                return redirect()->intended('/dashboard/operator');
+                return redirect()->intended(route('home'));
             }
         }
 
-        return back()->withErrors([
-            'username' => 'Username atau password salah.',
-        ])->onlyInput('username');
+        Log::warning('Failed login attempt for username: ' . $username);
+
+        throw ValidationException::withMessages([
+            'username' => ['Kredensial yang diberikan tidak cocok dengan catatan kami.'],
+        ]);
     }
 
+    /**
+     * Log the user out of the application.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        if ($user) {
+            Log::info('User logged out: ' . $user->username);
+        }
+
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/');
     }
 }
