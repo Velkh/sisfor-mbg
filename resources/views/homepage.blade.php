@@ -56,6 +56,12 @@
         .btn-login-nav { margin-left:8px; padding:8px 20px; background:var(--g700) !important; color:#fff !important; border-radius:7px; font-weight:700; }
         .btn-login-nav:hover { background:var(--g800) !important; }
 
+        .user-info { display: flex; align-items: center; gap: 12px; margin-left: 16px; padding-left: 16px; border-left: 1px solid var(--border); }
+        .user-info .username { font-size: 0.85rem; color: var(--muted); }
+        .user-info .badge { font-size: 0.75rem; background: var(--g50); color: var(--g700); padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+        .user-info .btn-logout { padding: 6px 14px; margin: 0; font-size: 0.85rem; border: none; background: var(--error, #dc2626); border-radius: 7px; }
+        .user-info .btn-logout:hover { background: #b91c1c; transform: translateY(-1px); }
+
         /* HERO */
         .hero { position:relative; background:linear-gradient(135deg, var(--g900) 0%, var(--g800) 55%, var(--g700) 100%); overflow:hidden; min-height:auto; display:flex; flex-direction:column; padding:60px 48px; }
         .hero-bg { position:absolute; inset:0; background:url('https://assets.promediateknologi.id/crop/0x0:0x0/1200x600/webp/photo/2023/07/26/DEPOK-2894385870.png') center/cover no-repeat; opacity:.13; z-index:0; }
@@ -191,6 +197,7 @@
             .hero,.about,.stats-section,.regulasi,.faq-section,.login-section,footer { padding-left:18px; padding-right:18px; }
             .hero-inner { padding:0; }
             .nav-links { display:none; }
+            .user-info { display:none; }
             .stats-grid { grid-template-columns:1fr; }
             .reg-panel.active { grid-template-columns:1fr; }
             .footer-grid { grid-template-columns:1fr; }
@@ -221,7 +228,18 @@
         <li><a href="#hero" class="active">Beranda</a></li>
         <li><a href="#about">Tentang</a></li>
         <li><a href="#stats">Statistik</a></li>
-        <li><a href="{{ route('login') }}" class="btn-login-nav">Login</a></li>
+        @auth
+            <li class="user-info">
+                <span class="username">{{ auth()->user()->username }}</span>
+                <span class="badge">{{ auth()->user()->role }}</span>
+                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="btn-login-nav btn-logout">Keluar</button>
+                </form>
+            </li>
+        @else
+            <li><a href="{{ route('login') }}" class="btn-login-nav">Login</a></li>
+        @endauth
     </ul>
 </nav>
 
@@ -451,6 +469,16 @@
 </footer>
 
 <script>
+// Redirect jika sudah login
+@auth
+    const userRole = "{{ auth()->user()->role }}";
+    if (userRole === 'admin_dinkes') {
+        window.location.href = "{{ route('admin.dashboard') }}";
+    } else if (userRole === 'operator_sppg') {
+        window.location.href = "{{ route('sppg.index') }}";
+    }
+@endauth
+
 // Regulasi tabs
 document.querySelectorAll('.reg-tab').forEach(tab => {
     tab.addEventListener('click', () => {
