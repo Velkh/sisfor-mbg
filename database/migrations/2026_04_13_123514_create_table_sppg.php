@@ -21,14 +21,14 @@ return new class extends Migration
             $table->integer('jml_pegawai');
             $table->integer('kapasitas_porsi');
             $table->unsignedBigInteger('id_puskesmas');
-            $table->enum('status_ikl', ['belum_mengajukan', 'sudah_mengajukan', 'selesai']); 
-            $table->integer('nilai_ikl');
-            $table->enum('hasil_ikl', ['memenuhi', 'tidak_memenuhi']);
-            $table->dateTime('tanggal_ikl');
-            $table->enum('status_slhs', ['belum_mengajukan', 'sudah_mengajukan', 'selesai']); 
+            $table->enum('status_ikl', ['belum_mengajukan', 'sudah_mengajukan', 'selesai'])->nullable(); 
+            $table->integer('nilai_ikl')->nullable();
+            $table->enum('hasil_ikl', ['memenuhi', 'tidak_memenuhi'])->nullable();
+            $table->dateTime('tanggal_ikl')->nullable();
+            $table->enum('status_slhs', ['belum_mengajukan', 'sudah_mengajukan', 'selesai'])->nullable();
             $table->string('foto_slhs')->nullable();
-            $table->dateTime('tgl_berlaku');
-            $table->dateTime('tgl_berakhir');
+            $table->dateTime('tgl_berlaku')->nullable();
+            $table->dateTime('tgl_berakhir')->nullable();
             $table->timestamps();
 
             $table->foreign('id_users')->references('id_users')->on('users')->cascadeOnDelete();
