@@ -6,6 +6,9 @@ use App\Http\Middleware\AdminDinkesMiddleware;
 use App\Http\Middleware\OperatorSppgMiddleware;
 use App\Http\Controllers\DinkesController;
 use App\Http\Controllers\Sppg\SppgController;
+use App\Http\Controllers\Sppg\DaftarSppgController;
+use App\Http\Controllers\Sppg\IklController;
+
 Route::get('/', function () {
     return view('homepage');
 })->name('home');
@@ -31,8 +34,19 @@ Route::middleware('auth')->group(function () {
 // Operator SPPG Routes
 Route::middleware('operator_sppg')->prefix('sppg')->name('sppg.')->group(function () {
     Route::get('/dashboard', [SppgController::class, 'index'])->name('index');
+
+    // Halaman inspeksi (UI)
     Route::get('/inspeksi', [SppgController::class, 'inspeksi'])->name('inspeksi');
-    Route::get('/profile', [SppgController::class, 'profile'])->name('profile');
+
+    // Aksi IKL (API search + simpan)
+    Route::get('/ikl/search', [IklController::class, 'search'])->name('ikl.search');
+    Route::post('/ikl', [IklController::class, 'store'])->name('ikl.store');
+
+    // Daftar / Profile SPPG
+    Route::get('/profile', [DaftarSppgController::class, 'create'])->name('profile');
+    Route::get('/daftar', [DaftarSppgController::class, 'create'])->name('daftar.create');
+    Route::post('/daftar', [DaftarSppgController::class, 'store'])->name('daftar.store');
+
     Route::get('/suratlaik', [SppgController::class, 'suratlaik'])->name('suratlaik');
     Route::get('/pelaporan', [SppgController::class, 'pelaporan'])->name('pelaporan');
 });

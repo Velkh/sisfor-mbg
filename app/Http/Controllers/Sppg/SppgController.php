@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Sppg;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -24,7 +26,12 @@ class SppgController extends Controller
      */
     public function inspeksi()
     {
-        return view('sppg.inspeksi');
+        $userId = Auth::id();
+
+        $existingData = DB::table('sppg')
+            ->where('id_users', $userId)
+            ->first();
+        return view('sppg.inspeksi', compact('existingData'));
     }
 
     /**

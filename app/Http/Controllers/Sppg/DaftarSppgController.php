@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Sppg;
 
 use App\Http\Controllers\Controller;
+use App\Models\FotoSppg;
+use App\Models\MenuSppg;
 use App\Models\Puskesmas;
 use App\Models\Sppg;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class DaftarSppgController extends Controller
@@ -19,6 +22,7 @@ class DaftarSppgController extends Controller
         $userId = Auth::id();
 
         $sppg = Sppg::query()
+            ->with(['menuSppg', 'fotoSppg'])
             ->where('id_users', $userId)
             ->first();
 
@@ -41,9 +45,18 @@ class DaftarSppgController extends Controller
             'jml_pegawai' => ['required', 'integer', 'min:1'],
             'kapasitas_porsi' => ['required', 'integer', 'min:1'],
             'id_puskesmas' => ['required', 'exists:puskesmas,id_puskesmas'],
+
+            'foto_sppg' => ['nullable', 'array'],
+            'foto_sppg.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+
+            'menu_nama' => ['nullable', 'array'],
+            'menu_nama.*' => ['nullable', 'string', 'max:255'],
+            'menu_foto' => ['nullable', 'array'],
+            'menu_foto.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $sppgLama = Sppg::query()
+            ->with(['menuSppg', 'fotoSppg'])
             ->where('id_users', $userId)
             ->first();
 
@@ -58,7 +71,7 @@ class DaftarSppgController extends Controller
                 $fotoKepalaPath = $request->file('foto_kepala')->store('foto_kepala', 'public');
             }
 
-            return Sppg::query()->updateOrCreate(
+            $sppg = Sppg::query()->updateOrCreate(
                 ['id_users' => $userId],
                 [
                     'nama_sppg' => $validated['nama_sppg'],
@@ -70,6 +83,59 @@ class DaftarSppgController extends Controller
                     'id_puskesmas' => $validated['id_puskesmas'],
                 ]
             );
+
+            if ($request->hasFile('foto_sppg')) {
+                $sppg->fotoSppg()->get()->each(function (FotoSppg $foto): void {
+                    Storage::disk('public')->delete($foto->foto_sppg);
+                });
+                $sppg->fotoSppg()->delete();
+
+                foreach ($request->file('foto_sppg') as $fotoFile) {
+                    $path = $fotoFile->store('foto_sppg', 'public');
+                    $sppg->fotoSppg()->create([
+                        'foto_sppg' => $path,
+                    ]);
+                }
+            }
+
+            $menuNames = $request->input('menu_nama', []);
+            $menuPhotos = $request->file('menu_foto', []);
+            $hasMenuInput = count(array_filter($menuNames, fn ($item) => trim((string) $item) !== '')) > 0 || count($menuPhotos) > 0;
+
+            if ($hasMenuInput) {
+                $sppg->menuSppg()->get()->each(function (MenuSppg $menu): void {
+                    if ($menu->foto_menu) {
+                        Storage::disk('public')->delete($menu->foto_menu);
+                    }
+                });
+                $sppg->menuSppg()->delete();
+
+                $maxRows = max(count($menuNames), count($menuPhotos));
+
+                for ($i = 0; $i < $maxRows; $i++) {
+                    $namaMenu = trim((string) ($menuNames[$i] ?? ''));
+                    $fotoMenuFile = $menuPhotos[$i] ?? null;
+
+                    if ($namaMenu === '' && ! $fotoMenuFile) {
+                        continue;
+                    }
+
+                    if ($namaMenu === '' || ! $fotoMenuFile) {
+                        throw ValidationException::withMessages([
+                            'menu_nama' => 'Nama menu dan foto menu harus diisi berpasangan.',
+                        ]);
+                    }
+
+                    $fotoMenuPath = $fotoMenuFile->store('foto_menu', 'public');
+
+                    $sppg->menuSppg()->create([
+                        'nama_menu' => $namaMenu,
+                        'foto_menu' => $fotoMenuPath,
+                    ]);
+                }
+            }
+
+            return $sppg;
         });
 
         $pesan = $sppg->wasRecentlyCreated
