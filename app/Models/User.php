@@ -2,9 +2,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\sppg;
+use App\Models\Sppg;
 
 class User extends Authenticatable
 {
@@ -27,5 +28,9 @@ class User extends Authenticatable
     public function isOperatorSppg()
     {
         return $this->role === 'operator_sppg';
+    }
+    public function sppg(): HasOne
+    {
+        return $this->hasOne(Sppg::class, 'id_users', 'id_users');
     }
 }
