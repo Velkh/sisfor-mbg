@@ -1,6 +1,20 @@
-<!-- Sidebar Navigation for SPPG Operator -->
+<div class="topbar-sppg">
+    <div class="topbar-left"></div>
+    
+    <div class="topbar-right">
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-details">
+                <p class="user-name">{{ Auth::user()->username ?? 'Operator' }}</p>
+                <span class="user-role">Operator SPPG</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="sidebar-sppg">
-    <!-- Sidebar Header with Logo -->
     <div class="sidebar-header">
         <div class="logo-section">
             <img src="https://upload.wikimedia.org/wikipedia/id/thumb/2/29/Logo_Badan_Gizi_Nasional.svg/3840px-Logo_Badan_Gizi_Nasional.svg.png" alt="Logo BGN" class="logo-img">
@@ -11,18 +25,6 @@
         </div>
     </div>
 
-    <!-- User Info -->
-    <div class="user-info">
-        <div class="user-avatar">
-            <i class="fas fa-user-circle"></i>
-        </div>
-        <div class="user-details">
-            <p class="user-name">{{ Auth::user()->username ?? 'Operator' }}</p>
-            <span class="user-role">Operator SPPG</span>
-        </div>
-    </div>
-
-    <!-- Navigation Menu -->
     <nav class="sidebar-nav">
         <ul class="nav-menu">
             <li class="nav-item">
@@ -62,7 +64,6 @@
         </ul>
     </nav>
 
-    <!-- Logout Button -->
     <div class="sidebar-footer">
         <form action="{{ route('logout') }}" method="POST" class="logout-form">
             @csrf
@@ -73,29 +74,71 @@
         </form>
     </div>
 </div>
-
-<!-- Sidebar Styles -->
 <style>
+    /* ================= Topbar Styles ================= */
+    .topbar-sppg {
+        position: fixed;
+        top: 0;
+        left: 250px; /* Menyesuaikan lebar sidebar */
+        right: 0;
+        height: 65px;
+        background: #0066cc;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 25px;
+        z-index: 999;
+    }
+
+    .topbar-sppg .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .topbar-sppg .user-avatar {
+        font-size: 32px;
+        color: #ffffff; /* Menggunakan warna biru agar senada dengan sidebar */
+    }
+
+    .topbar-sppg .user-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .topbar-sppg .user-name {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .topbar-sppg .user-role {
+        font-size: 11px;
+        color: #ffffff;
+    }
+
+    /* ================= Sidebar Styles ================= */
     .sidebar-sppg {
         position: fixed;
         left: 0;
         top: 0;
         width: 250px;
         height: 100vh;
-        background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+        background: #0066cc;
         display: flex;
         flex-direction: column;
         color: white;
         overflow-y: auto;
         overflow-x: hidden;
         z-index: 1000;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
     }
 
-    /* Sidebar Header */
     .sidebar-header {
         padding: 20px 15px;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .logo-section {
@@ -126,42 +169,6 @@
         font-size: 11px;
         color: rgba(255, 255, 255, 0.8);
         font-weight: 500;
-    }
-
-    /* User Info */
-    .user-info {
-        padding: 15px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .user-avatar {
-        font-size: 32px;
-        color: white;
-        min-width: 40px;
-        text-align: center;
-    }
-
-    .user-details {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .user-name {
-        margin: 0;
-        font-size: 13px;
-        font-weight: 600;
-        color: white;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .user-role {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.75);
     }
 
     /* Sidebar Navigation */
@@ -244,63 +251,49 @@
     }
 
     /* Scrollbar Styling */
-    .sidebar-sppg::-webkit-scrollbar {
-        width: 6px;
-    }
+    .sidebar-sppg::-webkit-scrollbar { width: 6px; }
+    .sidebar-sppg::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+    .sidebar-sppg::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+    .sidebar-sppg::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
 
-    .sidebar-sppg::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.05);
-    }
-
-    .sidebar-sppg::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 3px;
-    }
-
-    .sidebar-sppg::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    /* Main Content Adjustment */
+    /* ================= Main Content Layout ================= */
     body.sppg-layout {
         margin-left: 250px;
+        padding-top: 65px; /* Offset untuk menghindari konten tertutup topbar */
+        background-color: #f4f6f9; /* Background abu-abu muda standar dashboard */
     }
 
-    /* Responsive Design */
+    /* ================= Responsive Design ================= */
     @media (max-width: 768px) {
         .sidebar-sppg {
             width: 200px;
         }
-
+        .topbar-sppg {
+            left: 200px;
+        }
         body.sppg-layout {
             margin-left: 200px;
         }
-
-        .app-title h5 {
-            font-size: 13px;
-        }
-
-        .app-title p {
-            font-size: 10px;
-        }
-
-        .nav-link {
-            padding: 10px 15px;
-            font-size: 13px;
-        }
+        .app-title h5 { font-size: 13px; }
+        .app-title p { font-size: 10px; }
+        .nav-link { padding: 10px 15px; font-size: 13px; }
     }
 
     @media (max-width: 576px) {
         .sidebar-sppg {
-            position: absolute;
+            position: absolute; /* Atau fixed tapi disembunyikan menggunakan hamburger menu */
             width: 100%;
             height: auto;
             max-height: 300px;
             border-radius: 0 0 10px 10px;
+            z-index: 1001; /* Harus di atas topbar jika sedang terbuka */
         }
-
+        .topbar-sppg {
+            left: 0; /* Full width di mobile */
+        }
         body.sppg-layout {
             margin-left: 0;
+            padding-top: 65px;
         }
     }
 </style>
