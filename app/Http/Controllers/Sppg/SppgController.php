@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Sppg;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\Sppg;
+use App\Models\LaporanPenerima;
+use App\Models\Kecamatan;
+use App\Models\Kelurahan;
+use App\Models\Puskesmas;
 use Illuminate\Http\Request;
 
 class SppgController extends Controller
@@ -51,7 +56,13 @@ class SppgController extends Controller
      */
     public function suratlaik()
     {
-        return view('sppg.suratlaik');
+        $userId = Auth::id();
+
+        $sppg = Sppg::query()
+            ->where('id_users', $userId)
+            ->first();
+
+        return view('sppg.suratlaik', compact('sppg'));
     }
 
     /**
@@ -60,7 +71,31 @@ class SppgController extends Controller
      * @return \Illuminate\View\View
      */
     public function pelaporan()
-    {
-        return view('sppg.pelaporan');
+    {   
+        $userId = Auth::id();
+
+        $sppg = Sppg::query()
+            ->where('id_users', $userId)
+            ->first();
+
+        $laporans = collect();
+        if ($sppg) {
+            $laporans = LaporanPenerima::query()
+                ->where('id_sppg', $sppg->id_sppg)
+                ->latest()
+                ->get();
+        }
+
+        $kecamatans = Kecamatan::query()->orderBy('nama_kecamatan')->get();
+        $kelurahans = Kelurahan::query()->orderBy('nama_kelurahan')->get();
+        $puskesmas = Puskesmas::query()->orderBy('nama_puskesmas')->get();
+
+        return view('sppg.pelaporan', compact(
+            'sppg',
+            'laporans',
+            'kecamatans',
+            'kelurahans',
+            'puskesmas'
+        ));
     }
 }
