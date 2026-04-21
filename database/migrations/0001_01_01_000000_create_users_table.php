@@ -14,7 +14,6 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->enum('role', ['admin_dinkes', 'operator_sppg'])->default('operator_sppg');
-            $table->string('nomer_telepon')->nullable();
             $table->timestamps();
         });
     }
