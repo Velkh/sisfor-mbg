@@ -8,6 +8,8 @@ use App\Http\Controllers\DinkesController;
 use App\Http\Controllers\Sppg\SppgController;
 use App\Http\Controllers\Sppg\DaftarSppgController;
 use App\Http\Controllers\Sppg\IklController;
+use App\Http\Controllers\Sppg\SlhsController;
+use App\Http\Controllers\Sppg\DistribusiController;
 
 Route::get('/', function () {
     return view('homepage');
@@ -48,5 +50,8 @@ Route::middleware('operator_sppg')->prefix('sppg')->name('sppg.')->group(functio
     Route::post('/daftar', [DaftarSppgController::class, 'store'])->name('daftar.store');
 
     Route::get('/suratlaik', [SppgController::class, 'suratlaik'])->name('suratlaik');
+    Route::post('/suratlaik', [SlhsController::class, 'store'])->name('suratlaik.store');
+
     Route::get('/pelaporan', [SppgController::class, 'pelaporan'])->name('pelaporan');
+    Route::post('/pelaporan', [DistribusiController::class, 'store'])->name('pelaporan.store');
 });
