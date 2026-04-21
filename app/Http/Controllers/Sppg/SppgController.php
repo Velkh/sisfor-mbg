@@ -21,7 +21,43 @@ class SppgController extends Controller
      */
     public function index()
     {
-        return view('sppg.index');
+        $userId = Auth::id();
+
+        $sppg = Sppg::query()
+            ->where('id_users', $userId)
+            ->first();
+
+        $allLaporans = collect();
+
+        if ($sppg) {
+            $allLaporans = LaporanPenerima::query()
+                ->with(['kecamatan', 'kelurahan', 'puskesmas'])
+                ->where('id_sppg', $sppg->id_sppg)
+                ->latest()
+                ->get();
+        }
+
+        $laporansTerbaru = $allLaporans->take(5);
+
+        $totalLaporan = $allLaporans->count();
+        $totalNegeri = $allLaporans->where('status', 'negeri')->count();
+        $totalSwasta = $allLaporans->where('status', 'swasta')->count();
+
+        $totalPenerima = $allLaporans->sum(function ($item) {
+            return (int) $item->jml_siswa
+                + (int) $item->jml_bumil
+                + (int) $item->jml_busui
+                + (int) $item->jml_balita;
+        });
+
+        return view('sppg.index', compact(
+            'sppg',
+            'laporansTerbaru',
+            'totalLaporan',
+            'totalNegeri',
+            'totalSwasta',
+            'totalPenerima'
+        ));
     }
 
     /**
@@ -71,7 +107,7 @@ class SppgController extends Controller
      * @return \Illuminate\View\View
      */
     public function pelaporan()
-    {   
+    {
         $userId = Auth::id();
 
         $sppg = Sppg::query()
@@ -79,11 +115,27 @@ class SppgController extends Controller
             ->first();
 
         $laporans = collect();
+        $totalLaporan = 0;
+        $totalNegeri = 0;
+        $totalSwasta = 0;
+        $totalPenerima = 0;
+
         if ($sppg) {
-            $laporans = LaporanPenerima::query()
-                ->where('id_sppg', $sppg->id_sppg)
+            $baseQuery = LaporanPenerima::query()->where('id_sppg', $sppg->id_sppg);
+
+            $laporans = (clone $baseQuery)
+                ->with(['kecamatan', 'kelurahan', 'puskesmas'])
                 ->latest()
-                ->get();
+                ->paginate(5)
+                ->withQueryString();
+
+            $totalLaporan = (clone $baseQuery)->count();
+            $totalNegeri = (clone $baseQuery)->where('status', 'negeri')->count();
+            $totalSwasta = (clone $baseQuery)->where('status', 'swasta')->count();
+
+            $totalPenerima = (int) (clone $baseQuery)
+                ->selectRaw('COALESCE(SUM(jml_siswa + jml_bumil + jml_busui + jml_balita), 0) as total')
+                ->value('total');
         }
 
         $kecamatans = Kecamatan::query()->orderBy('nama_kecamatan')->get();
@@ -95,7 +147,11 @@ class SppgController extends Controller
             'laporans',
             'kecamatans',
             'kelurahans',
-            'puskesmas'
+            'puskesmas',
+            'totalLaporan',
+            'totalNegeri',
+            'totalSwasta',
+            'totalPenerima'
         ));
     }
 }
