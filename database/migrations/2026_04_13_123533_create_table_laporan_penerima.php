@@ -14,10 +14,10 @@ public function up(): void
         Schema::create('laporanpenerima', function (Blueprint $table) {
             $table->id('id_laporan');
             $table->unsignedBigInteger('id_sppg');
-            $table->enum('kategori', ['kategori_a', 'kategori_b']); // Sesuaikan isinya
-            $table->enum('tipe_instansi', ['sekolah', 'posyandu']); // Sesuaikan isinya
+            $table->enum('kategori', ['Satuan Pendidikan', 'Kelompok B3']); // Sesuaikan isinya
+            $table->enum('tipe_instansi', ['TK Sederajat', 'SD Sederajat', 'SMP Sederajat','SMA Sederajat', 'Posyandu']); // Sesuaikan isinya
             $table->string('nama_instansi');
-            $table->enum('status', ['menunggu', 'selesai']); // Sesuaikan isinya
+            $table->enum('status', ['negeri', 'swasta']); // Sesuaikan isinya
             $table->unsignedBigInteger('id_kelurahan');
             $table->unsignedBigInteger('id_kecamatan');
             $table->unsignedBigInteger('id_puskesmas');
