@@ -16,12 +16,16 @@
     $tglBerlaku = old('tgl_berlaku', $sppg?->tgl_berlaku?->format('Y-m-d'));
     $tglBerakhir = old('tgl_berakhir', $sppg?->tgl_berakhir?->format('Y-m-d'));
 
+    $canEditSlhs = ($sppg?->status_ikl === 'selesai')
+        && ($sppg?->hasil_ikl === 'memenuhi')
+        && ((int) ($sppg?->nilai_ikl ?? 0) >= 80);
+
     $sisaHariLabel = '-';
     $sisaHari = null;
     $perluPerbarui = false;
     $warningMerah = false;
 
-    if (!empty($sppg?->tgl_berakhir)) {
+    if (! empty($sppg?->tgl_berakhir)) {
         $today = \Carbon\Carbon::today();
         $endDate = \Carbon\Carbon::parse($sppg->tgl_berakhir)->startOfDay();
         $sisaHari = $today->diffInDays($endDate, false);
@@ -51,7 +55,6 @@
         }
     }
 @endphp
-
 
 <div class="page-header">
     <h1>
@@ -99,6 +102,13 @@
     </div>
 </div>
 
+@if (! $canEditSlhs)
+    <div class="alert alert-danger mb-4">
+        SLHS tidak bisa diubah karena IKL belum memenuhi.
+        Syarat: status IKL selesai, hasil IKL memenuhi, dan nilai IKL minimal 80.
+    </div>
+@endif
+
 @if ($warningMerah)
     <div class="alert alert-danger mb-4">
         Sisa masa berlaku SLHS tinggal {{ max($sisaHari, 0) }} hari. Segera lakukan pembaruan.
@@ -119,7 +129,7 @@
 
             <div class="mb-3">
                 <label class="form-label">Status Pengajuan</label>
-                <select name="status_slhs" id="statusSlhsSelect" class="form-select" required>
+                <select name="status_slhs" id="statusSlhsSelect" class="form-select" required @disabled(! $canEditSlhs)>
                     <option value="belum_mengajukan" @selected($statusValue === 'belum_mengajukan')>Belum Mengajukan</option>
                     <option value="sudah_mengajukan" @selected($statusValue === 'sudah_mengajukan')>Sudah Mengajukan (Menunggu proses)</option>
                     <option value="selesai" @selected($statusValue === 'selesai')>Selesai</option>
@@ -130,18 +140,18 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Tanggal Berlaku</label>
-                        <input type="date" name="tgl_berlaku" id="tglBerlakuInput" class="form-control" value="{{ $tglBerlaku }}">
+                        <input type="date" name="tgl_berlaku" id="tglBerlakuInput" class="form-control" value="{{ $tglBerlaku }}" @disabled(! $canEditSlhs)>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Tanggal Berakhir</label>
-                        <input type="date" name="tgl_berakhir" id="tglBerakhirInput" class="form-control" value="{{ $tglBerakhir }}">
+                        <input type="date" name="tgl_berakhir" id="tglBerakhirInput" class="form-control" value="{{ $tglBerakhir }}" @disabled(! $canEditSlhs)>
                         <small id="masaBerlakuInfo" class="text-muted d-block mt-2"></small>
                     </div>
                 </div>
 
                 <div class="mt-3">
                     <label class="form-label">Input File</label>
-                    <input type="file" name="foto_slhs" id="fotoSlhsInput" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.webp">
+                    <input type="file" name="foto_slhs" id="fotoSlhsInput" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.webp" @disabled(! $canEditSlhs)>
                     @if (!empty($sppg?->foto_slhs))
                         <small class="text-muted d-block mt-1">
                             File saat ini:
@@ -152,7 +162,7 @@
             </div>
 
             <div class="mt-4">
-                <button type="submit" class="btn btn-dark px-4">Simpan</button>
+                <button type="submit" class="btn btn-dark px-4" @disabled(! $canEditSlhs)>Simpan</button>
             </div>
         </form>
     </div>
@@ -166,6 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tglBerakhirInput = document.getElementById('tglBerakhirInput');
     const fotoSlhsInput = document.getElementById('fotoSlhsInput');
     const masaInfo = document.getElementById('masaBerlakuInfo');
+    const canEdit = @json($canEditSlhs);
 
     function formatYmd(startDate, endDate) {
         let y = endDate.getFullYear() - startDate.getFullYear();
@@ -201,9 +212,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const isSelesai = statusSelect.value === 'selesai';
 
         detailFields.classList.toggle('d-none', !isSelesai);
-        tglBerlakuInput.required = isSelesai;
-        tglBerakhirInput.required = isSelesai;
-        fotoSlhsInput.required = isSelesai;
+        tglBerlakuInput.required = isSelesai && canEdit;
+        tglBerakhirInput.required = isSelesai && canEdit;
+        fotoSlhsInput.required = isSelesai && canEdit;
 
         if (!isSelesai) {
             masaInfo.textContent = '';
@@ -243,9 +254,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    statusSelect.addEventListener('change', syncSlhsFields);
-    tglBerlakuInput.addEventListener('change', syncMasaInfo);
-    tglBerakhirInput.addEventListener('change', syncMasaInfo);
+    if (canEdit) {
+        statusSelect.addEventListener('change', syncSlhsFields);
+        tglBerlakuInput.addEventListener('change', syncMasaInfo);
+        tglBerakhirInput.addEventListener('change', syncMasaInfo);
+    }
 
     syncSlhsFields();
     syncMasaInfo();

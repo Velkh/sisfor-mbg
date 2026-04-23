@@ -4,24 +4,17 @@ namespace App\Http\Controllers\Sppg;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sppg;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\View\View;
 
 class SlhsController extends Controller
 {
     public function store(Request $request): RedirectResponse
     {
         $userId = Auth::id();
-
-        $validated = $request->validate([
-            'status_slhs' => ['required', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
-            'tgl_berlaku' => ['nullable', 'date'],
-            'tgl_berakhir' => ['nullable', 'date', 'after_or_equal:tgl_berlaku'],
-            'foto_slhs' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:4096'],
-        ]);
 
         $sppg = Sppg::query()
             ->where('id_users', $userId)
@@ -32,6 +25,23 @@ class SlhsController extends Controller
                 ->route('sppg.profile')
                 ->with('error', 'Data SPPG belum ada. Lengkapi profil terlebih dahulu.');
         }
+
+        $isIklMemenuhi = $sppg->status_ikl === 'selesai'
+            && $sppg->hasil_ikl === 'memenuhi'
+            && (int) ($sppg->nilai_ikl ?? 0) >= 80;
+
+        if (! $isIklMemenuhi) {
+            return redirect()
+                ->route('sppg.suratlaik')
+                ->with('error', 'SLHS tidak bisa diubah karena IKL belum memenuhi (status IKL selesai, hasil memenuhi, nilai minimal 80).');
+        }
+
+        $validated = $request->validate([
+            'status_slhs' => ['required', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
+            'tgl_berlaku' => ['nullable', 'date'],
+            'tgl_berakhir' => ['nullable', 'date', 'after_or_equal:tgl_berlaku'],
+            'foto_slhs' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:4096'],
+        ]);
 
         if ($validated['status_slhs'] === 'selesai') {
             $request->validate([
@@ -74,9 +84,9 @@ class SlhsController extends Controller
             ->route('sppg.suratlaik')
             ->with('success', 'Data SLHS berhasil disimpan.');
 
-        if ($sppg->status_slhs === 'selesai' && !empty($sppg->tgl_berakhir)) {
-            $today = \Carbon\Carbon::today();
-            $endDate = \Carbon\Carbon::parse($sppg->tgl_berakhir)->startOfDay();
+        if ($sppg->status_slhs === 'selesai' && ! empty($sppg->tgl_berakhir)) {
+            $today = Carbon::today();
+            $endDate = Carbon::parse($sppg->tgl_berakhir)->startOfDay();
             $remainingDays = $today->diffInDays($endDate, false);
 
             if ($remainingDays <= 30) {
@@ -89,6 +99,5 @@ class SlhsController extends Controller
         }
 
         return $redirect;
-
     }
 }
