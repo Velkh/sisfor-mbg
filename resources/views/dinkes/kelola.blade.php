@@ -1,164 +1,344 @@
 @extends('layout.dinkes')
 
-@section('title', 'Kelola SPPG')
+@section('title', 'Manajemen Operator')
 
 @section('content')
     <div class="container-fluid">
-        <!-- Page Header -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Daftar SPPG</h5>
-                    <button class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Tambah SPPG Baru
+                    <h5 class="mb-0">Daftar Operator SPPG</h5>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOperatorModal">
+                        <i class="fas fa-plus me-2"></i>Tambah Operator
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Filter & Search -->
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
         <div class="card mb-4">
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" class="form-control" placeholder="Cari SPPG...">
+                <form method="GET" action="{{ route('admin.manage.index') }}" id="filterForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Cari Nama (username / SPPG / mitra)</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                name="q"
+                                id="q"
+                                value="{{ $q ?? '' }}"
+                                placeholder="Ketik nama..."
+                                autocomplete="off"
+                                autofocus
+                            >
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Filter Kecamatan</label>
+                            <select class="form-select" name="kecamatan_id" id="kecamatan_id">
+                                <option value="">Semua Kecamatan</option>
+                                @foreach ($kecamatanOptions as $item)
+                                    <option value="{{ $item->id_kecamatan }}" {{ (int) $selectedKecamatanId === (int) $item->id_kecamatan ? 'selected' : '' }}>
+                                        {{ $item->nama_kecamatan }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 d-flex align-items-end">
+                            <a href="{{ route('admin.manage.index') }}" class="btn btn-outline-secondary w-100">Reset</a>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <select class="form-select">
-                            <option value="">Semua Status</option>
-                            <option value="layak">Layak</option>
-                            <option value="proses">Proses</option>
-                            <option value="ditolak">Ditolak</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select">
-                            <option value="">Semua Puskesmas</option>
-                            <option value="1">Puskesmas A</option>
-                            <option value="2">Puskesmas B</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-secondary w-100">
-                            <i class="fas fa-filter me-2"></i>Filter
-                        </button>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
 
-        <!-- Data Table -->
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover align-middle">
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>ID SPPG</th>
-                                <th>Puskesmas</th>
-                                <th>Status</th>
-                                <th>Tanggal Dibuat</th>
-                                <th>Terakhir Diubah</th>
+                                <th>Username</th>
+                                <th>Nama SPPG</th>
+                                <th>Mitra</th>
+                                <th>Kecamatan</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td><strong>SPPG-001-2026</strong></td>
-                                <td>Puskesmas Kota Depok</td>
-                                <td><span class="badge bg-success">Layak</span></td>
-                                <td>12 Apr 2026</td>
-                                <td>14 Apr 2026</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-primary" title="Lihat">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-danger" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td><strong>SPPG-002-2026</strong></td>
-                                <td>Puskesmas Bojong</td>
-                                <td><span class="badge bg-warning text-dark">Proses</span></td>
-                                <td>11 Apr 2026</td>
-                                <td>13 Apr 2026</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-primary" title="Lihat">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-danger" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td><strong>SPPG-003-2026</strong></td>
-                                <td>Puskesmas Sukatani</td>
-                                <td><span class="badge bg-danger">Ditolak</span></td>
-                                <td>10 Apr 2026</td>
-                                <td>12 Apr 2026</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-primary" title="Lihat">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-danger" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td><strong>SPPG-004-2026</strong></td>
-                                <td>Puskesmas Cilodong</td>
-                                <td><span class="badge bg-success">Layak</span></td>
-                                <td>09 Apr 2026</td>
-                                <td>11 Apr 2026</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-primary" title="Lihat">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-sm btn-outline-danger" title="Hapus">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                            @forelse ($operators as $operator)
+                                @php
+                                    $laporanTerbaru = $operator->sppg?->laporanPenerimas?->sortByDesc('created_at')->first();
+                                    $namaKecamatan = $laporanTerbaru?->kecamatan?->nama_kecamatan ?? '-';
+                                @endphp
+                                <tr>
+                                    <td>{{ $loop->iteration + ($operators->currentPage() - 1) * $operators->perPage() }}</td>
+                                    <td>{{ $operator->username }}</td>
+                                    <td>{{ $operator->sppg?->nama_sppg ?? '-' }}</td>
+                                    <td>{{ $operator->sppg?->nama_mitra ?? '-' }}</td>
+                                    <td>{{ $namaKecamatan }}</td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="Detail"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#detailOperatorModal"
+                                                data-username="{{ e($operator->username) }}"
+                                                data-sppg="{{ e($operator->sppg?->nama_sppg ?? '-') }}"
+                                                data-mitra="{{ e($operator->sppg?->nama_mitra ?? '-') }}"
+                                                data-kecamatan="{{ e($namaKecamatan) }}"
+                                                data-created="{{ e($operator->created_at?->format('d M Y H:i') ?? '-') }}"
+                                            >
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-warning"
+                                                title="Edit Password"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editOperatorModal"
+                                                data-update-url="{{ route('admin.manage.update', $operator) }}"
+                                                data-username="{{ e($operator->username) }}"
+                                            >
+                                                <i class="fas fa-key"></i>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Hapus"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteOperatorModal"
+                                                data-delete-url="{{ route('admin.manage.destroy', $operator) }}"
+                                                data-username="{{ e($operator->username) }}"
+                                            >
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="text-center">Belum ada data operator.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Pagination -->
-                <nav aria-label="Page navigation" class="mt-4">
-                    <ul class="pagination justify-content-end">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
-                </nav>
+                <div class="mt-3">
+                    {{ $operators->links() }}
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="createOperatorModal" tabindex="-1" aria-labelledby="createOperatorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" action="{{ route('admin.manage.store') }}">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createOperatorModalLabel">Tambah Operator Baru</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input
+                                type="text"
+                                name="username"
+                                value="{{ old('username') }}"
+                                class="form-control @error('username') is-invalid @enderror"
+                                required
+                            >
+                            @error('username')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label">Password</label>
+                            <input
+                                type="password"
+                                name="password"
+                                class="form-control @error('password') is-invalid @enderror"
+                                required
+                            >
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Operator</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailOperatorModal" tabindex="-1" aria-labelledby="detailOperatorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailOperatorModalLabel">Detail Operator</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2"><strong>Username:</strong> <span id="detailUsername">-</span></div>
+                    <div class="mb-2"><strong>Nama SPPG:</strong> <span id="detailSppg">-</span></div>
+                    <div class="mb-2"><strong>Mitra:</strong> <span id="detailMitra">-</span></div>
+                    <div class="mb-2"><strong>Kecamatan:</strong> <span id="detailKecamatan">-</span></div>
+                    <div class="mb-0"><strong>Dibuat:</strong> <span id="detailCreated">-</span></div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editOperatorModal" tabindex="-1" aria-labelledby="editOperatorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" id="editOperatorForm">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editOperatorModalLabel">Ubah Password Operator</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-3">Username: <strong id="editOperatorUsername">-</strong></p>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password Baru</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label">Konfirmasi Password</label>
+                            <input type="password" name="password_confirmation" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteOperatorModal" tabindex="-1" aria-labelledby="deleteOperatorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" id="deleteOperatorForm">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteOperatorModalLabel">Konfirmasi Hapus Operator</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">Yakin ingin menghapus operator <strong id="deleteOperatorUsername">-</strong>?</p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('filterForm');
+            const qInput = document.getElementById('q');
+            const kecamatanSelect = document.getElementById('kecamatan_id');
+            let typingTimer = null;
+
+            if (qInput && sessionStorage.getItem('refocusSearch') === '1') {
+                qInput.focus();
+                const len = qInput.value.length;
+                qInput.setSelectionRange(len, len);
+                sessionStorage.removeItem('refocusSearch');
+            }
+
+            if (qInput) {
+                qInput.addEventListener('input', function () {
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(function () {
+                        sessionStorage.setItem('refocusSearch', '1');
+                        form.requestSubmit();
+                    }, 400);
+                });
+            }
+
+            if (kecamatanSelect) {
+                kecamatanSelect.addEventListener('change', function () {
+                    form.requestSubmit();
+                });
+            }
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === '/' && document.activeElement !== qInput) {
+                    event.preventDefault();
+                    qInput.focus();
+                }
+            });
+
+            const detailModal = document.getElementById('detailOperatorModal');
+            const editModal = document.getElementById('editOperatorModal');
+            const deleteModal = document.getElementById('deleteOperatorModal');
+
+            if (detailModal) {
+                detailModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('detailUsername').textContent = button.getAttribute('data-username') || '-';
+                    document.getElementById('detailSppg').textContent = button.getAttribute('data-sppg') || '-';
+                    document.getElementById('detailMitra').textContent = button.getAttribute('data-mitra') || '-';
+                    document.getElementById('detailKecamatan').textContent = button.getAttribute('data-kecamatan') || '-';
+                    document.getElementById('detailCreated').textContent = button.getAttribute('data-created') || '-';
+                });
+            }
+
+            if (editModal) {
+                editModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const updateUrl = button.getAttribute('data-update-url');
+                    const username = button.getAttribute('data-username');
+
+                    document.getElementById('editOperatorForm').setAttribute('action', updateUrl);
+                    document.getElementById('editOperatorUsername').textContent = username || '-';
+                });
+            }
+
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const deleteUrl = button.getAttribute('data-delete-url');
+                    const username = button.getAttribute('data-username');
+
+                    document.getElementById('deleteOperatorForm').setAttribute('action', deleteUrl);
+                    document.getElementById('deleteOperatorUsername').textContent = username || '-';
+                });
+            }
+        });
+    </script>
 @endsection

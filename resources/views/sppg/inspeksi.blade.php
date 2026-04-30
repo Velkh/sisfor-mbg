@@ -148,7 +148,8 @@
             <div class="row g-3">
                 <div class="col-md-10">
                     <label class="form-label">Nama SPPG</label>
-                    <input type="text" id="namaInput" class="form-control" placeholder="Contoh: SPPG BEJI">
+                    <input type="text" id="namaInput" class="form-control" list="namaSppgOptions" placeholder="Contoh: SPPG BEJI">
+                    <datalist id="namaSppgOptions"></datalist>
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="button" id="searchBtn" class="btn btn-primary w-100">Cari</button>
@@ -268,6 +269,9 @@ document.addEventListener('DOMContentLoaded', function () {
     let pendingPick = null;
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
 
+    const namaSppgOptions = document.getElementById('namaSppgOptions');
+    let autocompleteTimer = null;
+
     function statusLabel(value) {
         if (value === 'belum_mengajukan') {
             return 'Belum Mengajukan IKL';
@@ -352,6 +356,40 @@ document.addEventListener('DOMContentLoaded', function () {
     sudahIklTidak.addEventListener('change', syncMode);
     sudahIklYa.addEventListener('change', syncMode);
     syncMode();
+
+    namaInput.addEventListener('input', function () {
+        const query = this.value.trim();
+
+        clearTimeout(autocompleteTimer);
+        if (query.length < 5) {
+            namaSppgOptions.innerHTML = '';
+            return;
+        }
+
+        autocompleteTimer = setTimeout(async () => {
+            try {
+                const url = '{{ route('sppg.ikl.search') }}?nama_sppg=' + encodeURIComponent(query);
+                const res = await fetch(url, { headers: { Accept: 'application/json' } });
+                const json = await res.json();
+
+                if (!res.ok || !json.success) {
+                    namaSppgOptions.innerHTML = '';
+                    return;
+                }
+
+                const rows = Array.isArray(json.data) ? json.data : [];
+                const names = rows
+                    .map((item) => item.nama_sppg ?? item.nama ?? '')
+                    .filter(Boolean);
+
+                namaSppgOptions.innerHTML = [...new Set(names)]
+                    .map((name) => `<option value="${name}"></option>`)
+                    .join('');
+            } catch (e) {
+                namaSppgOptions.innerHTML = '';
+            }
+        }, 200);
+    });
 
     searchBtn.addEventListener('click', async function () {
         const nama = namaInput.value.trim();

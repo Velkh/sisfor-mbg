@@ -36,4 +36,9 @@ class Kelurahan extends Model
     {
         return $this->hasMany(LaporanPenerima::class, 'id_kelurahan', 'id_kelurahan');
     }
+
+    public function sppg(): HasMany
+    {
+        return $this->hasMany(Sppg::class, 'id_kelurahan', 'id_kelurahan');
+    }
 }

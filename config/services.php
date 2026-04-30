@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'dsimfoniku' => [
+        'base_url' => env('API_DSIMFONIKU_BASE_URL', 'https://dsimfoniku.com/api'),
+    ],
+
 ];

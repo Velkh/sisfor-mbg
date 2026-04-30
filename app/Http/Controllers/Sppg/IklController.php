@@ -19,9 +19,10 @@ class IklController extends Controller
             'nama_sppg' => ['required', 'string', 'max:255'],
         ]);
 
-        $response = Http::get('https://dsimfoniku.com/api/tpp/jasa-boga', [
-            'search' => $validated['nama_sppg'],
-        ]);
+        $response = Http::get(
+            rtrim(config('services.dsimfoniku.base_url'), '/') . '/tpp/jasa-boga',
+            ['search' => $validated['nama_sppg']]
+        );
 
         if (! $response->successful()) {
             return response()->json([

@@ -33,4 +33,9 @@ class Kecamatan extends Model
     {
         return $this->hasMany(LaporanPenerima::class, 'id_kecamatan', 'id_kecamatan');
     }
+
+    public function sppg(): HasMany
+    {
+        return $this->hasMany(Sppg::class, 'id_kecamatan', 'id_kecamatan');
+    }
 }

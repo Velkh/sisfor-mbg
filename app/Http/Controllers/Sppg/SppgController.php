@@ -38,7 +38,6 @@ class SppgController extends Controller
         }
 
         $laporansTerbaru = $allLaporans->take(5);
-
         $totalLaporan = $allLaporans->count();
         $totalNegeri = $allLaporans->where('status', 'negeri')->count();
         $totalSwasta = $allLaporans->where('status', 'swasta')->count();

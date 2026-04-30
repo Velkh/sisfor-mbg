@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\FotoSppg;
 use App\Models\MenuSppg;
 use App\Models\Puskesmas;
+use App\Models\Kecamatan;
+use App\Models\Kelurahan;
 use App\Models\Sppg;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +32,15 @@ class DaftarSppgController extends Controller
             ->orderBy('nama_puskesmas')
             ->get();
 
-        return view('sppg.profile', compact('puskesmas', 'sppg'));
+        $kecamatan = Kecamatan::query()
+            ->orderBy('nama_kecamatan')
+            ->get();
+
+        $kelurahan = Kelurahan::query()
+            ->orderBy('nama_kelurahan')
+            ->get();
+
+        return view('sppg.profile', compact('puskesmas', 'sppg', 'kecamatan', 'kelurahan'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -45,6 +55,9 @@ class DaftarSppgController extends Controller
             'jml_pegawai' => ['required', 'integer', 'min:1'],
             'kapasitas_porsi' => ['required', 'integer', 'min:1'],
             'id_puskesmas' => ['required', 'exists:puskesmas,id_puskesmas'],
+            'id_kecamatan' => ['required', 'exists:kecamatan,id_kecamatan'],
+            'id_kelurahan' => ['required', 'exists:kelurahan,id_kelurahan'],
+
 
             'foto_sppg' => ['nullable', 'array'],
             'foto_sppg.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -81,6 +94,8 @@ class DaftarSppgController extends Controller
                     'jml_pegawai' => $validated['jml_pegawai'],
                     'kapasitas_porsi' => $validated['kapasitas_porsi'],
                     'id_puskesmas' => $validated['id_puskesmas'],
+                    'id_kecamatan' => $validated['id_kecamatan'],
+                    'id_kelurahan' => $validated['id_kelurahan'],
                 ]
             );
 

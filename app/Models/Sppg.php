@@ -24,6 +24,8 @@ class Sppg extends Model
         'jml_pegawai',
         'kapasitas_porsi',
         'id_puskesmas',
+        'id_kecamatan',
+        'id_kelurahan',
         'status_ikl',
         'nilai_ikl',
         'hasil_ikl',
@@ -59,6 +61,16 @@ class Sppg extends Model
     public function puskesmas(): BelongsTo
     {
         return $this->belongsTo(Puskesmas::class, 'id_puskesmas', 'id_puskesmas');
+    }
+
+    public function kecamatan(): BelongsTo
+    {
+        return $this->belongsTo(Kecamatan::class, 'id_kecamatan', 'id_kecamatan');
+    }
+
+    public function kelurahan(): BelongsTo
+    {
+        return $this->belongsTo(Kelurahan::class, 'id_kelurahan', 'id_kelurahan');
     }
 
     /**

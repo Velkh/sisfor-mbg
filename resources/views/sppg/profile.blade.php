@@ -81,7 +81,35 @@
                         value="{{ old('kapasitas_porsi', $sppg->kapasitas_porsi ?? '') }}" required>
                 </div>
 
-                <div class="col-md-12">
+                <div class="col-md-4">
+                    <label class="form-label">Kecamatan</label>
+                    <select name="id_kecamatan" id="idKecamatanSelect" class="form-select" required>
+                        <option value="">Pilih Kecamatan</option>
+                        @foreach ($kecamatan as $item)
+                            <option value="{{ $item->id_kecamatan }}"
+                                @selected(old('id_kecamatan', $sppg->id_kecamatan ?? null) == $item->id_kecamatan)>
+                                {{ $item->nama_kecamatan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Kelurahan</label>
+                    <select name="id_kelurahan" id="idKelurahanSelect" class="form-select" required>
+                        <option value="">Pilih Kelurahan</option>
+                        @foreach ($kelurahan as $item)
+                            <option
+                                value="{{ $item->id_kelurahan }}"
+                                data-kecamatan="{{ $item->id_kecamatan }}"
+                                @selected(old('id_kelurahan', $sppg->id_kelurahan ?? null) == $item->id_kelurahan)>
+                                {{ $item->nama_kelurahan }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-4">
                     <label class="form-label">Puskesmas</label>
                     <select name="id_puskesmas" class="form-select" required>
                         <option value="">Pilih Puskesmas</option>
@@ -200,9 +228,57 @@
 document.addEventListener('DOMContentLoaded', function () {
     const addMenuRowBtn = document.getElementById('addMenuRow');
     const menuRows = document.getElementById('menuRows');
+    const kecamatanSelect = document.getElementById('idKecamatanSelect');
+    const kelurahanSelect = document.getElementById('idKelurahanSelect');
 
     if (!addMenuRowBtn || !menuRows) {
         return;
+    }
+
+    const oldKelurahan = @json(old('id_kelurahan', $sppg->id_kelurahan ?? null));
+
+    const allKelurahan = Array.from(kelurahanSelect.options)
+        .slice(1)
+        .map(function (opt) {
+            return {
+                value: opt.value,
+                text: opt.textContent.trim(),
+                kecamatan: opt.dataset.kecamatan || ''
+            };
+        });
+
+    function syncKelurahanByKecamatan() {
+        const kecamatanId = kecamatanSelect.value;
+        const currentValue = kelurahanSelect.value;
+
+        kelurahanSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+
+        if (!kecamatanId) {
+            kelurahanSelect.disabled = true;
+            kelurahanSelect.value = '';
+            return;
+        }
+
+        const filtered = allKelurahan.filter(function (item) {
+            return item.kecamatan === kecamatanId;
+        });
+
+        filtered.forEach(function (item) {
+            const opt = document.createElement('option');
+            opt.value = item.value;
+            opt.textContent = item.text;
+            kelurahanSelect.appendChild(opt);
+        });
+
+        kelurahanSelect.disabled = false;
+
+        const nextValue = filtered.some(function (item) {
+            return item.value === currentValue;
+        }) ? currentValue : (filtered.some(function (item) {
+            return item.value === String(oldKelurahan || '');
+        }) ? String(oldKelurahan) : '');
+
+        kelurahanSelect.value = nextValue;
     }
 
     addMenuRowBtn.addEventListener('click', function () {
@@ -248,6 +324,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         row.remove();
     });
+
+    kecamatanSelect.addEventListener('change', syncKelurahanByKecamatan);
+    syncKelurahanByKecamatan();
 });
 </script>
 @endsection
