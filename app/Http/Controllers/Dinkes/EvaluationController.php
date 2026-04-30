@@ -106,7 +106,9 @@ class EvaluationController extends Controller
     private function buildFilteredQuery(array $filters): Builder
     {
         $query = Sppg::query()
-            ->with(['puskesmas:id_puskesmas,nama_puskesmas']);
+            ->with(['puskesmas:id_puskesmas,nama_puskesmas',
+                    'fotoSppg:id_foto,id_sppg,foto_sppg',
+                ]);
 
         if ($filters['q'] !== '') {
             $keyword = $filters['q'];
