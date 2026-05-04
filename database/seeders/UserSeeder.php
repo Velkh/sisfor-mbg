@@ -23,16 +23,13 @@ class UserSeeder extends Seeder
             'role' => 'admin_dinkes',
         ]);
 
-        // Create Operator SPPG account
+        // Create Admin Kecamatan account
         User::create([
             'username' => 'sppgbeji',
             'password' => Hash::make('sppgbeji123'),
-            'role' => 'operator_sppg',
-        ]);
-        User::create([
-            'username' => 'sppgbeji2',
-            'password' => Hash::make('beji123'),
-            'role' => 'operator_sppg',
+            'role' => 'admin_kecamatan',
+            'akses_tipe_usaha' => 'sppg',
+            'id_kecamatan' => 1,
         ]);
     }
 }

@@ -13,7 +13,8 @@ return new class extends Migration
             $table->id('id_users');
             $table->string('username')->unique();
             $table->string('password');
-            $table->enum('role', ['admin_dinkes', 'operator_sppg'])->default('operator_sppg');
+            $table->enum('role', ['admin_dinkes', 'admin_kecamatan'])->default('admin_kecamatan');
+            $table->enum('akses_tipe_usaha', ['sppg', 'tpp', 'dam', 'kantin'])->nullable();
             $table->timestamps();
         });
     }
