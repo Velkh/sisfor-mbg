@@ -23,7 +23,6 @@ return new class extends Migration
             $table->integer('jumlah_busui')->nullable();
             $table->integer('jumlah_balita')->nullable();
 
-            $table->string('nama_sasaran')->nullable();
             $table->text('detail_jangkauan')->nullable();
             $table->integer('jumlah_jiwa')->default(0);
 
