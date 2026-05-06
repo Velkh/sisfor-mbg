@@ -1,243 +1,109 @@
 @extends('layout.dinkes')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard Admin Dinkes')
 
 @section('content')
-    <div class="container-fluid">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Selamat Datang!</strong> Berikut adalah ringkasan data SPPG terbaru.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            </div>
-        </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <div class="row mb-4">
-            <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
-                <div class="stat-card h-100">
-                    <div class="stat-card-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $totalSppg ?? 0 }}</div>
-                    <div class="stat-card-label">Total SPPG</div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
-                <div class="stat-card h-100">
-                    <div class="stat-card-icon" style="color: #4CAF50;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $totalLulusIkl ?? 0 }}</div>
-                    <div class="stat-card-label">SPPG Lulus IKL</div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
-                <div class="stat-card h-100">
-                    <div class="stat-card-icon" style="color: #2196F3;">
-                        <i class="fas fa-certificate"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $totalBerslhs ?? 0 }}</div>
-                    <div class="stat-card-label">SPPG Bers SLHS</div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
-                <div class="stat-card h-100">
-                    <div class="stat-card-icon" style="color: #FF9800;">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $totalLaikHigiene ?? 0 }}</div>
-                    <div class="stat-card-label">SPPG Laik Higiene</div>
-                </div>
-            </div>
-        </div>
+<style>
+    .card-summary {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+        border: none;
+        border-radius: 12px;
+    }
+    .card-summary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .icon-box {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    .table-responsive {
+        border-radius: 0 0 12px 12px;
+    }
+</style>
 
-        <div class="row mb-4">
-            <div class="col-md-6 mb-3 mb-md-0">
-                <div class="card h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-0 fw-bold">Dashboard Kelayakan SPPG</h3>
+            <p class="text-muted mb-0">Ringkasan status kelayakan IKL tingkat kabupaten/kota.</p>
+        </div>
+        <div>
+            <span class="badge bg-light text-dark border p-2">
+                <i class="fas fa-calendar-alt me-2"></i>{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+            </span>
+        </div>
+    </div>
+
+    <!-- ROW 1: SUMMARY CARDS -->
+    <div class="row g-4 mb-4">
+        <!-- Total Unit -->
+        <div class="col-lg-3 col-md-12">
+            <div class="card card-summary shadow-sm h-100 bg-white border-start border-primary border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-muted small">Sedang Proses IKL</div>
-                            <div class="fs-3 fw-bold">{{ $totalProsesIkl ?? 0 }}</div>
+                            <p class="text-muted mb-1 fw-semibold">Total Unit Usaha</p>
+                            <h2 class="mb-0 fw-bold">{{ number_format($totalUnitUsaha) }}</h2>
                         </div>
-                        <div class="fs-1 text-warning">
-                            <i class="fas fa-hourglass-half"></i>
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-building"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 mb-3 mb-md-0">
-                <div class="card h-100">
-                    <div class="card-body d-flex align-items-center justify-content-between">
+        </div>
+
+        <!-- Memenuhi IKL -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-summary shadow-sm h-100 bg-white border-start border-success border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-muted small">Sedang Proses SLHS</div>
-                            <div class="fs-3 fw-bold">{{ $totalProsesSlhs ?? 0 }}</div>
+                            <p class="text-muted mb-1 fw-semibold">Memenuhi Syarat (IKL ≥ 80)</p>
+                            <h2 class="mb-0 fw-bold text-success">{{ number_format($totalLulusIkl) }}</h2>
                         </div>
-                        <div class="fs-1 text-info">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Sebaran SPPG per Kecamatan
-                        </h5>
-                        <small class="text-muted">Sumber data: relasi SPPG - Kecamatan</small>
-                    </div>
-                    <div class="card-body">
-                        <div style="height: 320px;">
-                            <canvas id="kecamatanChart"></canvas>
+                        <div class="icon-box bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-check-circle"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-8 mb-4 mb-lg-0">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Data SPPG Terbaru
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 60px;">No</th>
-                                        <th>Nama SPPG</th>
-                                        <th>Kecamatan</th>
-                                        <th>Status IKL</th>
-                                        <th>Status SLHS</th>
-                                        <th>Tanggal IKL</th>
-                                        <th style="width: 90px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse ($recentSppg ?? [] as $index => $sppg)
-                                        @php
-                                            $isIklLulus = $sppg->status_ikl === 'selesai'
-                                                && $sppg->hasil_ikl === 'memenuhi'
-                                                && (int) ($sppg->nilai_ikl ?? 0) >= 80;
-
-                                            $isLaikHigiene = $isIklLulus && $sppg->status_slhs === 'selesai';
-
-                                            if ($isLaikHigiene) {
-                                                $evaluasiLabel = 'Laik Higiene';
-                                                $evaluasiClass = 'bg-success';
-                                            } elseif ($isIklLulus) {
-                                                $evaluasiLabel = 'Lulus IKL';
-                                                $evaluasiClass = 'bg-primary';
-                                            } else {
-                                                $evaluasiLabel = 'Belum Layak';
-                                                $evaluasiClass = 'bg-secondary';
-                                            }
-
-                                            $statusIklLabel = $sppg->status_ikl
-                                                ? ucfirst(str_replace('_', ' ', $sppg->status_ikl))
-                                                : '-';
-
-                                            $statusSlhsLabel = $sppg->status_slhs
-                                                ? ucfirst(str_replace('_', ' ', $sppg->status_slhs))
-                                                : '-';
-                                        @endphp
-                                        <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>
-                                                <div class="fw-semibold">{{ $sppg->nama_sppg ?? '-' }}</div>
-                                                <small class="text-muted">{{ $sppg->nama_kepala ?? '-' }}</small>
-                                            </td>
-                                            <td>{{ $sppg->kecamatan?->nama_kecamatan ?? '-' }}</td>
-                                            <td>
-                                                <span class="badge {{ $isIklLulus ? 'bg-success' : 'bg-warning text-dark' }}">
-                                                    {{ $statusIklLabel }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge {{ $sppg->status_slhs === 'selesai' ? 'bg-success' : 'bg-secondary' }}">
-                                                    {{ $statusSlhsLabel }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $sppg->tanggal_ikl?->format('d M Y') ?? '-' }}</td>
-                                            <td>
-                                                <span class="badge {{ $evaluasiClass }}">{{ $evaluasiLabel }}</span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="text-center text-muted py-4">
-                                                Belum ada data SPPG terbaru.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+        <!-- Tidak Memenuhi IKL -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card card-summary shadow-sm h-100 bg-white border-start border-danger border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">Tidak Memenuhi (IKL < 80)</p>
+                            <h2 class="mb-0 fw-bold text-danger">{{ number_format($totalUnitUsaha - $totalLulusIkl) }}</h2>
                         </div>
-
-                        <div class="mt-3">
-                            <a href="{{ route('admin.kelola') }}" class="btn btn-primary">
-                                Lihat Semua <i class="fas fa-arrow-right ms-2"></i>
-                            </a>
+                        <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                            <i class="fas fa-times-circle"></i>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="col-lg-4">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bell me-2"></i>Ringkasan Status
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3 p-3 rounded bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="small text-muted">Total SPPG</div>
-                                    <div class="fs-4 fw-bold">{{ $totalSppg ?? 0 }}</div>
-                                </div>
-                                <i class="fas fa-building fs-2 text-primary"></i>
-                            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card card-summary shadow-sm h-100 bg-white border-start border-info border-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 fw-semibold">Penerima Manfaat</p>
+                            <h2 class="mb-0 fw-bold text-info">{{ number_format($totalPenerima) }}</h2>
                         </div>
-
-                        <div class="mb-3 p-3 rounded bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="small text-muted">Lulus IKL</div>
-                                    <div class="fs-4 fw-bold">{{ $totalLulusIkl ?? 0 }}</div>
-                                </div>
-                                <i class="fas fa-check-circle fs-2 text-success"></i>
-                            </div>
-                        </div>
-
-                        <div class="mb-3 p-3 rounded bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="small text-muted">Bers SLHS</div>
-                                    <div class="fs-4 fw-bold">{{ $totalBerslhs ?? 0 }}</div>
-                                </div>
-                                <i class="fas fa-certificate fs-2 text-info"></i>
-                            </div>
-                        </div>
-
-                        <div class="p-3 rounded bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="small text-muted">Laik Higiene</div>
-                                    <div class="fs-4 fw-bold">{{ $totalLaikHigiene ?? 0 }}</div>
-                                </div>
-                                <i class="fas fa-shield-alt fs-2 text-warning"></i>
-                            </div>
+                        <div class="icon-box bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-users-shield"></i>
                         </div>
                     </div>
                 </div>
@@ -245,101 +111,278 @@
         </div>
     </div>
 
-    <style>
-        .stat-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(0, 0, 0, 0.04);
-        }
+    <!-- ROW 2: CHARTS -->
+    <div class="row g-4 mb-4">
+        <!-- Grafik Sebaran Kecamatan -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h5 class="fw-bold"><i class="fas fa-map-marker-alt text-primary me-2"></i>Sebaran Unit Usaha per Kecamatan</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="barChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
 
-        .stat-card-icon {
-            font-size: 28px;
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
+        <!-- Grafik Rasio Kelayakan -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0">
+                    <h5 class="fw-bold"><i class="fas fa-chart-pie text-primary me-2"></i>Rasio Kelayakan IKL</h5>
+                </div>
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <div style="width: 80%;">
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        .stat-card-value {
-            font-size: 30px;
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 6px;
-        }
+    <!-- ROW 3: LINE CHART (TREN BULANAN) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold"><i class="fas fa-chart-line text-primary me-2"></i>Tren Penambahan Unit Usaha Tahun {{ $tahunIni }}</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Atur height di sini agar grafiknya tidak terlalu tinggi -->
+                    <canvas id="lineChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        .stat-card-label {
-            font-size: 14px;
-            color: #6c757d;
-        }
-    </style>
+    <!-- ROW 3: NEW ALERTS (MENGAJUKAN & JATUH TEMPO) -->
+    <div class="row g-4 mb-4">
+        <!-- Tabel SLHS Mengajukan -->
+        <div class="col-xl-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-warning"><i class="fas fa-bell me-2"></i>Antrean Pengajuan SLHS</h5>
+                    <span class="badge bg-warning text-dark">{{ $pengajuanSlhs->count() }} Data</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Nama Unit Usaha</th>
+                                    <th>Kecamatan</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($pengajuanSlhs as $item)
+                                <tr>
+                                    <td class="ps-4 fw-semibold">{{ $item->nama_unit_usaha }}</td>
+                                    <td>{{ $item->kecamatan->nama_kecamatan ?? '-' }}</td>
+                                    <td><span class="badge bg-warning text-dark">Menunggu Verifikasi</span></td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">Tidak ada antrean pengajuan SLHS.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const chartElement = document.getElementById('kecamatanChart');
-            if (!chartElement) {
-                return;
+        <!-- Tabel SLHS Jatuh Tempo -->
+        <div class="col-xl-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>SLHS Hampir Jatuh Tempo</h5>
+                    <span class="badge bg-danger">{{ $slhsJatuhTempo->count() }} Terdekat</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Nama Unit Usaha</th>
+                                    <th>Kecamatan</th>
+                                    <th>Tgl Berakhir</th>
+                                    <th class="text-end pe-4">Sisa Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($slhsJatuhTempo as $item)
+                                    @php
+                                        // Hitung sisa hari dari sekarang ke tanggal berakhir
+                                        $tglBerakhir = \Carbon\Carbon::parse($item->laporanSlhs->tgl_berakhir_slhs);
+                                        $sisaHari = \Carbon\Carbon::now()->diffInDays($tglBerakhir, false); // false agar bisa negatif jika terlewat
+                                    @endphp
+                                <tr>
+                                    <td class="ps-4 fw-semibold">{{ $item->nama_unit_usaha }}</td>
+                                    <td>{{ $item->kecamatan->nama_kecamatan ?? '-' }}</td>
+                                    <td>{{ $tglBerakhir->format('d M Y') }}</td>
+                                    <td class="text-end pe-4">
+                                        @if($sisaHari <= 30)
+                                            <span class="badge bg-danger">{{ floor($sisaHari) }} Hari Lagi</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ floor($sisaHari) }} Hari</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Semua data SLHS masih dalam masa aktif yang aman.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 4: RECENT DATA TABLE -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-clock text-primary me-2"></i>Data Unit Usaha Terbaru</h5>
+                    <a href="{{ route('admin.reporting.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua Data</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Nama Unit Usaha</th>
+                                    <th>Pemilik</th>
+                                    <th>Jenis Usaha</th>
+                                    <th>Kecamatan</th>
+                                    <th>Tanggal Input</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentUnitUsaha as $item)
+                                <tr>
+                                    <td class="ps-4 fw-semibold">{{ $item->nama_unit_usaha }}</td>
+                                    <td>{{ $item->nama_pemilik ?? '-' }}</td>
+                                    <td><span class="badge bg-secondary">{{ strtoupper($item->jenis_usaha ?? '-') }}</span></td>
+                                    <td>{{ $item->kecamatan->nama_kecamatan ?? '-' }}</td>
+                                    <td>{{ $item->created_at->format('d M Y') }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">Belum ada data unit usaha.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS UNTUK RENDER CHART -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // 1. Data untuk Grafik Bar
+    const kecamatanData = @json($sebaranKecamatan);
+    const labelsBar = kecamatanData.map(item => item.nama_kecamatan || item.nama);
+    const dataSppg = kecamatanData.map(item => item.sppg_count || 0);
+    const dataTpp = kecamatanData.map(item => item.tpp_count || 0);
+    const dataDam = kecamatanData.map(item => item.dam_count || 0);
+    const dataKantin = kecamatanData.map(item => item.kantin_count || 0);
+
+    const ctxBar = document.getElementById('barChart').getContext('2d');
+    new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+            labels: labelsBar,
+            datasets: [
+                { label: 'SPPG', data: dataSppg, backgroundColor: 'rgba(13, 110, 253, 0.8)', borderRadius: 4 },
+                { label: 'TPP', data: dataTpp, backgroundColor: 'rgba(25, 135, 84, 0.8)', borderRadius: 4 },
+                { label: 'DAM', data: dataDam, backgroundColor: 'rgba(13, 202, 240, 0.8)', borderRadius: 4 },
+                { label: 'Kantin', data: dataKantin, backgroundColor: 'rgba(255, 193, 7, 0.8)', borderRadius: 4 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: true, position: 'top' } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+
+    // 2. Data untuk Grafik Donat
+    const totalSemua = {{ $totalUnitUsaha }};
+    const totalMemenuhi = {{ $totalLulusIkl }};
+    const totalTidakMemenuhi = totalSemua - totalMemenuhi;
+
+    const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+    new Chart(ctxDoughnut, {
+        type: 'doughnut',
+        data: {
+            labels: ['Memenuhi (IKL ≥ 80)', 'Tidak Memenuhi (IKL < 80)'],
+            datasets: [{
+                data: [totalMemenuhi, totalTidakMemenuhi],
+                backgroundColor: ['#198754', '#dc3545'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '70%',
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
             }
+        }
+    });
+});
 
-            const labels = @json(($sebaranKecamatan ?? collect())->pluck('nama_kecamatan')->values());
-            const totals = @json(($sebaranKecamatan ?? collect())->pluck('sppg_count')->map(fn ($item) => (int) $item)->values());
+const trenBulananData = @json($grafikBulanan);
 
-            const hasData = totals.some(function (value) {
-                return value > 0;
-            });
-
-            if (!hasData) {
-                chartElement.parentElement.innerHTML = '<div class="text-muted text-center py-5">Belum ada data SPPG per kecamatan.</div>';
-                return;
-            }
-
-            new Chart(chartElement, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Jumlah SPPG',
-                        data: totals,
-                        backgroundColor: '#1976d2',
-                        borderRadius: 8,
-                        barThickness: 26,
-                        maxBarThickness: 32
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return 'Jumlah SPPG: ' + context.raw;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: '#495057'
-                            },
-                            grid: {
-                                display: false
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0,
-                                color: '#495057'
-                            }
-                        }
-                    }
+    const ctxLine = document.getElementById('lineChart').getContext('2d');
+    new Chart(ctxLine, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'],
+            datasets: [{
+                label: 'Jumlah Unit Usaha Baru',
+                data: trenBulananData,
+                borderColor: 'rgba(13, 110, 253, 1)', // Warna Garis Biru
+                backgroundColor: 'rgba(13, 110, 253, 0.1)', // Warna area bawah garis (transparan)
+                borderWidth: 3,
+                pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                fill: true, // Membuat area di bawah garis terisi warna
+                tension: 0.4 // Membuat garis melengkung halus (curvy)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false } // Legend disembunyikan karena sudah jelas dari judul
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { precision: 0 } 
                 }
-            });
-        });
-    </script>
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index',
+            },
+        }
+    });
+
+</script>
 @endsection
