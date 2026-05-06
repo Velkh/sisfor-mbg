@@ -4,69 +4,59 @@
 
 @section('content')
     <div class="container-fluid">
+        @php
+            $total = $stats['total'] ?? 0;
+            $memenuhiCount = ($stats['laik_higiene'] ?? 0) + ($stats['bersyarat'] ?? 0);
+            $tidakCount = $stats['belum_layak'] ?? 0;
+        @endphp
+
         <div class="row mb-4">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-card-icon">
                         <i class="fas fa-list"></i>
                     </div>
-                    <div class="stat-card-value">{{ $stats['total'] }}</div>
-                    <div class="stat-card-label">Total SPPG</div>
+                    <div class="stat-card-value">{{ $total }}</div>
+                    <div class="stat-card-label">Total Unit Usaha</div>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-card-icon" style="color: #F44336;">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $stats['belum_layak'] ?? 0 }}</div>
-                    <div class="stat-card-label">Belum Layak</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-card-icon" style="color: #FF9800;">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $stats['bersyarat'] ?? 0 }}</div>
-                    <div class="stat-card-label">Bersyarat</div>
-                </div>
-            </div>
-            <div class="col-md-3">
+
+            <div class="col-md-4">
                 <div class="stat-card">
                     <div class="stat-card-icon" style="color: #4CAF50;">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="stat-card-value">{{ $stats['laik_higiene'] ?? 0 }}</div>
-                    <div class="stat-card-label">Laik Higiene</div>
+                    <div class="stat-card-value">{{ $memenuhiCount }}</div>
+                    <div class="stat-card-label">Memenuhi</div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-card-icon" style="color: #F44336;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-card-value">{{ $tidakCount }}</div>
+                    <div class="stat-card-label">Tidak Memenuhi</div>
                 </div>
             </div>
         </div>
 
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" action="{{ route('admin.data') }}">
+                <form method="GET" action="{{ url()->current() }}">
                     <div class="row g-3">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <input
                                 type="text"
                                 name="q"
                                 class="form-control"
-                                placeholder="Cari SPPG"
-                                value="{{ $filters['q'] }}"
+                                placeholder="Cari unit usaha / pemilik"
+                                value="{{ $filters['q'] ?? '' }}"
                             >
                         </div>
 
-                        <div class="col-md-2">
-                            <select name="evaluasi" class="form-select">
-                                <option value="all" @selected(($filters['evaluasi'] ?? 'all') === 'all')>Semua Evaluasi</option>
-                                <option value="belum_layak" @selected(($filters['evaluasi'] ?? '') === 'belum_layak')>Belum Layak</option>
-                                <option value="bersyarat" @selected(($filters['evaluasi'] ?? '') === 'bersyarat')>Bersyarat</option>
-                                <option value="laik_higiene" @selected(($filters['evaluasi'] ?? '') === 'laik_higiene')>Laik Higiene</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <select name="status_ikl" class="form-select">
                                 <option value="">Semua Status IKL</option>
                                 <option value="belum_mengajukan" @selected(($filters['status_ikl'] ?? '') === 'belum_mengajukan')>Belum Mengajukan</option>
@@ -75,7 +65,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <select name="status_slhs" class="form-select">
                                 <option value="">Semua Status SLHS</option>
                                 <option value="belum_mengajukan" @selected(($filters['status_slhs'] ?? '') === 'belum_mengajukan')>Belum Mengajukan</option>
@@ -84,15 +74,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-1">
-                            <input type="date" name="dari" class="form-control" value="{{ $filters['dari'] }}">
-                        </div>
-
-                        <div class="col-md-1">
-                            <input type="date" name="sampai" class="form-control" value="{{ $filters['sampai'] }}">
-                        </div>
-
-                        <div class="col-md-1 d-flex gap-2">
+                        <div class="col-md-2 d-flex gap-2">
                             <button class="btn btn-outline-secondary w-100" type="submit">
                                 <i class="fas fa-filter"></i>
                             </button>
@@ -103,17 +85,20 @@
                         <a href="{{ route('admin.data.export.pdf', request()->query()) }}" class="btn btn-sm btn-outline-danger">
                             <i class="fas fa-file-pdf me-2"></i>PDF
                         </a>
-                        <a href="{{ route('admin.data') }}" class="btn btn-sm btn-outline-dark">
+                        <a href="{{ route('admin.data.export.excel', request()->query()) }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-file-excel me-2"></i>Excel
+                        </a>
+                        <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-dark">
                             Reset
                         </a>
                     </div>
                 </form>
             </div>
-        </div>
+        </div>>
 
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-check-double me-2"></i>Daftar Kelayakan SPPG</h5>
+                <h5 class="mb-0"><i class="fas fa-check-double me-2"></i>Daftar Kelayakan Unit Usaha</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -121,11 +106,12 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>SPPG</th>
+                                <th>Unit Usaha</th>
                                 <th>Puskesmas</th>
                                 <th>IKL</th>
                                 <th>SLHS</th>
-                                <th>Tanggal IKL</th>
+                                <th>IPAL</th>
+                                <th>Pengelolaan Sampah</th>
                                 <th>Evaluasi</th>
                                 <th>Aksi</th>
                             </tr>
@@ -133,12 +119,26 @@
                         <tbody>
                             @forelse ($items as $index => $item)
                                 @php
-                                    $isIklLulus = $item->status_ikl === 'selesai'
-                                        && $item->hasil_ikl === 'memenuhi'
-                                        && (int) ($item->nilai_ikl ?? 0) >= 80;
+                                    $laporan = $item->laporanSlhs;
+                                    $nilaiIkl = (int) ($laporan?->nilai_ikl ?? 0);
 
-                                    $isLaikHigiene = $isIklLulus && $item->status_slhs === 'selesai';
-                                    $isBersyarat = $isIklLulus && $item->status_slhs !== 'selesai';
+                                    // short evaluation based on nilai_ikl only
+                                    if ($nilaiIkl >= 80) {
+                                        $evaluasiShort = 'Memenuhi';
+                                        $evaluasiClassShort = 'success';
+                                    } else {
+                                        $evaluasiShort = 'Tidak Memenuhi';
+                                        $evaluasiClassShort = 'danger';
+                                    }
+
+                                    // keep original descriptive evaluation for modal
+                                    $isIklLulus = $laporan
+                                        && $laporan->status_ikl === 'selesai'
+                                        && $laporan->hasil_ikl === 'memenuhi'
+                                        && $nilaiIkl >= 80;
+
+                                    $isLaikHigiene = $isIklLulus && $laporan && $laporan->status_slhs === 'selesai';
+                                    $isBersyarat = $isIklLulus && $laporan && $laporan->status_slhs !== 'selesai';
 
                                     if ($isLaikHigiene) {
                                         $evaluasiText = 'Laik Higiene';
@@ -152,51 +152,54 @@
                                     }
 
                                     $detailPayload = [
-                                        'nama_sppg' => $item->nama_sppg,
-                                        'nama_mitra' => $item->nama_mitra,
+                                        'nama_unit_usaha' => $item->nama_unit_usaha,
+                                        'nama_pemilik' => $item->nama_pemilik,
+                                        'jenis_usaha' => strtoupper($item->jenis_usaha ?? '-'),
                                         'puskesmas' => $item->puskesmas?->nama_puskesmas ?? '-',
-                                        'status_ikl' => $item->status_ikl ? ucfirst(str_replace('_', ' ', $item->status_ikl)) : '-',
-                                        'nilai_ikl' => $item->nilai_ikl ?? '-',
-                                        'hasil_ikl' => $item->hasil_ikl ? ucfirst(str_replace('_', ' ', $item->hasil_ikl)) : '-',
-                                        'tanggal_ikl' => $item->tanggal_ikl?->format('d M Y') ?? '-',
-                                        'status_slhs' => $item->status_slhs ? ucfirst(str_replace('_', ' ', $item->status_slhs)) : '-',
-                                        'tgl_berlaku' => $item->tgl_berlaku?->format('d M Y') ?? '-',
-                                        'tgl_berakhir' => $item->tgl_berakhir?->format('d M Y') ?? '-',
-                                        'foto_slhs_path' => $item->foto_slhs ? asset('storage/' . $item->foto_slhs) : null,
-                                        'foto_slhs_name' => $item->foto_slhs,
+                                        'status_ikl' => $laporan?->status_ikl ? ucfirst(str_replace('_', ' ', $laporan->status_ikl)) : '-',
+                                        'nilai_ikl' => $laporan?->nilai_ikl ?? '-',
+                                        'hasil_ikl' => $laporan?->hasil_ikl ? ucfirst(str_replace('_', ' ', $laporan->hasil_ikl)) : '-',
+                                        'tanggal_ikl' => optional($laporan?->updated_at)->format('d M Y') ?? '-',
+                                        'status_slhs' => $laporan?->status_slhs ? ucfirst(str_replace('_', ' ', $laporan->status_slhs)) : '-',
+                                        'tgl_terbit_slhs' => optional($laporan?->tgl_terbit_slhs)->format('d M Y') ?? '-',
+                                        'tgl_berakhir_slhs' => optional($laporan?->tgl_berakhir_slhs)->format('d M Y') ?? '-',
+                                        'link_slhs' => $laporan?->link_slhs ?? null,
+                                        'ketersediaan_ipal' => $laporan?->ketersediaan_ipal ? ucfirst(str_replace('_', ' ', $laporan->ketersediaan_ipal)) : '-',
+                                        'jenis_ipal' => $laporan?->jenis_ipal ?? '-',
+                                        'pengelolaan_sampah' => $laporan?->pengelolaan_sampah ? ucfirst(str_replace('_', ' ', $laporan->pengelolaan_sampah)) : '-',
+                                        'jenis_pengelolaan' => $laporan?->jenis_pengelolaan ?? '-',
                                         'evaluasi_text' => $evaluasiText,
-                                        'foto_sppg' => $item->fotoSppg
-                                            ->map(fn ($foto) => asset('storage/' . $foto->foto_sppg))
-                                            ->values()
-                                            ->all(),
+                                        'evaluasi_short' => $evaluasiShort,
                                     ];
                                 @endphp
                                 <tr>
                                     <td>{{ $items->firstItem() + $index }}</td>
                                     <td>
-                                        <strong>{{ $item->nama_sppg }}</strong>
+                                        <strong>{{ $item->nama_unit_usaha }}</strong>
                                         <br>
-                                        <small class="text-muted">Mitra: {{ $item->nama_mitra }}</small>
+                                        <small class="text-muted">Pemilik: {{ $item->nama_pemilik ?? '-' }}</small>
+                                        <br>
+                                        <small class="text-muted">Jenis: {{ strtoupper($item->jenis_usaha ?? '-') }}</small>
                                     </td>
                                     <td>{{ $item->puskesmas?->nama_puskesmas ?? '-' }}</td>
                                     <td>
                                         <div>
-                                            @if ($item->status_ikl === 'belum_mengajukan')
+                                            @if (($laporan?->status_ikl ?? null) === 'belum_mengajukan')
                                                 <span class="badge bg-secondary">Belum Mengajukan</span>
-                                            @elseif ($item->status_ikl === 'sudah_mengajukan')
+                                            @elseif (($laporan?->status_ikl ?? null) === 'sudah_mengajukan')
                                                 <span class="badge bg-warning text-dark">Sudah Mengajukan</span>
-                                            @elseif ($item->status_ikl === 'selesai')
+                                            @elseif (($laporan?->status_ikl ?? null) === 'selesai')
                                                 <span class="badge bg-info">Selesai</span>
                                             @else
                                                 <span class="badge bg-light text-dark">-</span>
                                             @endif
                                         </div>
                                         <small class="text-muted">
-                                            Nilai: {{ $item->nilai_ikl ?? '-' }} |
+                                            Nilai: {{ $laporan?->nilai_ikl ?? '-' }} |
                                             Hasil:
-                                            @if ($item->hasil_ikl === 'memenuhi')
+                                            @if (($laporan?->hasil_ikl ?? null) === 'memenuhi')
                                                 Memenuhi
-                                            @elseif ($item->hasil_ikl === 'tidak_memenuhi')
+                                            @elseif (($laporan?->hasil_ikl ?? null) === 'tidak_memenuhi')
                                                 Tidak Memenuhi
                                             @else
                                                 -
@@ -204,24 +207,41 @@
                                         </small>
                                     </td>
                                     <td>
-                                        @if ($item->status_slhs === 'belum_mengajukan')
+                                        @if (($laporan?->status_slhs ?? null) === 'belum_mengajukan')
                                             <span class="badge bg-secondary">Belum Mengajukan</span>
-                                        @elseif ($item->status_slhs === 'sudah_mengajukan')
+                                        @elseif (($laporan?->status_slhs ?? null) === 'sudah_mengajukan')
                                             <span class="badge bg-warning text-dark">Sudah Mengajukan</span>
-                                        @elseif ($item->status_slhs === 'selesai')
+                                        @elseif (($laporan?->status_slhs ?? null) === 'selesai')
                                             <span class="badge bg-success">Selesai</span>
                                         @else
                                             <span class="badge bg-light text-dark">-</span>
                                         @endif
                                         <br>
                                         <small class="text-muted">
-                                            Berlaku: {{ $item->tgl_berlaku?->format('d M Y') ?? '-' }}
-                                            s/d {{ $item->tgl_berakhir?->format('d M Y') ?? '-' }}
+                                            Terbit: {{ optional($laporan?->tgl_terbit_slhs)->format('d M Y') ?? '-' }}
+                                            <br>
+                                            Berakhir: {{ optional($laporan?->tgl_berakhir_slhs)->format('d M Y') ?? '-' }}
                                         </small>
                                     </td>
-                                    <td>{{ $item->tanggal_ikl?->format('d M Y') ?? '-' }}</td>
+
                                     <td>
-                                        <span class="badge bg-{{ $evaluasiClass }}">{{ $evaluasiText }}</span>
+                                        <small class="text-muted d-block">Ketersediaan:</small>
+                                        {{ $laporan?->ketersediaan_ipal ? ucfirst(str_replace('_', ' ', $laporan->ketersediaan_ipal)) : '-' }}
+                                        <br>
+                                        <small class="text-muted d-block">Jenis:</small>
+                                        {{ $laporan?->jenis_ipal ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        <small class="text-muted d-block">Pengelolaan:</small>
+                                        {{ $laporan?->pengelolaan_sampah ? ucfirst(str_replace('_', ' ', $laporan->pengelolaan_sampah)) : '-' }}
+                                        <br>
+                                        <small class="text-muted d-block">Jenis:</small>
+                                        {{ $laporan?->jenis_pengelolaan ?? '-' }}
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-{{ $evaluasiClassShort }}">{{ $evaluasiShort }}</span>
                                     </td>
                                     <td>
                                         <button
@@ -237,7 +257,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted">Data tidak ditemukan.</td>
+                                    <td colspan="9" class="text-center text-muted">Data tidak ditemukan.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -256,25 +276,29 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="detailKelayakanModalLabel">
-                        <i class="fas fa-file-alt me-2"></i>Detail IKL & SLHS
+                        <i class="fas fa-file-alt me-2"></i>Detail IKL, SLHS, dan Sanitasi
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <small class="text-muted d-block">Nama SPPG</small>
-                            <strong id="detailNamaSppg">-</strong>
+                            <small class="text-muted d-block">Nama Unit Usaha</small>
+                            <strong id="detailNamaUnitUsaha">-</strong>
                         </div>
                         <div class="col-md-4">
-                            <small class="text-muted d-block">Mitra</small>
-                            <strong id="detailMitra">-</strong>
+                            <small class="text-muted d-block">Nama Pemilik</small>
+                            <strong id="detailNamaPemilik">-</strong>
                         </div>
                         <div class="col-md-4">
                             <small class="text-muted d-block">Puskesmas</small>
                             <strong id="detailPuskesmas">-</strong>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Jenis Usaha</small>
+                            <strong id="detailJenisUsaha">-</strong>
+                        </div>
+                        <div class="col-md-8">
                             <small class="text-muted d-block">Evaluasi</small>
                             <span id="detailEvaluasi" class="badge bg-secondary">-</span>
                         </div>
@@ -293,9 +317,6 @@
                                         <tr><th>Hasil IKL</th><td id="detailHasilIkl">-</td></tr>
                                         <tr><th>Tanggal IKL</th><td id="detailTanggalIkl">-</td></tr>
                                     </table>
-                                    <small class="text-muted d-block mt-2">
-                                        Foto IKL khusus belum tersedia pada struktur tabel saat ini.
-                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -308,11 +329,10 @@
                                 <div class="card-body">
                                     <table class="table table-sm mb-3">
                                         <tr><th style="width:40%;">Status SLHS</th><td id="detailStatusSlhs">-</td></tr>
-                                        <tr><th>Tanggal Berlaku</th><td id="detailTglBerlaku">-</td></tr>
-                                        <tr><th>Tanggal Berakhir</th><td id="detailTglBerakhir">-</td></tr>
+                                        <tr><th>Tgl Terbit</th><td id="detailTglTerbitSlhs">-</td></tr>
+                                        <tr><th>Tgl Berakhir</th><td id="detailTglBerakhirSlhs">-</td></tr>
                                     </table>
-
-                                    <div id="detailSlhsContainer" class="text-muted">File SLHS belum tersedia.</div>
+                                    <div id="detailSlhsContainer" class="text-muted">Link SLHS belum tersedia.</div>
                                 </div>
                             </div>
                         </div>
@@ -320,11 +340,26 @@
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header">
-                                    <h6 class="mb-0"><i class="fas fa-images me-2"></i>Galeri Foto SPPG</h6>
+                                    <h6 class="mb-0"><i class="fas fa-recycle me-2"></i>IPAL dan Pengelolaan Sampah</h6>
                                 </div>
                                 <div class="card-body">
-                                    <div id="detailFotoSppgContainer" class="row g-3">
-                                        <p class="text-muted mb-0">Belum ada foto SPPG.</p>
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Ketersediaan IPAL</small>
+                                            <strong id="detailKetersediaanIpal">-</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Jenis IPAL</small>
+                                            <strong id="detailJenisIpal">-</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Pengelolaan Sampah</small>
+                                            <strong id="detailPengelolaanSampah">-</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <small class="text-muted d-block">Jenis Pengelolaan</small>
+                                            <strong id="detailJenisPengelolaan">-</strong>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -347,67 +382,48 @@
                     }
                 };
 
-                setText('detailNamaSppg', detail.nama_sppg);
-                setText('detailMitra', detail.nama_mitra);
+                setText('detailNamaUnitUsaha', detail.nama_unit_usaha);
+                setText('detailNamaPemilik', detail.nama_pemilik);
+                setText('detailJenisUsaha', detail.jenis_usaha);
                 setText('detailPuskesmas', detail.puskesmas);
+
                 setText('detailStatusIkl', detail.status_ikl);
                 setText('detailNilaiIkl', detail.nilai_ikl);
                 setText('detailHasilIkl', detail.hasil_ikl);
                 setText('detailTanggalIkl', detail.tanggal_ikl);
+
                 setText('detailStatusSlhs', detail.status_slhs);
-                setText('detailTglBerlaku', detail.tgl_berlaku);
-                setText('detailTglBerakhir', detail.tgl_berakhir);
+                setText('detailTglTerbitSlhs', detail.tgl_terbit_slhs);
+                setText('detailTglBerakhirSlhs', detail.tgl_berakhir_slhs);
+
+                setText('detailKetersediaanIpal', detail.ketersediaan_ipal);
+                setText('detailJenisIpal', detail.jenis_ipal);
+                setText('detailPengelolaanSampah', detail.pengelolaan_sampah);
+                setText('detailJenisPengelolaan', detail.jenis_pengelolaan);
 
                 const evaluasiEl = document.getElementById('detailEvaluasi');
-                evaluasiEl.textContent = detail.evaluasi_text ?? '-';
+                evaluasiEl.textContent = detail.evaluasi_short ?? detail.evaluasi_text ?? '-';
                 evaluasiEl.className = 'badge bg-secondary';
 
-                const ev = (detail.evaluasi_text || '').toLowerCase();
-                if (ev === 'laik higiene') {
+                const ev = (detail.evaluasi_short || detail.evaluasi_text || '').toLowerCase();
+                if (ev.includes('memenuhi') || ev.includes('laik')) {
                     evaluasiEl.className = 'badge bg-success';
-                } else if (ev === 'bersyarat') {
+                } else if (ev.includes('bersyarat')) {
                     evaluasiEl.className = 'badge bg-warning text-dark';
-                } else if (ev === 'belum layak') {
+                } else {
                     evaluasiEl.className = 'badge bg-danger';
                 }
 
                 const slhsContainer = document.getElementById('detailSlhsContainer');
                 slhsContainer.innerHTML = '';
-                if (detail.foto_slhs_path) {
-                    const isPdf = (detail.foto_slhs_name || '').toLowerCase().endsWith('.pdf');
-                    if (isPdf) {
-                        slhsContainer.innerHTML = `
-                            <a href="${detail.foto_slhs_path}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-file-pdf me-1"></i>Lihat File SLHS
-                            </a>
-                        `;
-                    } else {
-                        slhsContainer.innerHTML = `
-                            <a href="${detail.foto_slhs_path}" target="_blank">
-                                <img src="${detail.foto_slhs_path}" class="img-fluid rounded border" alt="Foto SLHS">
-                            </a>
-                        `;
-                    }
+                if (detail.link_slhs) {
+                    slhsContainer.innerHTML = `
+                        <a href="${detail.link_slhs}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-link me-1"></i>Buka Link SLHS
+                        </a>
+                    `;
                 } else {
-                    slhsContainer.innerHTML = '<span class="text-muted">File SLHS belum tersedia.</span>';
-                }
-
-                const fotoContainer = document.getElementById('detailFotoSppgContainer');
-                fotoContainer.innerHTML = '';
-                const fotoList = Array.isArray(detail.foto_sppg) ? detail.foto_sppg : [];
-                if (fotoList.length === 0) {
-                    fotoContainer.innerHTML = '<p class="text-muted mb-0">Belum ada foto SPPG.</p>';
-                } else {
-                    fotoList.forEach(function (url) {
-                        const col = document.createElement('div');
-                        col.className = 'col-md-3 col-sm-4 col-6';
-                        col.innerHTML = `
-                            <a href="${url}" target="_blank">
-                                <img src="${url}" class="img-fluid rounded border" alt="Foto SPPG" style="height:160px;width:100%;object-fit:cover;">
-                            </a>
-                        `;
-                        fotoContainer.appendChild(col);
-                    });
+                    slhsContainer.innerHTML = '<span class="text-muted">Link SLHS belum tersedia.</span>';
                 }
             });
         });
