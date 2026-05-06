@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Dinkes;
 
 use App\Http\Controllers\Controller;
-use App\Models\Sppg;
+use App\Models\UnitUsaha;
+use App\Models\LaporanSlhs;
+use App\Exports\KelayakanExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
@@ -19,7 +22,7 @@ class EvaluationController extends Controller
         $baseQuery = $this->buildFilteredQuery($filters);
 
         $items = (clone $baseQuery)
-            ->orderByDesc('updated_at')
+            ->orderByDesc('created_at')
             ->paginate(10)
             ->withQueryString();
 
@@ -27,30 +30,35 @@ class EvaluationController extends Controller
             'total' => (clone $baseQuery)->count(),
 
             'belum_layak' => (clone $baseQuery)
-                ->where(function (Builder $query): void {
-                    $query->whereNull('status_ikl')
-                        ->orWhere('status_ikl', '!=', 'selesai')
-                        ->orWhereNull('hasil_ikl')
-                        ->orWhere('hasil_ikl', '!=', 'memenuhi')
-                        ->orWhereNull('nilai_ikl')
-                        ->orWhere('nilai_ikl', '<', 80);
+                ->whereHas('laporanSlhs', function (Builder $query): void {
+                    $query->where(function (Builder $q): void {
+                        $q->whereNull('status_ikl')
+                            ->orWhere('status_ikl', '!=', 'selesai')
+                            ->orWhereNull('hasil_ikl')
+                            ->orWhere('hasil_ikl', '!=', 'memenuhi')
+                            ->orWhereNull('nilai_ikl')
+                            ->orWhere('nilai_ikl', '<', 80);
+                    });
                 })->count(),
 
             'bersyarat' => (clone $baseQuery)
-                ->where('status_ikl', 'selesai')
-                ->where('hasil_ikl', 'memenuhi')
-                ->where('nilai_ikl', '>=', 80)
-                ->where(function (Builder $query): void {
-                    $query->whereNull('status_slhs')
-                        ->orWhere('status_slhs', '!=', 'selesai');
+                ->whereHas('laporanSlhs', function (Builder $query): void {
+                    $query->where('status_ikl', 'selesai')
+                        ->where('hasil_ikl', 'memenuhi')
+                        ->where('nilai_ikl', '>=', 80)
+                        ->where(function (Builder $q): void {
+                            $q->whereNull('status_slhs')
+                                ->orWhere('status_slhs', '!=', 'selesai');
+                        });
                 })->count(),
 
             'laik_higiene' => (clone $baseQuery)
-                ->where('status_ikl', 'selesai')
-                ->where('hasil_ikl', 'memenuhi')
-                ->where('nilai_ikl', '>=', 80)
-                ->where('status_slhs', 'selesai')
-                ->count(),
+                ->whereHas('laporanSlhs', function (Builder $query): void {
+                    $query->where('status_ikl', 'selesai')
+                        ->where('hasil_ikl', 'memenuhi')
+                        ->where('nilai_ikl', '>=', 80)
+                        ->where('status_slhs', 'selesai');
+                })->count(),
         ];
 
         return view('dinkes.kelayakan', [
@@ -65,7 +73,7 @@ class EvaluationController extends Controller
     {
         $filters = $this->validatedFilters($request);
         $rows = $this->buildFilteredQuery($filters)
-            ->orderByDesc('updated_at')
+            ->orderByDesc('created_at')
             ->get();
 
         $fileName = 'laporan-kelayakan-' . now()->format('Ymd-His') . '.pdf';
@@ -84,37 +92,33 @@ class EvaluationController extends Controller
     {
         $validated = $request->validate([
             'q' => ['nullable', 'string', 'max:255'],
-            'evaluasi' => ['nullable', 'in:all,belum_layak,bersyarat,laik_higiene'],
             'status_ikl' => ['nullable', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
-            'hasil_ikl' => ['nullable', 'in:memenuhi,tidak_memenuhi'],
             'status_slhs' => ['nullable', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
-            'dari' => ['nullable', 'date'],
-            'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
+            'evaluasi' => ['nullable', 'in:all,memenuhi,tidak_memenuhi'],
         ]);
 
         return [
             'q' => trim((string) ($validated['q'] ?? '')),
-            'evaluasi' => (string) ($validated['evaluasi'] ?? 'all'),
             'status_ikl' => (string) ($validated['status_ikl'] ?? ''),
-            'hasil_ikl' => (string) ($validated['hasil_ikl'] ?? ''),
             'status_slhs' => (string) ($validated['status_slhs'] ?? ''),
-            'dari' => $validated['dari'] ?? null,
-            'sampai' => $validated['sampai'] ?? null,
+            'evaluasi' => (string) ($validated['evaluasi'] ?? 'all'),
         ];
     }
 
     private function buildFilteredQuery(array $filters): Builder
     {
-        $query = Sppg::query()
-            ->with(['puskesmas:id_puskesmas,nama_puskesmas',
-                    'fotoSppg:id_foto,id_sppg,foto_sppg',
-                ]);
+        $query = UnitUsaha::query()
+            ->with([
+                'laporanSlhs:id_laporan_slhs,id_unit_usaha,status_ikl,nilai_ikl,hasil_ikl,status_slhs,tgl_terbit_slhs,tgl_berakhir_slhs,link_slhs,ketersediaan_ipal,jenis_ipal,pengelolaan_sampah,jenis_pengelolaan',
+                'puskesmas:id_puskesmas,nama_puskesmas',
+                'sasaranManfaat',
+            ]);
 
         if ($filters['q'] !== '') {
             $keyword = $filters['q'];
             $query->where(function (Builder $builder) use ($keyword): void {
-                $builder->where('nama_sppg', 'like', '%' . $keyword . '%')
-                    ->orWhere('nama_mitra', 'like', '%' . $keyword . '%')
+                $builder->where('nama_unit_usaha', 'like', '%' . $keyword . '%')
+                    ->orWhere('nama_pemilik', 'like', '%' . $keyword . '%')
                     ->orWhereHas('puskesmas', function (Builder $relationQuery) use ($keyword): void {
                         $relationQuery->where('nama_puskesmas', 'like', '%' . $keyword . '%');
                     });
@@ -122,85 +126,68 @@ class EvaluationController extends Controller
         }
 
         if ($filters['status_ikl'] !== '') {
-            $query->where('status_ikl', $filters['status_ikl']);
-        }
-
-        if ($filters['hasil_ikl'] !== '') {
-            $query->where('hasil_ikl', $filters['hasil_ikl']);
+            $query->whereHas('laporanSlhs', function (Builder $q) use ($filters): void {
+                $q->where('status_ikl', $filters['status_ikl']);
+            });
         }
 
         if ($filters['status_slhs'] !== '') {
-            $query->where('status_slhs', $filters['status_slhs']);
+            $query->whereHas('laporanSlhs', function (Builder $q) use ($filters): void {
+                $q->where('status_slhs', $filters['status_slhs']);
+            });
         }
 
-        if (! empty($filters['dari'])) {
-            $query->whereDate('tanggal_ikl', '>=', $filters['dari']);
+        if ($filters['evaluasi'] === 'memenuhi') {
+            $query->whereHas('laporanSlhs', function (Builder $q): void {
+                $q->whereNotNull('nilai_ikl')
+                ->where('nilai_ikl', '>=', 80);
+            });
         }
 
-        if (! empty($filters['sampai'])) {
-            $query->whereDate('tanggal_ikl', '<=', $filters['sampai']);
-        }
-
-        if ($filters['evaluasi'] === 'laik_higiene') {
-            $query->where('status_ikl', 'selesai')
-                ->where('hasil_ikl', 'memenuhi')
-                ->where('nilai_ikl', '>=', 80)
-                ->where('status_slhs', 'selesai');
-        }
-
-        if ($filters['evaluasi'] === 'bersyarat') {
-            $query->where('status_ikl', 'selesai')
-                ->where('hasil_ikl', 'memenuhi')
-                ->where('nilai_ikl', '>=', 80)
-                ->where(function (Builder $builder): void {
-                    $builder->whereNull('status_slhs')
-                        ->orWhere('status_slhs', '!=', 'selesai');
-                });
-        }
-
-        if ($filters['evaluasi'] === 'belum_layak') {
-        $query->where(function (Builder $builder): void {
-            $builder->whereNull('status_ikl')
-                ->orWhere('status_ikl', '!=', 'selesai')
-                ->orWhereNull('hasil_ikl')
-                ->orWhere('hasil_ikl', '!=', 'memenuhi')
-                ->orWhereNull('nilai_ikl')
+        if ($filters['evaluasi'] === 'tidak_memenuhi') {
+            $query->whereHas('laporanSlhs', function (Builder $q): void {
+                $q->whereNull('nilai_ikl')
                 ->orWhere('nilai_ikl', '<', 80);
-        });
-    }
+            });
+        }
+
         return $query;
     }
 
-    public function show(int $sppg): View
+    public function exportExcel(Request $request): Response
     {
-        $item = Sppg::query()
+        $filters = $this->validatedFilters($request);
+        $fileName = 'laporan-kelayakan-' . now()->format('Ymd-His') . '.xlsx';
+
+        return Excel::download(new KelayakanExport($filters), $fileName);
+    }
+
+    public function show(int $unitId): View
+    {
+        $item = UnitUsaha::query()
             ->with([
+                'laporanSlhs',
+                'sasaranManfaat',
                 'puskesmas:id_puskesmas,nama_puskesmas',
-                'user:id_users,username',
-                'fotoSppg:id_foto,id_sppg,foto_sppg',
+                'kecamatan:id_kecamatan,nama_kecamatan',
+                'kelurahan:id_kelurahan,nama_kelurahan',
             ])
-            ->findOrFail($sppg);
+            ->findOrFail($unitId);
 
-        $isIklLulus = $item->status_ikl === 'selesai'
-            && $item->hasil_ikl === 'memenuhi'
-            && (int) ($item->nilai_ikl ?? 0) >= 80;
+        $laporan = $item->laporanSlhs;
+        $nilaiIkl = (int) ($laporan?->nilai_ikl ?? 0);
 
-        $isLaikHigiene = $isIklLulus && $item->status_slhs === 'selesai';
-        $isBersyarat = $isIklLulus && $item->status_slhs !== 'selesai';
-
-        if ($isLaikHigiene) {
-            $evaluasiText = 'Laik Higiene';
+        if ($nilaiIkl >= 80) {
+            $evaluasiText = 'Memenuhi';
             $evaluasiClass = 'success';
-        } elseif ($isBersyarat) {
-            $evaluasiText = 'Bersyarat';
-            $evaluasiClass = 'warning text-dark';
         } else {
-            $evaluasiText = 'Belum Layak';
+            $evaluasiText = 'Tidak Memenuhi';
             $evaluasiClass = 'danger';
         }
 
         return view('dinkes.kelayakan-detail', [
             'item' => $item,
+            'laporan' => $laporan,
             'evaluasiText' => $evaluasiText,
             'evaluasiClass' => $evaluasiClass,
         ]);
