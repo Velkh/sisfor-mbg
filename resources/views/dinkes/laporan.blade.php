@@ -13,7 +13,7 @@
                 <form method="GET" action="{{ route('admin.laporan') }}">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <label class="form-label">Cari SPPG / Puskesmas</label>
+                            <label class="form-label">Cari Unit Usaha / Puskesmas</label>
                             <input type="text" name="q" class="form-control" value="{{ $filters['q'] }}" placeholder="Cari...">
                         </div>
                         <div class="col-md-2">
@@ -25,11 +25,12 @@
                             <input type="date" name="sampai" class="form-control" value="{{ $filters['sampai'] }}">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Kelompok Penerima</label>
+                            <label class="form-label">Kategori Sasaran</label>
                             <select name="kategori" class="form-select">
                                 <option value="all" @selected($filters['kategori'] === 'all')>Semua</option>
-                                <option value="Satuan Pendidikan" @selected($filters['kategori'] === 'Satuan Pendidikan')>Satuan Pendidikan</option>
-                                <option value="Kelompok B3" @selected($filters['kategori'] === 'Kelompok B3')>Kelompok B3</option>
+                                <option value="Sekolah" @selected($filters['kategori'] === 'Sekolah')>Sekolah</option>
+                                <option value="B3" @selected($filters['kategori'] === 'B3')>B3</option>
+                                <option value="Umum" @selected($filters['kategori'] === 'Umum')>Umum</option>
                             </select>
                         </div>
                         <div class="col-md-2 d-flex align-items-end gap-2">
@@ -45,7 +46,7 @@
 
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Rekap Per SPPG</h5>
+                <h5 class="mb-0"><i class="fas fa-table me-2"></i>Rekap Per Unit Usaha</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -53,8 +54,8 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Nama SPPG</th>
-                                <th>Total Kapasitas</th>
+                                <th>Unit Usaha</th>
+                                <th>Jenis Usaha</th>
                                 <th>Jumlah Penerima</th>
                                 <th>Kelompok Penerima</th>
                                 <th>Detail</th>
@@ -63,31 +64,32 @@
                         <tbody>
                             @forelse ($reports as $index => $item)
                                 @php
-                                    $details = $item->laporanPenerimas->map(function ($laporan) use ($item) {
-                                        $jumlah = (int) $laporan->jml_siswa
-                                            + (int) $laporan->jml_bumil
-                                            + (int) $laporan->jml_busui
-                                            + (int) $laporan->jml_balita;
+                                    $details = $item->sasaranManfaat->map(function ($row) use ($item) {
+                                        $jumlah = (int) $row->jumlah_siswa
+                                            + (int) $row->jumlah_bumil
+                                            + (int) $row->jumlah_busui
+                                            + (int) $row->jumlah_balita
+                                            + (int) $row->jumlah_jiwa;
 
                                         return [
-                                            'nama_kelompok_penerima' => $laporan->nama_instansi,
-                                            'kategori' => $laporan->kategori,
-                                            'tipe' => $laporan->tipe_instansi,
-                                            'status' => ucfirst((string) $laporan->status),
+                                            'nama_kelompok_penerima' => $row->nama_instansi ?? '-',
+                                            'kategori' => $row->kategori ?? '-',
+                                            'tipe' => $row->tipe_instansi ?? '-',
+                                            'status' => $row->status ? ucfirst((string) $row->status) : '-',
                                             'jumlah_penerima' => $jumlah,
-                                            'kelurahan' => $laporan->kelurahan?->nama_kelurahan ?? '-',
-                                            'kecamatan' => $laporan->kecamatan?->nama_kecamatan ?? '-',
-                                            'puskesmas' => $laporan->puskesmas?->nama_puskesmas ?? ($item->puskesmas?->nama_puskesmas ?? '-'),
+                                            'kelurahan' => $item->kelurahan?->nama_kelurahan ?? '-',
+                                            'kecamatan' => $item->kecamatan?->nama_kecamatan ?? '-',
+                                            'puskesmas' => $item->puskesmas?->nama_puskesmas ?? '-',
                                         ];
                                     })->values();
                                 @endphp
                                 <tr>
                                     <td>{{ $reports->firstItem() + $index }}</td>
                                     <td>
-                                        <strong>{{ $item->nama_sppg }}</strong><br>
-                                        <small class="text-muted">{{ $item->puskesmas?->nama_puskesmas ?? '-' }}</small>
+                                        <strong>{{ $item->nama_unit_usaha }}</strong><br>
+                                        <small class="text-muted">Kecamatan {{ $item->kecamatan?->nama_kecamatan ?? '-' }}</small>
                                     </td>
-                                    <td>{{ number_format((int) $item->total_kapasitas) }}</td>
+                                    <td>{{ strtoupper((string) $item->jenis_usaha) }}</td>
                                     <td>{{ number_format((int) $item->total_penerima) }}</td>
                                     <td>{{ $item->kelompok_penerima !== '' ? $item->kelompok_penerima : '-' }}</td>
                                     <td>
@@ -96,7 +98,7 @@
                                             class="btn btn-sm btn-outline-primary btn-detail"
                                             data-bs-toggle="modal"
                                             data-bs-target="#detailDistribusiModal"
-                                            data-sppg="{{ $item->nama_sppg }}"
+                                            data-unit="{{ $item->nama_unit_usaha }}"
                                             data-details='@json($details)'
                                         >
                                             <i class="fas fa-eye me-1"></i>Detail
@@ -124,7 +126,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="fas fa-list-alt me-2"></i>Detail Distribusi - <span id="modalSppgName">SPPG</span>
+                        <i class="fas fa-list-alt me-2"></i>Detail Distribusi - <span id="modalUnitName">Unit Usaha</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -135,6 +137,7 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Kelompok Penerima</th>
+                                    <th>Kategori</th>
                                     <th>Tipe</th>
                                     <th>Status</th>
                                     <th>Jumlah Penerima</th>
@@ -145,7 +148,7 @@
                             </thead>
                             <tbody id="detailDistribusiBody">
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted">Belum ada detail.</td>
+                                    <td colspan="9" class="text-center text-muted">Belum ada detail.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -158,16 +161,16 @@
     <script>
         document.querySelectorAll('.btn-detail').forEach(function (button) {
             button.addEventListener('click', function () {
-                const sppgName = this.getAttribute('data-sppg') || 'SPPG';
+                const unitName = this.getAttribute('data-unit') || 'Unit Usaha';
                 const details = JSON.parse(this.getAttribute('data-details') || '[]');
 
-                document.getElementById('modalSppgName').textContent = sppgName;
+                document.getElementById('modalUnitName').textContent = unitName;
 
                 const body = document.getElementById('detailDistribusiBody');
                 body.innerHTML = '';
 
                 if (!Array.isArray(details) || details.length === 0) {
-                    body.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada detail distribusi.</td></tr>';
+                    body.innerHTML = '<tr><td colspan="9" class="text-center text-muted">Belum ada detail distribusi.</td></tr>';
                     return;
                 }
 
@@ -176,6 +179,7 @@
                     tr.innerHTML = `
                         <td>${index + 1}</td>
                         <td>${row.nama_kelompok_penerima ?? '-'}</td>
+                        <td>${row.kategori ?? '-'}</td>
                         <td>${row.tipe ?? '-'}</td>
                         <td>${row.status ?? '-'}</td>
                         <td>${row.jumlah_penerima ?? 0}</td>
