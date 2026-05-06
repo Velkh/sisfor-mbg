@@ -38,4 +38,9 @@ class Kecamatan extends Model
     {
         return $this->hasMany(Sppg::class, 'id_kecamatan', 'id_kecamatan');
     }
+
+    public function unitUsahas(): HasMany
+    {
+        return $this->hasMany(UnitUsaha::class, 'id_kecamatan', 'id_kecamatan');
+    }
 }
