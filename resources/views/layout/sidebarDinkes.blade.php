@@ -34,9 +34,16 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('admin.kelola') }}" class="nav-link {{ Route::is('admin.kelola*') ? 'active' : '' }}">
+                <a href="{{ route('admin.reporting.index') }}" class="nav-link {{ Route::is('admin.reporting*') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Input Data Unit Usaha</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('admin.manage.index') }}" class="nav-link {{ Route::is('admin.manage*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
-                    <span>Kelola SPPG</span>
+                    <span>Kelola Admin</span>
                 </a>
             </li>
 
