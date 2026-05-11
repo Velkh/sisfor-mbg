@@ -25,7 +25,7 @@
         <a href="{{ route('guest.index') }}" class="navbar-brand">
             <div class="logo-pill">
                 <div class="logo-circle gold-c">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Lambang_Kota_Depok.png/800px-Lambang_Kota_Depok.png" alt="Pemkot Depok" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <img src="{{ asset('images/images.jpeg') }}"  alt="Pemkot Depok" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                     <span style="display:none;">DPK</span>
                 </div>
             </div>

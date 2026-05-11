@@ -3,80 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap SPPG per Kecamatan</title>
+    <title>Rekap Pengawasan SLHS per Kecamatan</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/rekap.css') }}">
-    <style>
-        .recap-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .recap-btn {
-            padding: 15px 20px;
-            background-color: #3d5a7a;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .recap-btn:hover {
-            background-color: #2d4461;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .recap-btn.active {
-            background-color: #ff9800;
-            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
-        }
-        .table-content {
-            display: none;
-        }
-        .table-content.active {
-            display: block;
-        }
-        .loading-state {
-            text-align: center;
-            padding: 30px;
-            color: #999;
-        }
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3d5a7a;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
 </head>
 <body>
     <header class="top">
         <div class="top-inner">
             <div class="title">
-                <h1>Rekap SPPG per Kecamatan</h1>
-                <p>Data publik SPPG berdasarkan wilayah kecamatan.</p>
+                <h1>Rekap Pengawasan SLHS per Kecamatan</h1>
+                <p>Data publik pengawasan SLHS berdasarkan wilayah kecamatan.</p>
             </div>
-            <a href="{{ route('home') }}" class="btn btn-outline">Kembali ke Beranda</a>
+            <a href="{{ route('guest.index') }}" class="btn btn-outline">Kembali ke Beranda</a>
         </div>
     </header>
 
     <main class="wrap">
         <section class="card">
             <div class="card-head">
-                <h2>Data Penyaluran Program MBG</h2>
+                <h2>Data Pengawasan SLHS</h2>
                 <h2>Kota Depok</h2>
             </div>
             <div class="card-body">
@@ -89,9 +35,9 @@
                         </div>
 
                         <div class="summary-item">
-                            <span class="summary-badge sppg">SPPG</span>
+                            <span class="summary-badge sppg">UU</span>
                             <div class="summary-value">{{ number_format($rekapTotalSppg ?? 0, 0, ',', '.') }}</div>
-                            <div class="summary-label">SPPG</div>
+                            <div class="summary-label">Unit Usaha</div>
                         </div>
 
                         <div class="summary-item">
@@ -104,6 +50,19 @@
                             <span class="summary-badge pm">PM</span>
                             <div class="summary-value">{{ number_format($rekapTotalPenerima ?? 0, 0, ',', '.') }}</div>
                             <div class="summary-label">Orang Penerima</div>
+                        </div>
+                    </div>
+
+                    <div class="group-block">
+                        <div class="group-pill">Unit Usaha</div>
+                        <div class="stats-grid">
+                            @foreach (($unitUsahaCards ?? []) as $card)
+                                <div class="stats-card">
+                                    <div class="stats-title">{{ $card['judul'] }}</div>
+                                    <div class="stats-main">{{ number_format((int) ($card['nilai'] ?? 0), 0, ',', '.') }}</div>
+                                    <div class="stats-sub">{{ $card['subNilai'] }}</div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
@@ -141,11 +100,11 @@
 
         <section class="card">
             <div class="card-head">
-                <h2>Rekap Data SPPG</h2>
+                <h2>Rekap Data Unit Usaha</h2>
             </div>
             <div class="card-body">
                 <div class="recap-buttons">
-                    <button class="recap-btn active" data-type="sppg">Data Rekap SPPG</button>
+                    <button class="recap-btn active" data-type="sppg">Data Rekap Unit Usaha</button>
                     <button class="recap-btn" data-type="kelompok-penerima">Data Rekap Kelompok Penerima</button>
                     <button class="recap-btn" data-type="penerima">Data Rekap Penerima</button>
                 </div>
@@ -157,7 +116,7 @@
                                 <tr>
                                     <th style="width: 60px;">#</th>
                                     <th>KECAMATAN</th>
-                                    <th>JUMLAH SPPG</th>
+                                    <th>JUMLAH UNIT USAHA</th>
                                     <th>MEMENUHI IKL</th>
                                     <th>BELUM MEMENUHI IKL</th>
                                     <th>BELUM MENGAJUKAN IKL</th>
@@ -185,6 +144,7 @@
                                     <th>SD SEDERAJAT</th>
                                     <th>TKA/PAUD SEDERAJAT</th>
                                     <th>POSYANDU</th>
+                                    <th>UMUM</th>
                                     <th>JUMLAH</th>
                                 </tr>
                             </thead>
@@ -211,6 +171,7 @@
                                     <th>BALITA</th>
                                     <th>BUMIL</th>
                                     <th>BUSUI</th>
+                                    <th>UMUM</th>
                                     <th>JUMLAH</th>
                                 </tr>
                             </thead>
@@ -227,8 +188,20 @@
 
         <section class="card">
             <div class="card-head">
-                <h2>Daftar SPPG</h2>
+                <h2>Daftar Unit Usaha</h2>
             </div>
+            <form id="filterForm" method="GET" action="{{ route('guest.rekap') }}" class="filter-form">
+                <input type="hidden" name="kecamatan_id" id="kecamatan_id" value="{{ request('kecamatan_id') }}">
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama/alamat...">
+                <select name="jenis_usaha">
+                    <option value="">Semua Jenis</option>
+                    <option value="TPP" @selected(request('jenis_usaha') === 'TPP')>TPP</option>
+                    <option value="DAM" @selected(request('jenis_usaha') === 'DAM')>DAM</option>
+                    <option value="Kantin" @selected(request('jenis_usaha') === 'Kantin')>Kantin</option>
+                    <option value="SPPG" @selected(request('jenis_usaha') === 'SPPG')>SPPG</option>
+                </select>
+                <button type="submit">Filter</button>
+            </form>
             <div class="card-body">
                 <div class="content-grid">
                     <aside>
@@ -258,7 +231,7 @@
                             <thead>
                                 <tr>
                                     <th style="width: 60px;">No</th>
-                                    <th>Nama SPPG</th>
+                                    <th>Nama Sarana</th>
                                     <th>Status IKL</th>
                                     <th>Status SLHS</th>
                                     <th>Jumlah Pegawai</th>
@@ -273,18 +246,16 @@
                                         $totalPenerima = (int) ($row->total_siswa ?? 0)
                                             + (int) ($row->total_bumil ?? 0)
                                             + (int) ($row->total_busui ?? 0)
-                                            + (int) ($row->total_balita ?? 0);
+                                            + (int) ($row->total_balita ?? 0)
+                                            + (int) ($row->total_jiwa ?? 0);
 
-                                        $statusIklRaw = strtolower((string) ($row->status_ikl ?? ''));
-                                        $statusSlhsRaw = strtolower((string) ($row->status_slhs ?? ''));
+                                        $statusIklRaw = strtolower((string) ($row->laporanSlhs?->status_ikl ?? ''));
+                                        $statusSlhsRaw = strtolower((string) ($row->laporanSlhs?->status_slhs ?? ''));
 
                                         $statusMap = [
-                                            'lolos' => 'Lolos',
-                                            'tidak lolos' => 'Belum Lolos',
-                                            'belum lolos' => 'Belum Lolos',
-                                            'gagal' => 'Belum Lolos',
-                                            'pending' => 'Belum Ada',
-                                            'belum ada' => 'Belum Ada',
+                                            'belum_mengajukan' => 'Belum Mengajukan',
+                                            'sudah_mengajukan' => 'Sudah Mengajukan',
+                                            'selesai' => 'Selesai',
                                             '' => 'Belum Ada',
                                         ];
 
@@ -292,30 +263,27 @@
                                         $statusSlhsLabel = $statusMap[$statusSlhsRaw] ?? ucfirst($statusSlhsRaw);
 
                                         if ($statusIklRaw === 'selesai') {
-                                            $nilaiIkl = (float) ($row->nilai_ikl ?? 0);
-                                            $statusIklLabel = $nilaiIkl > 80 ? 'Memenuhi Syarat' : 'Belum Memenuhi';
+                                            $nilaiIkl = (float) ($row->laporanSlhs?->nilai_ikl ?? 0);
+                                            $statusIklLabel = $nilaiIkl >= 80 ? 'Memenuhi Syarat' : 'Belum Memenuhi';
                                         }
                                     @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td class="name">
-                                            <strong>{{ $row->nama_sppg }}</strong>
-                                            <small>{{ $row->nama_mitra ?? '-' }}</small>
+                                            <strong>{{ $row->nama_unit_usaha ?? '-' }}</strong>
+                                            <small>{{ mb_strtoupper($row->jenis_usaha ?? '-') }}</small>
                                         </td>
                                         <td>{{ $statusIklLabel }}</td>
                                         <td>{{ $statusSlhsLabel }}</td>
-                                        <td>{{ number_format((int) ($row->jml_pegawai ?? 0), 0, ',', '.') }}</td>
+                                        <td>{{ number_format((int) ($row->jumlah_pegawai ?? 0), 0, ',', '.') }}</td>
                                         <td>{{ number_format((int) ($row->kelompok_penerima ?? 0), 0, ',', '.') }}</td>
                                         <td>{{ number_format($totalPenerima, 0, ',', '.') }}</td>
                                         <td class="actions">
-                                            <a href="{{ route('guest.sppg.show', $row->id_sppg) }}" class="btn btn-detail">
-                                                Detail
-                                            </a>
-                                        </td>
+                                            <a href="{{ route('guest.sppg.show', $row->id_unit_usaha) }}" class="btn btn-detail">Detail</a>                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="empty">Belum ada data SPPG.</td>
+                                        <td colspan="8" class="empty">Belum ada data sarana.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -325,12 +293,63 @@
             </div>
         </section>
     </main>
+    
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand-name">Dashboard SLHS</div>
+                <div class="footer-brand-sub">Sistem Informasi Pengawasan<br>Higiene Sanitasi Pangan</div>
+                <div class="footer-address"> Jalan Margonda Raya No.54, Depok 16431<br> Gedung Balai Kota Depok </div>
+            </div>
+            
+            <div>
+                <h4 class="footer-col-title">Link</h4>
+                <ul class="footer-links">
+                    <li><a href="#hero">Beranda</a></li>
+                    <li><a href="#about">Tentang SLHS</a></li>
+                    <li><a href="{{ route('login') }}">Login Sistem</a></li>
+                    <li><a href="#faq">FAQ Syarat IKL</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="footer-col-title">Pusat</h4>
+                <ul class="footer-links">
+                    <li><a href="https://kemkes.go.id/" target="_blank">Kementerian Kesehatan</a></li>
+                    <li><a href="https://badanpangan.go.id/" target="_blank">Badan Pangan Nasional</a></li>
+                    <li><a href="https://www.pom.go.id/" target="_blank">Badan POM</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="footer-col-title">Daerah</h4>
+                <ul class="footer-links">
+                    <li><a href="https://depok.go.id/" target="_blank">Pemkot Depok</a></li>
+                    <li><a href="https://dinkes.depok.go.id/" target="_blank">Dinas Kesehatan Depok</a></li>
+                    <li><a href="https://dpmptsp.depok.go.id/" target="_blank">DPMPTSP Depok</a></li>
+                    <li><a href="https://diskominfo.depok.go.id/" target="_blank">Diskominfo Depok</a></li>
+                </ul>
+                <h4 class="footer-col-title" style="margin-top:18px;">Portal Layanan</h4>
+                <ul class="footer-links">
+                    <li><a href="https://oss.go.id/" target="_blank">OSS RBA</a></li>
+                    <li><a href="https://opendata.depok.go.id/" target="_blank">Opendata Depok</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <span><strong>Dinas Kesehatan & Diskominfo</strong> Kota Depok</span>
+            <span>Copyright &copy; {{ date('Y') }}</span>
+        </div>
+    </footer>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const recapBtns = document.querySelectorAll('.recap-btn');
             const recapTables = document.querySelectorAll('.table-content');
             const daftarKecLinks = document.querySelectorAll('.daftar-kec-link');
+            const kecamatanIdInput = document.getElementById('kecamatan_id');
 
             loadRekapTable('sppg');
 
@@ -380,6 +399,10 @@
 
                         daftarKecLinks.forEach((item) => item.classList.remove('active'));
                         link.classList.add('active');
+
+                        if (kecamatanIdInput) {
+                            kecamatanIdInput.value = kecamatanId;
+                        }
 
                         renderDaftarSppg(data.rows || []);
 
@@ -460,7 +483,7 @@
                 const tableBody = document.getElementById('table-kelompok-penerima');
 
                 if (!rows.length) {
-                    tableBody.innerHTML = '<tr><td colspan="7" class="empty">Belum ada data.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada data.</td></tr>';
                     return;
                 }
 
@@ -472,6 +495,7 @@
                         <td>${row.sd_sederajat}</td>
                         <td>${row.tka_paud_sederajat}</td>
                         <td>${row.posyandu}</td>
+                        <td>${row.umum}</td>
                         <td><strong>${row.jumlah}</strong></td>
                     </tr>
                 `).join('');
@@ -497,6 +521,7 @@
                         <td>${row.balita}</td>
                         <td>${row.bumil}</td>
                         <td>${row.busui}</td>
+                        <td>${row.umum}</td>
                         <td><strong>${row.jumlah}</strong></td>
                     </tr>
                 `).join('');
@@ -505,29 +530,35 @@
 
         function renderDaftarSppg(rows) {
             const tableBody = document.getElementById('table-daftar-sppg');
+            const baseDetailUrl = "{{ route('guest.sppg.show', ['sppg' => '___ID___']) }}";
 
             if (!rows.length) {
-                tableBody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada data SPPG.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada data Unit Usaha di Wilayah Ini.</td></tr>';
                 return;
             }
 
-            tableBody.innerHTML = rows.map((row, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td class="name">
-                        <strong>${escapeHtml(row.nama_sppg)}</strong>
-                        <small>${escapeHtml(row.nama_mitra)}</small>
-                    </td>
-                    <td>${escapeHtml(row.status_ikl_label)}</td>
-                    <td>${escapeHtml(row.status_slhs_label)}</td>
-                    <td>${escapeHtml(row.jml_pegawai)}</td>
-                    <td>${escapeHtml(row.kelompok_penerima)}</td>
-                    <td>${escapeHtml(row.total_penerima)}</td>
-                    <td class="actions">
-                        <a href="{{ url('/sppg') }}/${row.id_sppg}" class="btn btn-detail">Detail</a>
-                    </td>
-                </tr>
-            `).join('');
+            tableBody.innerHTML = rows.map((row, index) => {
+                const unitId = row.id_sppg ?? row.id_unit_usaha ?? row.id;
+                const detailUrl = unitId ? baseDetailUrl.replace('___ID___', unitId) : '#';
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td class="name">
+                            <strong>${escapeHtml(row.nama_unit_usaha ?? row.nama_sppg ?? '-')}</strong>
+                            <small>${escapeHtml(String(row.jenis_usaha || '-').toUpperCase())}</small>
+                        </td>
+                        <td>${escapeHtml(row.status_ikl_label)}</td>
+                        <td>${escapeHtml(row.status_slhs_label)}</td>
+                        <td>${escapeHtml(row.jumlah_pegawai)}</td>
+                        <td>${escapeHtml(row.kelompok_penerima)}</td>
+                        <td>${escapeHtml(row.total_penerima)}</td>
+                        <td class="actions">
+                            <a href="${detailUrl}" class="btn btn-detail">Detail</a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function escapeHtml(value) {
@@ -540,6 +571,33 @@
             };
 
             return String(value ?? '').replace(/[&<>"']/g, (char) => map[char]);
+        }
+
+        const filterForm = document.getElementById('filterForm');
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const params = new URLSearchParams(new FormData(filterForm));
+                const tableBody = document.getElementById('table-daftar-sppg');
+
+                tableBody.innerHTML = '<tr><td colspan="8" class="loading-state"><div class="loading-spinner"></div> Loading...</td></tr>';
+
+                try {
+                    const response = await fetch(`/api/rekap/kecamatan?${params.toString()}`);
+                    const data = await response.json();
+
+                    if (!data.success) {
+                        throw new Error(data.message || 'Data gagal dimuat');
+                    }
+
+                    renderDaftarSppg(data.rows || []);
+                    window.history.pushState({}, '', `{{ route('guest.rekap') }}?${params.toString()}`);
+                } catch (error) {
+                    tableBody.innerHTML = '<tr><td colspan="8" class="empty">Error: Gagal memuat data.</td></tr>';
+                }
+            });
         }
     </script>
 </body>

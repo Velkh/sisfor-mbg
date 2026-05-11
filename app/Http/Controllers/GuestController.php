@@ -199,6 +199,7 @@ class GuestController extends Controller
                 'puskesmas:id_puskesmas,nama_puskesmas', 
                 'sasaranManfaat:id_sasaran_manfaat,id_unit_usaha,kategori,tipe_instansi,nama_instansi,status,jumlah_siswa,jumlah_bumil,jumlah_busui,jumlah_balita,jumlah_jiwa,created_at',
                 'laporanSlhs',
+                'fotos',
             ]) 
             ->findOrFail($sppg);
 
@@ -208,6 +209,7 @@ class GuestController extends Controller
         $item->setAttribute('jumlah_pegawai', $item->jumlah_pegawai ?? 0);
         $item->setAttribute('kapasitas_porsi', 0);
         $item->setAttribute('foto_kepala', null);
+        $item->load('fotos');
 
         $laporans = collect($item->sasaranManfaat ?? []);
         $getSchoolStats = function($tipe) use ($laporans) {
