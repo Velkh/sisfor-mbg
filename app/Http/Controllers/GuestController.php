@@ -98,8 +98,13 @@ class GuestController extends Controller
             ->selectRaw('COUNT(*) as total_sppg') 
             ->whereNotNull('id_kecamatan') 
             ->groupBy('id_kecamatan') 
-            ->pluck('total_sppg', 'id_kecamatan'); 
-
+            ->pluck('total_sppg', 'id_kecamatan');
+            
+        $unitUsahaCounts = UnitUsaha::query()
+            ->selectRaw('jenis_usaha, COUNT(*) as total')
+            ->groupBy('jenis_usaha')
+            ->pluck('total', 'jenis_usaha');
+        
         $rekapPerKecamatan = $kecamatanOptions->map(function (Kecamatan $kecamatan) use ($rekapPerKecamatanCounts): Kecamatan { 
             $kecamatan->setAttribute( 
                 'total_sppg', (int) ($rekapPerKecamatanCounts[$kecamatan->id_kecamatan] ?? 0) 
@@ -145,7 +150,30 @@ class GuestController extends Controller
                 'nilai' => (int) SasaranManfaat::where('kategori', 'B3')->sum('jumlah_busui'), 
                 'subNilai' => 'Penerima', 
             ], 
-        ]; 
+        ];
+        
+        $unitUsahaCards = [
+            [
+                'judul' => 'SPPG',
+                'nilai' => (int) ($unitUsahaCounts['sppg'] ?? 0),
+                'subNilai' => 'Unit',
+            ],
+            [
+                'judul' => 'TPP',
+                'nilai' => (int) ($unitUsahaCounts['tpp'] ?? 0),
+                'subNilai' => 'Unit',
+            ],
+            [
+                'judul' => 'DAM',
+                'nilai' => (int) ($unitUsahaCounts['dam'] ?? 0),
+                'subNilai' => 'Unit',
+            ],
+            [
+                'judul' => 'Kantin',
+                'nilai' => (int) ($unitUsahaCounts['kantin'] ?? 0),
+                'subNilai' => 'Unit',
+            ],
+        ];
 
         return view('rekapdaerah', [ 
             'rows' => $rows, 
@@ -157,7 +185,8 @@ class GuestController extends Controller
             'rekapTotalKelompok' => $rekapTotalKelompok, 
             'rekapTotalPenerima' => $rekapTotalPenerima, 
             'pendidikanCards' => $pendidikanCards, 
-            'kelompokB3Cards' => $kelompokB3Cards, 
+            'kelompokB3Cards' => $kelompokB3Cards,
+            'unitUsahaCards' => $unitUsahaCards, 
         ]); 
     } 
 
@@ -175,8 +204,8 @@ class GuestController extends Controller
 
         $item->setAttribute('nama_sppg', $item->nama_unit_usaha);
         $item->setAttribute('nama_kepala', $item->nama_pemilik);
-        $item->setAttribute('nama_mitra', '-');
-        $item->setAttribute('jml_pegawai', $item->jumlah_pegawai ?? 0);
+        $item->setAttribute('jenis_usaha', $item->jenis_usaha ?? '-');
+        $item->setAttribute('jumlah_pegawai', $item->jumlah_pegawai ?? 0);
         $item->setAttribute('kapasitas_porsi', 0);
         $item->setAttribute('foto_kepala', null);
 
@@ -211,8 +240,13 @@ class GuestController extends Controller
     /**
      * API: Get kecamatan data untuk section "Daftar SPPG"
      */
-    public function getKecamatanData(?int $kecamatanId = null): JsonResponse
+    public function getKecamatanData(?Request $request, ?int $kecamatanId = null): JsonResponse
     {
+        $q = trim((string) $request->query('q'));
+        $jenisUsaha = $request->query('jenis_usaha');
+
+        $kecamatanId = $kecamatanId ?? (int) $request->query('kecamatan_id');
+
         $baseQuery = UnitUsaha::query()
             ->with([
                 'kecamatan:id_kecamatan,nama_kecamatan',
@@ -229,6 +263,18 @@ class GuestController extends Controller
 
         if ($kecamatanId) {
             $baseQuery->where('id_kecamatan', $kecamatanId);
+        }
+
+        if ($q !== '') {
+            $baseQuery->where(function ($sub) use ($q) {
+                $sub->where('nama_unit_usaha', 'like', "%{$q}%")
+                    ->orWhere('nama_pemilik', 'like', "%{$q}%")
+                    ->orWhere('alamat', 'like', "%{$q}%");
+            });
+        }
+
+        if (! empty($jenisUsaha)) {
+            $baseQuery->where('jenis_usaha', $jenisUsaha);
         }
 
         $rows = (clone $baseQuery)
@@ -262,10 +308,10 @@ class GuestController extends Controller
             return [
                 'id_sppg' => $row->id_unit_usaha,
                 'nama_sppg' => $row->nama_unit_usaha,
-                'nama_mitra' => '-',
+                'jenis_usaha' => $row->jenis_usaha,
                 'status_ikl_label' => $statusIklLabel,
                 'status_slhs_label' => $statusSlhsLabel,
-                'jml_pegawai' => number_format((int) ($row->jumlah_pegawai ?? 0), 0, ',', '.'),
+                'jumlah_pegawai' => number_format((int) ($row->jumlah_pegawai ?? 0), 0, ',', '.'),
                 'kelompok_penerima' => number_format((int) ($row->kelompok_penerima ?? 0), 0, ',', '.'),
                 'total_penerima' => number_format($totalPenerima, 0, ',', '.'),
             ];
@@ -403,8 +449,11 @@ class GuestController extends Controller
                 ->filter()
                 ->unique()
                 ->count();
+            
+            $umum = (int) $laporans->where('kategori', 'Umum')->count();
 
-            $jumlah = $sma + $smp + $sd + $tk + $posyandu;
+
+            $jumlah = $sma + $smp + $sd + $tk + $posyandu + $umum;
 
             return [
                 'kecamatan' => $kec->nama_kecamatan,
@@ -413,6 +462,7 @@ class GuestController extends Controller
                 'sd_sederajat' => $sd,
                 'tka_paud_sederajat' => $tk,
                 'posyandu' => $posyandu,
+                'umum' => $umum,
                 'jumlah' => $jumlah,
             ];
         })->toArray();
@@ -453,8 +503,10 @@ class GuestController extends Controller
             $balita = (int) $laporans->where('kategori', 'B3')->sum('jumlah_balita');
             $bumil = (int) $laporans->where('kategori', 'B3')->sum('jumlah_bumil');
             $busui = (int) $laporans->where('kategori', 'B3')->sum('jumlah_busui');
+            $umum = (int) $laporans->where('kategori', 'Umum')->sum('jumlah_jiwa');
 
-            $jumlah = $sma + $smp + $sd + $tk + $balita + $bumil + $busui;
+
+            $jumlah = $sma + $smp + $sd + $tk + $balita + $bumil + $busui + $umum;
 
             return [
                 'kecamatan' => $kec->nama_kecamatan,
@@ -465,6 +517,7 @@ class GuestController extends Controller
                 'balita' => number_format($balita, 0, ',', '.'),
                 'bumil' => number_format($bumil, 0, ',', '.'),
                 'busui' => number_format($busui, 0, ',', '.'),
+                'umum' => number_format($umum, 0, ',', '.'),
                 'jumlah' => number_format($jumlah, 0, ',', '.'),
             ];
         })->toArray();
@@ -479,11 +532,13 @@ class GuestController extends Controller
     { 
         $validated = $request->validate([ 
             'kecamatan_id' => ['nullable', 'exists:kecamatan,id_kecamatan'], 
+            'jenis_usaha' => ['nullable', 'string', 'max:255'],
             'q' => ['nullable', 'string', 'max:255'],
         ]); 
 
         return [ 
             'kecamatan_id' => isset($validated['kecamatan_id']) ? (int) $validated['kecamatan_id'] : null, 
+            'jenis_usaha' => $validated['jenis_usaha'] ?? null,
             'q' => $validated['q'] ?? null,
         ]; 
     } 
@@ -492,7 +547,11 @@ class GuestController extends Controller
     { 
         if (! empty($filters['kecamatan_id'])) { 
             $query->where('id_kecamatan', $filters['kecamatan_id']); 
-        } 
+        }
+        
+        if (! empty($filters['jenis_usaha'])) {
+            $query->where('jenis_usaha', $filters['jenis_usaha']);
+        }
         
         if (! empty($filters['q'])) {
             $search = $filters['q'];

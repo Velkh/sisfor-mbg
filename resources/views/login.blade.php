@@ -181,10 +181,10 @@
         <div class="login-header">
             <div class="logo-pill">
                 <div class="logo-circle">
-                    <img src="https://upload.wikimedia.org/wikipedia/id/thumb/2/29/Logo_Badan_Gizi_Nasional.svg/3840px-Logo_Badan_Gizi_Nasional.svg.png" alt="BGN" style="object-fit: contain; padding: 4px;" onerror="this.style.display='none';">
+                    <img src="{{ asset('images/images.jpeg') }}" alt="BGN" style="object-fit: contain; padding: 4px;" onerror="this.style.display='none';">
                 </div>
             </div>
-            <h1>Dashboard MBG</h1>
+            <h1>Dashboard SLHS</h1>
             <p>Kota Depok</p>
         </div>
 
@@ -219,7 +219,7 @@
         </form>
 
         <div class="login-footer">
-            Kembali ke <a href="{{ route('home') }}">Beranda</a>
+            Kembali ke <a href="{{ route('guest.index') }}">Beranda</a>
         </div>
     </div>
 </div>

@@ -10,7 +10,7 @@
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ route('home') }}" class="navbar-brand">
+        <a href="{{ route('guest.index') }}" class="navbar-brand">
             <div class="logo-pill">
                 <div class="logo-circle gold-c">
                     <img src="https://upload.wikimedia.org/wikipedia/id/thumb/2/29/Logo_Badan_Gizi_Nasional.svg/3840px-Logo_Badan_Gizi_Nasional.svg.png" alt="BGN" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div class="brand-text">
-                Dashboard MBG
+                Dashboard SLHS
                 <small>Kota Depok</small>
             </div>
         </a>
@@ -26,7 +26,6 @@
         <ul class="nav-links">
             <li><a href="#profil">Profil</a></li>
             <li><a href="#sasaran">Sasaran</a></li>
-            <li><a href="#menu">Menu</a></li>
             <li> <a href="{{ route('guest.rekap') }}" class="btn-green">Kembali</a></li>
         </ul>
     </nav>
@@ -45,13 +44,13 @@
                                 <span>👤</span>
                             @endif
                         </div>
-                        <div style="font-weight:700;">Kepala SPPG</div>
+                        <div style="font-weight:700;">Pemilik Unit Usaha</div>
                     </div>
 
                     <div>
                         <table class="detail-table">
                             <tr>
-                                <td>Nama Kepala SPPG</td>
+                                <td>Nama Pemilik Usaha</td>
                                 <td>{{ $item->nama_kepala ?? '-' }}</td>
                             </tr>
                             <tr>
@@ -72,24 +71,20 @@
                             </tr>
                             <tr>
                                 <td>Jumlah Pegawai</td>
-                                <td>{{ $item->jml_pegawai ?? 0 }} orang</td>
-                            </tr>
-                            <tr>
-                                <td>Kapasitas</td>
-                                <td>{{ $item->kapasitas_porsi ?? 0 }} porsi</td>
+                                <td>{{ $item->jumlah_pegawai ?? 0 }} orang</td>
                             </tr>
                             <tr>
                                 <td>Kelompok Penerima</td>
-                                <td>{{ $item->laporanPenerimas?->count() ?? 0 }}</td>
+                                <td>{{ $laporans->count() }}</td>
                             </tr>
                             <tr>
                                 <td>Jumlah Penerima</td>
                                 <td>
                                     {{
-                                        ($item->laporanPenerimas?->sum('jml_siswa') ?? 0) +
-                                        ($item->laporanPenerimas?->sum('jml_bumil') ?? 0) +
-                                        ($item->laporanPenerimas?->sum('jml_busui') ?? 0) +
-                                        ($item->laporanPenerimas?->sum('jml_balita') ?? 0)
+                                        (int) $laporans->sum('jumlah_siswa') +
+                                        (int) $laporans->sum('jumlah_bumil') +
+                                        (int) $laporans->sum('jumlah_busui') +
+                                        (int) $laporans->sum('jumlah_balita')
                                     }} orang
                                 </td>
                             </tr>
@@ -103,29 +98,8 @@
             </div>
         </section>
 
-        <section class="card">
-            <div class="card-head">Galeri</div>
-            <div class="card-body">
-                <div class="gallery-grid">
-                    @php
-                        $fotos = $item->fotoSppg ?? collect();
-                    @endphp
-                    @forelse($fotos->take(4) as $foto)
-                        <div class="gallery-item">
-                            <img src="{{ asset('storage/' . $foto->foto_sppg) }}" alt="Foto Gallery">
-                        </div>
-                    @empty
-                        <div class="gallery-item">🖼️</div>
-                        <div class="gallery-item">🖼️</div>
-                        <div class="gallery-item">🖼️</div>
-                        <div class="gallery-item">🖼️</div>
-                    @endforelse
-                </div>
-            </div>
-        </section>
-
         <section class="sasaran-section" id="sasaran">
-            <div class="sasaran-header">Sasaran Penerima MBG</div>
+            <div class="sasaran-header">Sasaran Penerima</div>
             <div class="sasaran-layout">
                 <div class="sidebar-menu">
                     <button class="tab-btn active" data-target="tab-rekap">Rekap Sasaran</button>
@@ -181,17 +155,17 @@
                             </div>
                             <div class="stat-card">
                                 <div class="stat-title">BALITA</div>
-                                <div class="stat-value">{{ number_format((int) $laporans->sum('jml_balita'), 0, ',', '.') }}</div>
+                                <div class="stat-value">{{ number_format((int) $laporans->sum('jumlah_balita'), 0, ',', '.') }}</div>
                                 <div class="stat-label">Anak</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-title">BUMIL</div>
-                                <div class="stat-value">{{ number_format((int) $laporans->sum('jml_bumil'), 0, ',', '.') }}</div>
+                                <div class="stat-value">{{ number_format((int) $laporans->sum('jumlah_bumil'), 0, ',', '.') }}</div>
                                 <div class="stat-label">Penerima</div>
                             </div>
                             <div class="stat-card">
                                 <div class="stat-title">BUSUI</div>
-                                <div class="stat-value">{{ number_format((int) $laporans->sum('jml_busui'), 0, ',', '.') }}</div>
+                                <div class="stat-value">{{ number_format((int) $laporans->sum('jumlah_busui'), 0, ',', '.') }}</div>
                                 <div class="stat-label">Penerima</div>
                             </div>
                         </div>
@@ -211,8 +185,8 @@
                             <tbody>
                                 @forelse ($laporans as $lap)
                                     @php
-                                        $penerima = (int) ($lap->jml_siswa ?? 0) + (int) ($lap->jml_bumil ?? 0)
-                                            + (int) ($lap->jml_busui ?? 0) + (int) ($lap->jml_balita ?? 0);
+                                        $penerima = (int) ($lap->jumlah_siswa ?? 0) + (int) ($lap->jumlah_bumil ?? 0)
+                                            + (int) ($lap->jumlah_busui ?? 0) + (int) ($lap->jumlah_balita ?? 0);
                                     @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
@@ -238,25 +212,6 @@
                 </div>
             </div>
         </section>
-                <section class="card" id="menu">
-            <div class="card-head">Menu MBG</div>
-                <div class="card-body">
-                    <div class="menu-grid">
-                        @forelse (($item->menuSppg ?? collect()) as $menu)
-                            <div class="menu-card">
-                                @if (!empty($menu->foto_menu))
-                                    <img src="{{ asset('storage/' . $menu->foto_menu) }}" alt="{{ $menu->nama_menu }}">
-                                @endif
-                                <div class="menu-body">
-                                    <strong>{{ $menu->nama_menu ?? 'Variasi Menu' }}</strong>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="empty-menu">Belum ada menu MBG.</div>
-                        @endforelse
-                    </div>
-                </div>
-         </section>
     </div>
 
     <script>

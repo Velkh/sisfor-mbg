@@ -250,9 +250,9 @@
         color: var(--text);
         background: #fff;
         border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: .82rem;
+        border-radius: 8px;
+        padding: 6px 8px;
+        font-size: .75rem;
         font-weight: 700;
     }
 
@@ -335,6 +335,114 @@
         text-align: center;
         padding: 26px 10px;
         color: var(--muted);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin: 0 0 16px;
+    }
+
+    .filter-form input,
+    .filter-form select {
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: .82rem;
+        font-weight: 600;
+        color: var(--text);
+        background: #fff;
+        min-width: 220px;
+    }
+
+    .filter-form input:focus,
+    .filter-form select:focus {
+        outline: none;
+        border-color: #c8e3d3;
+        box-shadow: 0 0 0 2px rgba(26, 122, 63, .12);
+    }
+
+    .filter-form button {
+        padding: 10px 16px;
+        background: var(--g700);
+        color: #fff;
+        border: 1px solid var(--g700);
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: .82rem;
+        cursor: pointer;
+    }
+
+    .filter-form button:hover {
+        background: var(--g800);
+        border-color: var(--g800);
+    }
+
+    .footer { background: var(--g900); color: rgba(255,255,255,.68); padding: 60px 48px 30px; }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 44px; padding-bottom: 44px; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .footer-brand-name { font-family: 'Fraunces', serif; font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
+    .footer-brand-sub { font-size: .77rem; color: rgba(255,255,255,.5); margin-bottom: 14px; line-height: 1.6; }
+    .footer-address { font-size: .8rem; line-height: 1.85; }
+    .footer-col-title { font-family: 'Fraunces', serif; color: #fff; font-size: .93rem; margin-bottom: 14px; }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .footer-links a { font-size: .8rem; color: rgba(255,255,255,.62); transition: color .2s; }
+    .footer-links a:hover { color: var(--g400); }
+    .footer-bottom { max-width: 1200px; margin: 24px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: .77rem; color: rgba(255,255,255,.32); }
+    .footer-bottom strong { color: rgba(255,255,255,.6); }
+
+    .recap-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    .recap-btn {
+        padding: 15px 20px;
+        background-color: #3d5a7a;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .recap-btn:hover {
+        background-color: #2d4461;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .recap-btn.active {
+        background-color: #ff9800;
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+    .table-content {
+        display: none;
+    }
+    .table-content.active {
+        display: block;
+    }
+    .loading-state {
+        text-align: center;
+        padding: 30px;
+        color: #999;
+    }
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3d5a7a;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
     @media (max-width: 1050px) {
