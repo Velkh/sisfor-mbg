@@ -19,45 +19,34 @@ class EvaluationController extends Controller
     public function index(Request $request): View
     {
         $filters = $this->validatedFilters($request);
-        $baseQuery = $this->buildFilteredQuery($filters);
 
-        $items = (clone $baseQuery)
+        // Data tabel tetap pakai filter
+        $itemsQuery = $this->buildFilteredQuery($filters);
+        $items = (clone $itemsQuery)
             ->orderByDesc('created_at')
             ->paginate(10)
             ->withQueryString();
 
-        $stats = [
-            'total' => (clone $baseQuery)->count(),
+        // Statistik kartu: global, tidak ikut filter
+        $statsBase = UnitUsaha::query();
 
-            'belum_layak' => (clone $baseQuery)
-                ->whereHas('laporanSlhs', function (Builder $query): void {
-                    $query->where(function (Builder $q): void {
-                        $q->whereNull('status_ikl')
-                            ->orWhere('status_ikl', '!=', 'selesai')
-                            ->orWhereNull('hasil_ikl')
-                            ->orWhere('hasil_ikl', '!=', 'memenuhi')
-                            ->orWhereNull('nilai_ikl')
-                            ->orWhere('nilai_ikl', '<', 80);
+        $stats = [
+            'total' => (clone $statsBase)->count(),
+
+            'belum_layak' => (clone $statsBase)
+                ->where(function (Builder $q): void {
+                    $q->whereDoesntHave('laporanSlhs')
+                    ->orWhereHas('laporanSlhs', function (Builder $query): void {
+                        $query->whereNull('nilai_ikl')
+                                ->orWhere('nilai_ikl', '<', 80);
                     });
                 })->count(),
 
-            'bersyarat' => (clone $baseQuery)
+            'laik_higiene' => (clone $statsBase)
                 ->whereHas('laporanSlhs', function (Builder $query): void {
                     $query->where('status_ikl', 'selesai')
                         ->where('hasil_ikl', 'memenuhi')
-                        ->where('nilai_ikl', '>=', 80)
-                        ->where(function (Builder $q): void {
-                            $q->whereNull('status_slhs')
-                                ->orWhere('status_slhs', '!=', 'selesai');
-                        });
-                })->count(),
-
-            'laik_higiene' => (clone $baseQuery)
-                ->whereHas('laporanSlhs', function (Builder $query): void {
-                    $query->where('status_ikl', 'selesai')
-                        ->where('hasil_ikl', 'memenuhi')
-                        ->where('nilai_ikl', '>=', 80)
-                        ->where('status_slhs', 'selesai');
+                        ->where('nilai_ikl', '>=', 80);
                 })->count(),
         ];
 
