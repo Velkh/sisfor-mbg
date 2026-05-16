@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dinkes;
 use App\Http\Controllers\Controller;
 use App\Models\UnitUsaha;
 use Illuminate\Contracts\View\View;
+use App\Models\Kecamatan;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -14,14 +15,14 @@ class ReportsController extends Controller
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:255'],
-            'dari' => ['nullable', 'date'],
-            'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
-            'kategori' => ['nullable', 'in:all,Sekolah,B3,Umum'],
+            'id_kecamatan' => ['nullable', 'integer'],
+            'jenis_sasaran' => ['nullable', 'in:Sekolah,B3,Umum'],
+
         ]);
 
         $q = trim((string) ($filters['q'] ?? ''));
-        $dari = $filters['dari'] ?? null;
-        $sampai = $filters['sampai'] ?? null;
+        $idKecamatan = $filters['id_kecamatan'] ?? null;
+        $jenisSasaran = $filters['jenis_sasaran'] ?? null;
         $kategori = (string) ($filters['kategori'] ?? 'all');
 
         $reports = UnitUsaha::query()
@@ -29,18 +30,19 @@ class ReportsController extends Controller
                 'puskesmas:id_puskesmas,nama_puskesmas',
                 'kecamatan:id_kecamatan,nama_kecamatan',
                 'kelurahan:id_kelurahan,nama_kelurahan',
-                'sasaranManfaat' => function ($q) use ($dari, $sampai, $kategori): void {
-                    $q->when($dari, fn ($x) => $x->whereDate('created_at', '>=', $dari))
-                    ->when($sampai, fn ($x) => $x->whereDate('created_at', '<=', $sampai))
-                    ->when($kategori !== 'all', fn ($x) => $x->where('kategori', $kategori))
-                    ->orderByDesc('created_at');
-                },
+                'sasaranManfaat',
             ])
             ->when($q !== '', function ($builder) use ($q): void {
                 $builder->where(function ($sub) use ($q): void {
                     $sub->where('nama_unit_usaha', 'like', '%' . $q . '%')
                         ->orWhere('nama_pemilik', 'like', '%' . $q . '%')
                         ->orWhereHas('puskesmas', fn ($r) => $r->where('nama_puskesmas', 'like', '%' . $q . '%'));
+                });
+            })
+            ->when($idKecamatan, fn ($builder) => $builder->where('id_kecamatan', $idKecamatan))
+            ->when($jenisSasaran, function ($builder) use ($jenisSasaran): void {
+                $builder->whereHas('sasaranManfaat', function ($q) use ($jenisSasaran): void {
+                    $q->where('kategori', $jenisSasaran);
                 });
             })
             ->orderBy('nama_unit_usaha')
@@ -74,10 +76,13 @@ class ReportsController extends Controller
             'total_distribusi' => (int) $reports->getCollection()->sum('jumlah_distribusi'),
         ];
 
+        $kecamatans = Kecamatan::orderBy('nama_kecamatan')->get();
+
         return view('dinkes.laporan', [
             'reports' => $reports,
             'stats' => $stats,
-            'filters' => compact('q', 'dari', 'sampai', 'kategori'),
+            'filters' => compact('q', 'idKecamatan', 'jenisSasaran'),
+            'kecamatans' => $kecamatans,
         ]);
     }
 }

@@ -3,7 +3,19 @@
 @section('title', 'Rekap Laporan')
 
 @section('content')
-    <div class="container-fluid">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/dinkes/kelayakan.css') }}">
+
+    <div class="container-fluid civic civic-fade ">
+        <div class="civic-header">
+            <div>
+                <div class="civic-title"><i class="fas fa-building me-2"></i>Data Laporan</div>
+                <div class="civic-sub">Rekap laporan per unit usaha</div>
+            </div>
+        </div>
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Laporan</h5>
@@ -12,32 +24,35 @@
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.laporan') }}">
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Cari Unit Usaha / Puskesmas</label>
-                            <input type="text" name="q" class="form-control" value="{{ $filters['q'] }}" placeholder="Cari...">
+                        <div class="col-md-4">
+                            <label class="form-label">Cari Unit Usaha</label>
+                            <input type="text" name="q" class="form-control" value="{{ $filters['q'] ?? '' }}" placeholder="Cari...">
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Periode Awal</label>
-                            <input type="date" name="dari" class="form-control" value="{{ $filters['dari'] }}">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Periode Akhir</label>
-                            <input type="date" name="sampai" class="form-control" value="{{ $filters['sampai'] }}">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Kategori Sasaran</label>
-                            <select name="kategori" class="form-select">
-                                <option value="all" @selected($filters['kategori'] === 'all')>Semua</option>
-                                <option value="Sekolah" @selected($filters['kategori'] === 'Sekolah')>Sekolah</option>
-                                <option value="B3" @selected($filters['kategori'] === 'B3')>B3</option>
-                                <option value="Umum" @selected($filters['kategori'] === 'Umum')>Umum</option>
+                        <div class="col-md-4">
+                            <label class="form-label">Kecamatan</label>
+                            <select name="id_kecamatan" class="form-select">
+                                <option value="">Semua Kecamatan</option>
+                                @foreach ($kecamatans as $kec)
+                                    <option value="{{ $kec->id_kecamatan }}"
+                                        @selected((string) ($filters['id_kecamatan'] ?? '') === (string) $kec->id_kecamatan)>
+                                        {{ $kec->nama_kecamatan }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end gap-2">
+                        <div class="col-md-3">
+                            <label class="form-label">Jenis Sasaran</label>
+                            <select name="jenis_sasaran" class="form-select">
+                                <option value="">Semua</option>
+                                <option value="Sekolah" @selected(($filters['jenis_sasaran'] ?? '') === 'Sekolah')>Sekolah</option>
+                                <option value="B3" @selected(($filters['jenis_sasaran'] ?? '') === 'B3')>B3</option>
+                                <option value="Umum" @selected(($filters['jenis_sasaran'] ?? '') === 'Umum')>Umum</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
                             <button class="btn btn-primary w-100" type="submit">
-                                <i class="fas fa-search me-2"></i>Tampilkan
+                                <i class="fas fa-search"></i>
                             </button>
-                            <a href="{{ route('admin.laporan') }}" class="btn btn-outline-secondary">Reset</a>
                         </div>
                     </div>
                 </form>
