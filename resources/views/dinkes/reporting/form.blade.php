@@ -3,6 +3,13 @@
 @section('title', isset($unit) ? 'Edit Data Unit Usaha' : 'Tambah Data Unit Usaha')
 
 @section('content')
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/dinkes/kelayakan.css') }}">
+
 @php
     $isEdit = isset($unit);
     $laporan = $laporan ?? null;
@@ -24,13 +31,13 @@
                     'jumlah_jiwa' => $row->jumlah_jiwa,
                 ];
             })->toArray()
-            : [[]];
+            : []; // Array kosong agar default tidak ada baris
     }
 
     $kecamatans = $kecamatans ?? collect();
     $kelurahans = $kelurahans ?? collect();
 
-    // Build a plain array for JS to consume to avoid Blade parsing issues
+    // Build a plain array for JS to consume
     $kelurahanData = $kelurahans->map(function($it){
         return [
             'id' => $it->id_kelurahan ?? $it->id ?? null,
@@ -43,7 +50,7 @@
     $oldKel = old('id_kelurahan', $unit->id_kelurahan ?? '');
 @endphp
 
-<div class="container-fluid">
+<div class="container-fluid civic civic-fade">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0">
             <i class="fas fa-file-alt me-2"></i>
@@ -54,47 +61,7 @@
         </a>
     </div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    @if (session('success') || session('error'))
-        @php
-            $isSuccess = session('success');
-        @endphp
-        <div class="modal fade" id="flashModal" tabindex="-1" aria-labelledby="flashModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow">
-                    <div class="modal-header {{ $isSuccess ? 'bg-success text-white' : 'bg-danger text-white' }}">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="d-inline-flex align-items-center justify-content-center bg-white text-dark rounded-circle" style="width:36px;height:36px;">
-                                <i class="fas {{ $isSuccess ? 'fa-check' : 'fa-exclamation' }}"></i>
-                            </span>
-                            <h5 class="modal-title mb-0" id="flashModalLabel">
-                                {{ $isSuccess ? 'Berhasil' : 'Gagal' }}
-                            </h5>
-                        </div>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p class="mb-0 fs-6">{{ $isSuccess ?? session('error') }}</p>
-                        <div class="small text-muted mt-2">Klik OK untuk melanjutkan.</div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn {{ $isSuccess ? 'btn-success' : 'btn-danger' }}" data-bs-dismiss="modal">OK</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <form method="POST" action="{{ $isEdit ? route('admin.reporting.update', $unit->id_unit_usaha) : route('admin.reporting.store') }}">
+    <form method="POST" action="{{ $isEdit ? route('admin.reporting.update', $unit->id_unit_usaha) : route('admin.reporting.store') }}" enctype="multipart/form-data">
         @csrf
         @if ($isEdit)
             @method('PUT')
@@ -157,7 +124,6 @@
                         <label class="form-label">Kelurahan</label>
                         <select name="id_kelurahan" id="selectKelurahan" class="form-select" required>
                             <option value="">Pilih Kelurahan</option>
-                            {{-- Filled by JS --}}
                         </select>
                     </div>
 
@@ -271,6 +237,14 @@
                         <input type="text" name="jenis_pengelolaan" class="form-control" value="{{ old('jenis_pengelolaan', $laporan->jenis_pengelolaan ?? '') }}">
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <label class="form-label">Foto Unit Usaha</label>
+                <input type="file" name="foto_unit_usaha[]" class="form-control" accept="image/*" multiple>
+                <small class="text-muted">Format gambar: JPG/PNG, max 5MB.</small>
             </div>
         </div>
 
@@ -451,10 +425,45 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const flashModal = document.getElementById('flashModal');
-    if (flashModal && window.bootstrap && window.bootstrap.Modal) {
-        new window.bootstrap.Modal(flashModal).show();
-    }
+    
+    // ==========================================
+    // SWEETALERT2 POP-UP NOTIFICATIONS
+    // ==========================================
+    
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}',
+            timer: 3000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '{{ session('error') }}',
+        });
+    @endif
+
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Terjadi Kesalahan!',
+            html: `
+                <ul class="text-start mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            `,
+        });
+    @endif
+
     // --- IKL / SLHS logic (existing) ---
     const statusIkl = document.getElementById('statusIkl');
     const statusSlhs = document.getElementById('statusSlhs');
@@ -674,12 +683,14 @@ document.addEventListener('DOMContentLoaded', function () {
             visibleFields.add('tipe_instansi');
             visibleFields.add('nama_instansi');
             visibleFields.add('jumlah_siswa');
+            visibleFields.add('status');
         } else if (kategori === 'B3') {
             visibleFields.add('tipe_instansi');
             visibleFields.add('nama_instansi');
             visibleFields.add('jumlah_bumil');
             visibleFields.add('jumlah_busui');
             visibleFields.add('jumlah_balita');
+            visibleFields.add('status');
         } else if (kategori === 'Umum') {
             visibleFields.add('jumlah_jiwa');
         }

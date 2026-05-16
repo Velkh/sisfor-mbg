@@ -9,6 +9,7 @@ use App\Models\SasaranManfaat;
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
 use App\Models\Puskesmas;
+use App\Models\FotoUnit;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,16 +18,31 @@ use Illuminate\Support\Facades\Http;
 
 class ReportingController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $query = UnitUsaha::query()
+            ->with(['laporanSlhs', 'sasaranManfaat']);
 
-        $items = UnitUsaha::query()
-            ->with(['laporanSlhs', 'sasaranManfaat'])
-            ->orderByDesc('created_at')
-            ->paginate(10);
+        if ($request->filled('q')) {
+            $search = $request->input('q');
+            $query->where(function ($q) use ($search): void {
+                $q->where('nama_unit_usaha', 'like', '%' . $search . '%')
+                ->orWhere('nama_pemilik', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($request->filled('id_kecamatan')) {
+            $query->where('id_kecamatan', $request->input('id_kecamatan'));
+        }
+
+        $items = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
+
+        $kecamatans = Kecamatan::orderBy('nama_kecamatan')->get();
 
         return view('dinkes.reporting.index', [
             'items' => $items,
+            'kecamatans' => $kecamatans,
+            'filters' => $request->only(['q', 'id_kecamatan']),
         ]);
     }
 
@@ -48,8 +64,19 @@ class ReportingController extends Controller
         $validated = $this->validatePayload($request);
         $laporanPayload = $this->buildLaporanPayload($validated);
 
-        DB::transaction(function () use ($validated, $laporanPayload): void {
+        DB::transaction(function () use ($validated, $laporanPayload, $request): void {
             $unit = UnitUsaha::create($this->payloadUnitUsaha($validated));
+
+            if ($request->hasFile('foto_unit_usaha')) {
+                foreach ($request->file('foto_unit_usaha') as $file) {
+                    $path = $file->store('foto-unit-usaha', 'public');
+
+                    FotoUnit::create([
+                        'id_unit_usaha' => $unit->id_unit_usaha,
+                        'foto_unit_usaha' => $path,
+                    ]);
+                }
+            }
 
             LaporanSlhs::create(array_merge(
                 $laporanPayload,
@@ -68,7 +95,7 @@ class ReportingController extends Controller
 
     public function show(UnitUsaha $unit): View
     {
-        $unit->load(['laporanSlhs', 'sasaranManfaat']);
+        $unit->load(['laporanSlhs', 'sasaranManfaat', 'fotos', 'puskesmas', 'kecamatan', 'kelurahan']);
 
         return view('dinkes.reporting.show', [
             'unit' => $unit,
@@ -98,8 +125,19 @@ class ReportingController extends Controller
         $validated = $this->validatePayload($request);
         $laporanPayload = $this->buildLaporanPayload($validated);
 
-        DB::transaction(function () use ($validated, $unit, $laporanPayload): void {
+        DB::transaction(function () use ($validated, $unit, $request, $laporanPayload): void {
             $unit->update($this->payloadUnitUsaha($validated));
+            
+            if ($request->hasFile('foto_unit_usaha')) {
+                foreach ($request->file('foto_unit_usaha') as $file) {
+                    $path = $file->store('foto-unit-usaha', 'public');
+
+                    FotoUnit::create([
+                        'id_unit_usaha' => $unit->id_unit_usaha,
+                        'foto_unit_usaha' => $path,
+                    ]);
+                }
+            }
 
             $laporan = $unit->laporanSlhs;
             if ($laporan) {
@@ -123,19 +161,23 @@ class ReportingController extends Controller
             ->with('success', 'Data berhasil diperbarui.');
     }
 
-    public function destroySasaran(UnitUsaha $unit, SasaranManfaat $sasaran): RedirectResponse
+    public function destroy(UnitUsaha $unit): RedirectResponse
     {
-        if ((int) $sasaran->id_unit_usaha !== (int) $unit->id_unit_usaha) {
-            return redirect()
-                ->route('admin.reporting.edit', $unit->id_unit_usaha)
-                ->with('error', 'Sasaran tidak sesuai unit.');
-        }
+        DB::transaction(function () use ($unit): void {
+            $unit->sasaranManfaat()->delete();
 
-        $sasaran->delete();
+            if ($unit->laporanSlhs) {
+                $unit->laporanSlhs->delete();
+            }
+
+            $unit->fotos()->delete();
+
+            $unit->delete();
+        });
 
         return redirect()
-            ->route('admin.reporting.edit', $unit->id_unit_usaha)
-            ->with('success', 'Sasaran berhasil dihapus.');
+            ->route('admin.reporting.index')
+            ->with('success', 'Unit usaha berhasil dihapus.');
     }
 
     public function searchIkl(Request $request)
@@ -200,6 +242,7 @@ class ReportingController extends Controller
 
             'nilai_ikl' => ['nullable', 'integer', 'min:0'],
             'hasil_ikl' => ['nullable', 'in:memenuhi,tidak_memenuhi'],
+            'selected_api_data' => ['nullable', 'string'],
             'status_ikl' => ['required', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
             'status_slhs' => ['nullable', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
             'tgl_terbit_slhs' => ['nullable', 'date'],
@@ -209,6 +252,9 @@ class ReportingController extends Controller
             'jenis_ipal' => ['nullable', 'string', 'max:255'],
             'pengelolaan_sampah' => ['nullable', 'in:ada,tidak_ada'],
             'jenis_pengelolaan' => ['nullable', 'string', 'max:255'],
+
+            'foto_unit_usaha' => ['nullable', 'array'],
+            'foto_unit_usaha.*' => ['image', 'max:5048'],
 
             'sasaran' => ['array'],
             'sasaran.*.kategori' => ['required', 'in:Sekolah,B3,Umum'],
@@ -245,12 +291,28 @@ class ReportingController extends Controller
             'jenis_pengelolaan' => $validated['jenis_pengelolaan'] ?? null,
         ];
 
-        if (! is_null($nilaiIkl)) {
-            $payload['nilai_ikl'] = $nilaiIkl;
-        }
+            if ($validated['status_ikl'] === 'selesai') {
+            $apiData = null;
 
-        if (! is_null($hasilIkl)) {
-            $payload['hasil_ikl'] = $hasilIkl;
+            if (! empty($validated['selected_api_data'])) {
+                $decoded = json_decode($validated['selected_api_data'], true);
+                if (is_array($decoded)) {
+                    $apiData = $decoded;
+                }
+            }
+
+            if (is_array($apiData)) {
+                $payload['nilai_ikl'] = $apiData['nilai_ikl'] ?? null;
+                $payload['hasil_ikl'] = $apiData['hasil_ikl'] ?? null;
+            } else {
+                [$nilaiIkl, $hasilIkl] = $this->resolveIklFromApi(
+                    $validated['status_ikl'],
+                    $validated['nama_unit_usaha']
+                );
+
+                $payload['nilai_ikl'] = $nilaiIkl;
+                $payload['hasil_ikl'] = $hasilIkl;
+            }
         }
 
         return $payload;
