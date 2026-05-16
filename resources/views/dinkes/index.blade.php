@@ -4,6 +4,11 @@
 
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/dinkes/kelayakan.css') }}">
+
 
 <style>
     .card-summary {
@@ -29,7 +34,7 @@
     }
 </style>
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 civic civic-fade">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3 class="mb-0 fw-bold">Dashboard Kelayakan SPPG</h3>

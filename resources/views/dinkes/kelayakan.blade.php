@@ -3,111 +3,122 @@
 @section('title', 'Data Kelayakan')
 
 @section('content')
-    <div class="container-fluid">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('css/dinkes/kelayakan.css') }}">
+
+    <div class="container-fluid civic civic-fade">
         @php
             $total = $stats['total'] ?? 0;
             $memenuhiCount = ($stats['laik_higiene'] ?? 0) + ($stats['bersyarat'] ?? 0);
             $tidakCount = $stats['belum_layak'] ?? 0;
         @endphp
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-card-icon">
-                        <i class="fas fa-list"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $total }}</div>
-                    <div class="stat-card-label">Total Unit Usaha</div>
+        <div class="civic-header">
+            <div>
+                <div class="civic-title">Data Kelayakan</div>
+                <div class="civic-sub">Ringkasan status kelayakan unit usaha di wilayah Anda</div>
+            </div>
+        </div>
+
+        <div class="stat-grid mb-4">
+            <div class="stat-tile">
+                <div class="stat-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $total }}</div>
+                    <div class="stat-label">Total Unit Usaha</div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-card-icon" style="color: #4CAF50;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $memenuhiCount }}</div>
-                    <div class="stat-card-label">Memenuhi</div>
+            <div class="stat-tile">
+                <div class="stat-icon" style="color: #2e7d32; background: rgba(46, 125, 50, 0.12);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $memenuhiCount }}</div>
+                    <div class="stat-label">Memenuhi</div>
                 </div>
             </div>
 
-            <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-card-icon" style="color: #F44336;">
-                        <i class="fas fa-times-circle"></i>
-                    </div>
-                    <div class="stat-card-value">{{ $tidakCount }}</div>
-                    <div class="stat-card-label">Tidak Memenuhi</div>
+            <div class="stat-tile">
+                <div class="stat-icon" style="color: #c62828; background: rgba(198, 40, 40, 0.12);">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div>
+                    <div class="stat-value">{{ $tidakCount }}</div>
+                    <div class="stat-label">Tidak Memenuhi</div>
                 </div>
             </div>
         </div>
 
-        <div class="card mb-4">
-            <div class="card-body">
-                <form method="GET" action="{{ url()->current() }}">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <input
-                                type="text"
-                                name="q"
-                                class="form-control"
-                                placeholder="Cari unit usaha / pemilik"
-                                value="{{ $filters['q'] ?? '' }}"
-                            >
-                        </div>
-
-                        <div class="col-md-3">
-                            <select name="status_ikl" class="form-select">
-                                <option value="">Semua Status IKL</option>
-                                <option value="belum_mengajukan" @selected(($filters['status_ikl'] ?? '') === 'belum_mengajukan')>Belum Mengajukan</option>
-                                <option value="sudah_mengajukan" @selected(($filters['status_ikl'] ?? '') === 'sudah_mengajukan')>Sudah Mengajukan</option>
-                                <option value="selesai" @selected(($filters['status_ikl'] ?? '') === 'selesai')>Selesai</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <select name="status_slhs" class="form-select">
-                                <option value="">Semua Status SLHS</option>
-                                <option value="belum_mengajukan" @selected(($filters['status_slhs'] ?? '') === 'belum_mengajukan')>Belum Mengajukan</option>
-                                <option value="sudah_mengajukan" @selected(($filters['status_slhs'] ?? '') === 'sudah_mengajukan')>Sudah Mengajukan</option>
-                                <option value="selesai" @selected(($filters['status_slhs'] ?? '') === 'selesai')>Selesai</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-2 d-flex gap-2">
-                            <button class="btn btn-outline-secondary w-100" type="submit">
-                                <i class="fas fa-filter"></i>
-                            </button>
-                        </div>
+        <div class="filter-card mb-4">
+            <form method="GET" action="{{ url()->current() }}">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input
+                            type="text"
+                            name="q"
+                            class="form-control"
+                            placeholder="Cari unit usaha / pemilik"
+                            value="{{ $filters['q'] ?? '' }}"
+                        >
                     </div>
 
-                    <div class="mt-3 d-flex gap-2">
-                        <a href="{{ route('admin.data.export.pdf', request()->query()) }}" class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-file-pdf me-2"></i>PDF
-                        </a>
-                        <a href="{{ route('admin.data.export.excel', request()->query()) }}" class="btn btn-sm btn-outline-success">
-                            <i class="fas fa-file-excel me-2"></i>Excel
-                        </a>
-                        <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-dark">
-                            Reset
-                        </a>
+                    <div class="col-md-3">
+                        <select name="status_ikl" class="form-select">
+                            <option value="">Semua Status IKL</option>
+                            <option value="belum_mengajukan" @selected(($filters['status_ikl'] ?? '') === 'belum_mengajukan')>Belum Mengajukan</option>
+                            <option value="sudah_mengajukan" @selected(($filters['status_ikl'] ?? '') === 'sudah_mengajukan')>Sudah Mengajukan</option>
+                            <option value="selesai" @selected(($filters['status_ikl'] ?? '') === 'selesai')>Selesai</option>
+                        </select>
                     </div>
-                </form>
-            </div>
-        </div>>
 
-        <div class="card">
-            <div class="card-header">
+                    <div class="col-md-3">
+                        <select name="status_slhs" class="form-select">
+                            <option value="">Semua Status SLHS</option>
+                            <option value="belum_mengajukan" @selected(($filters['status_slhs'] ?? '') === 'belum_mengajukan')>Belum Mengajukan</option>
+                            <option value="sudah_mengajukan" @selected(($filters['status_slhs'] ?? '') === 'sudah_mengajukan')>Sudah Mengajukan</option>
+                            <option value="selesai" @selected(($filters['status_slhs'] ?? '') === 'selesai')>Selesai</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex gap-2">
+                        <button class="btn btn-civic w-100" type="submit">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-3 d-flex gap-2 flex-wrap">
+                    <a href="{{ route('admin.data.export.pdf', request()->query()) }}" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-file-pdf me-2"></i>PDF
+                    </a>
+                    <a href="{{ route('admin.data.export.excel', request()->query()) }}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-file-excel me-2"></i>Excel
+                    </a>
+                    <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-dark">
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-card">
+            <div class="card-header border-0 bg-transparent">
                 <h5 class="mb-0"><i class="fas fa-check-double me-2"></i>Daftar Kelayakan Unit Usaha</h5>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                <div class="table-responsive border rounded-3 overflow-hidden">
+                    <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
                                 <th>No</th>
                                 <th>Unit Usaha</th>
-                                <th>Puskesmas</th>
+                                <th>Kecamatan</th>
                                 <th>IKL</th>
                                 <th>SLHS</th>
                                 <th>IPAL</th>
@@ -122,7 +133,6 @@
                                     $laporan = $item->laporanSlhs;
                                     $nilaiIkl = (int) ($laporan?->nilai_ikl ?? 0);
 
-                                    // short evaluation based on nilai_ikl only
                                     if ($nilaiIkl >= 80) {
                                         $evaluasiShort = 'Memenuhi';
                                         $evaluasiClassShort = 'success';
@@ -131,7 +141,6 @@
                                         $evaluasiClassShort = 'danger';
                                     }
 
-                                    // keep original descriptive evaluation for modal
                                     $isIklLulus = $laporan
                                         && $laporan->status_ikl === 'selesai'
                                         && $laporan->hasil_ikl === 'memenuhi'
@@ -155,6 +164,7 @@
                                         'nama_unit_usaha' => $item->nama_unit_usaha,
                                         'nama_pemilik' => $item->nama_pemilik,
                                         'jenis_usaha' => strtoupper($item->jenis_usaha ?? '-'),
+                                        'kecamatan' => $item->kecamatan?->nama_kecamatan ?? '-',
                                         'puskesmas' => $item->puskesmas?->nama_puskesmas ?? '-',
                                         'status_ikl' => $laporan?->status_ikl ? ucfirst(str_replace('_', ' ', $laporan->status_ikl)) : '-',
                                         'nilai_ikl' => $laporan?->nilai_ikl ?? '-',
@@ -181,7 +191,7 @@
                                         <br>
                                         <small class="text-muted">Jenis: {{ strtoupper($item->jenis_usaha ?? '-') }}</small>
                                     </td>
-                                    <td>{{ $item->puskesmas?->nama_puskesmas ?? '-' }}</td>
+                                    <td>{{ $item->kecamatan?->nama_kecamatan ?? '-' }}</td>
                                     <td>
                                         <div>
                                             @if (($laporan?->status_ikl ?? null) === 'belum_mengajukan')
