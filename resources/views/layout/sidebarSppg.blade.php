@@ -8,7 +8,8 @@
             </div>
             <div class="user-details">
                 <p class="user-name">{{ Auth::user()->username ?? 'Operator' }}</p>
-                <span class="user-role">Operator SPPG</span>
+                <span class="user-role">Admin {{ Auth::user()->kecamatan?->nama_kecamatan ?? 'Kecamatan' }} 
+                    | {{ strtoupper(Auth::user()->akses_tipe_usaha ?? 'Unit Usaha') }}</span>
             </div>
         </div>
     </div>
@@ -17,10 +18,10 @@
 <div class="sidebar-sppg">
     <div class="sidebar-header">
         <div class="logo-section">
-            <img src="https://upload.wikimedia.org/wikipedia/id/thumb/2/29/Logo_Badan_Gizi_Nasional.svg/3840px-Logo_Badan_Gizi_Nasional.svg.png" alt="Logo BGN" class="logo-img">
+            <img src="{{ asset('images/images.jpeg') }}" alt="Logo BGN" class="logo-img">
             <div class="app-title">
-                <h5>BGN</h5>
-                <p>SPPG System</p>
+                <h5>Dinas Kesehatan Kota Depok</h5>
+                <p>SLHS Monitoring System</p>
             </div>
         </div>
     </div>
@@ -28,35 +29,28 @@
     <nav class="sidebar-nav">
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="{{ route('sppg.index') }}" class="nav-link {{ Route::is('sppg.index') ? 'active' : '' }}">
+                <a href="{{ route('kecamatan.dashboard') }}" class="nav-link {{ Route::is('kecamatan.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('sppg.inspeksi') }}" class="nav-link {{ Route::is('sppg.inspeksi') ? 'active' : '' }}">
+                <a href="{{ route('kecamatan.laporan-unit.index') }}" class="nav-link {{ Route::is('kecamatan.unit-usaha.index') ? 'active' : '' }}">
                     <i class="fas fa-stethoscope"></i>
-                    <span>Inspeksi</span>
+                    <span>Tambah Unit Usaha</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('sppg.profile') }}" class="nav-link {{ Route::is('sppg.profile') ? 'active' : '' }}">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('sppg.suratlaik') }}" class="nav-link {{ Route::is('sppg.suratlaik') ? 'active' : '' }}">
+                <a href="{{ route('kecamatan.kelayakan.index') }}" class="nav-link {{ Route::is('kecamatan.kelayakan.index') ? 'active' : '' }}">
                     <i class="fas fa-file-pdf"></i>
-                    <span>Surat Laik</span>
+                    <span>Kelayakan</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('sppg.pelaporan') }}" class="nav-link {{ Route::is('sppg.pelaporan') ? 'active' : '' }}">
+                <a href="{{ route('kecamatan.sasaran.index') }}" class="nav-link {{ Route::is('kecamatan.sasaran.index') ? 'active' : '' }}">
                     <i class="fas fa-file-alt"></i>
                     <span>Pelaporan</span>
                 </a>

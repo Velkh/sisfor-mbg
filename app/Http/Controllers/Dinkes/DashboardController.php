@@ -45,6 +45,8 @@ use Illuminate\Contracts\View\View;
                 });
         })->count();
 
+        
+
         $sebaranKecamatan = Kecamatan::query()
             ->withCount([
                 'unitUsahas as sppg_count' => function ($query) {

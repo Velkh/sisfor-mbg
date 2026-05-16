@@ -2,21 +2,17 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
-use App\Http\Middleware\AdminDinkesMiddleware;
-use App\Http\Middleware\OperatorSppgMiddleware;
-use App\Http\Middleware\AdminKecamatanMiddleware;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\DinkesController;
-use App\Http\Controllers\Sppg\SppgController;
-use App\Http\Controllers\Sppg\DaftarSppgController;
-use App\Http\Controllers\Sppg\IklController;
-use App\Http\Controllers\Sppg\SlhsController;
-use App\Http\Controllers\Sppg\DistribusiController;
 use App\Http\Controllers\Dinkes\EvaluationController;
 use App\Http\Controllers\Dinkes\ManageOperatorsController;
 use App\Http\Controllers\Dinkes\ReportsController;
 use App\Http\Controllers\Dinkes\ReportingController;
 use App\Http\Controllers\Dinkes\DashboardController;
+use App\Http\Controllers\Kecamatan\LaporanUnitController;
+use App\Http\Controllers\Kecamatan\SlhsController;
+use App\Http\Controllers\Kecamatan\LaporanSasaranController;
+use App\Http\Controllers\Kecamatan\DashboardController as KecamatanDashboardController;
 
 Route::get('/', [GuestController::class, 'index'])->name('guest.index');
 
@@ -59,37 +55,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/reporting/{unit}', [ReportingController::class, 'show'])->name('reporting.show');
         Route::get('/reporting/{unit}/edit', [ReportingController::class, 'edit'])->name('reporting.edit');
         Route::put('/reporting/{unit}', [ReportingController::class, 'update'])->name('reporting.update');
-        Route::delete('/reporting/{unit}/sasaran/{sasaran}', [ReportingController::class, 'destroySasaran'])
-            ->name('reporting.sasaran.destroy');
+        Route::delete('/reporting/{unit}/delete', [ReportingController::class, 'destroy'])->name('reporting.destroy');
         Route::get('/reporting/ikl/search', [ReportingController::class, 'searchIkl'])
             ->name('reporting.ikl.search');
 
     });
 });
 
-// Operator SPPG Routes
-Route::middleware('operator_sppg')->prefix('sppg')->name('sppg.')->group(function () {
-    Route::get('/dashboard', [SppgController::class, 'index'])->name('index');
-
-    // Halaman inspeksi (UI)
-    Route::get('/inspeksi', [SppgController::class, 'inspeksi'])->name('inspeksi');
-
-    // Aksi IKL (API search + simpan)
-    Route::get('/ikl/search', [IklController::class, 'search'])->name('ikl.search');
-    Route::post('/ikl', [IklController::class, 'store'])->name('ikl.store');
-
-    // Daftar / Profile SPPG
-    Route::get('/profile', [DaftarSppgController::class, 'create'])->name('profile');
-    Route::get('/daftar', [DaftarSppgController::class, 'create'])->name('daftar.create');
-    Route::post('/daftar', [DaftarSppgController::class, 'store'])->name('daftar.store');
-
-    Route::get('/suratlaik', [SppgController::class, 'suratlaik'])->name('suratlaik');
-    Route::post('/suratlaik', [SlhsController::class, 'store'])->name('suratlaik.store');
-
-    Route::get('/pelaporan', [SppgController::class, 'pelaporan'])->name('pelaporan');
-    Route::post('/pelaporan', [DistribusiController::class, 'store'])->name('pelaporan.store');
-});
-
 Route::middleware('admin_kecamatan')->prefix('kecamatan')->name('kecamatan.')->group(function () {
-   
+    Route::get('/', [KecamatanDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/laporan-unit', [LaporanUnitController::class, 'index'])->name('laporan-unit.index');
+    Route::get('/laporan-unit/create', [LaporanUnitController::class, 'create'])->name('laporan-unit.create');
+    Route::post('/laporan-unit', [LaporanUnitController::class, 'store'])->name('laporan-unit.store');
+    Route::get('/laporan-unit/{unit}', [LaporanUnitController::class, 'show'])->name('laporan-unit.show');
+
+    Route::get('/kelayakan',[SlhsController::class, 'index'])->name('kelayakan.index');
+    Route::get('/kelayakan/{unit}', [SlhsController::class, 'showKelayakan'])->name('kelayakan.show');
+
+    Route::get('/sasaran', [LaporanSasaranController::class, 'index'])->name('sasaran.index');
 });
