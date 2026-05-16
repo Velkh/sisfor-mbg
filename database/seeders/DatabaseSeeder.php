@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Traits\Units;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,10 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            KecamatanSeeder::class,
-            UserSeeder::class,
-            KelurahanSeeder::class,
-            PuskesmasSeeder::class,
+            UnitSeedeers::class
         ]);
     }
 }
