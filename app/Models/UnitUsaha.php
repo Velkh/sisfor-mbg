@@ -61,4 +61,9 @@ class UnitUsaha extends Model
     {
         return $this->hasOne(LaporanSlhs::class, 'id_unit_usaha', 'id_unit_usaha');
     }
+
+    public function fotos()
+    {
+        return $this->hasMany(FotoUnit::class, 'id_unit_usaha', 'id_unit_usaha');
+    }
 }
