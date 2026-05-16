@@ -53,6 +53,11 @@
         font-size: .86rem;
         cursor: pointer;
     }
+    .card {
+        max-width: 10000px;
+        margin: 0 auto 24px;
+        padding: 24px;
+        }
 
     .btn-outline {
         border-color: rgba(255,255,255,.45);
@@ -63,7 +68,7 @@
     .btn-outline:hover { background: rgba(255,255,255,.12); }
 
     .wrap {
-        max-width: 1240px;
+        max-width: 1500px;
         margin: 20px auto 40px;
         padding: 0 18px;
     }
