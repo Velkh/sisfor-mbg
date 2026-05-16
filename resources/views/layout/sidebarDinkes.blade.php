@@ -34,16 +34,16 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('admin.reporting.index') }}" class="nav-link {{ Route::is('admin.reporting*') ? 'active' : '' }}">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Input Data Unit Usaha</span>
+                <a href="{{ route('admin.manage.index') }}" class="nav-link {{ Route::is('admin.manage*') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>Kelola Admin</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('admin.manage.index') }}" class="nav-link {{ Route::is('admin.manage*') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i>
-                    <span>Kelola Admin</span>
+                <a href="{{ route('admin.reporting.index') }}" class="nav-link {{ Route::is('admin.reporting*') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Input Data Unit Usaha</span>
                 </a>
             </li>
 
