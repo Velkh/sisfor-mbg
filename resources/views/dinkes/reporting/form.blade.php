@@ -209,36 +209,72 @@
                         <input type="text" name="link_slhs" class="form-control" value="{{ old('link_slhs', $laporan->link_slhs ?? '') }}">
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Ketersediaan IPAL</label>
-                        <select name="ketersediaan_ipal" class="form-select">
-                            <option value="">Pilih</option>
-                            <option value="ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'ada')>Ada</option>
-                            <option value="tidak_ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'tidak_ada')>Tidak Ada</option>
-                        </select>
-                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Ketersediaan IPAL</label>
+                            <select name="ketersediaan_ipal" id="ketersediaan_ipal" class="form-select">
+                                <option value="">Pilih</option>
+                                <option value="ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'ada')>Ada</option>
+                                <option value="tidak_ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'tidak_ada')>Tidak Ada</option>
+                            </select>
+                        </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Jenis IPAL</label>
-                        <input type="text" name="jenis_ipal" class="form-control" value="{{ old('jenis_ipal', $laporan->jenis_ipal ?? '') }}">
-                    </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Jenis IPAL</label>
+                            @php
+                                $jenisIpalList = [
+                                    'Grease Trap' => 'Grease Trap (Penangkap Lemak)',
+                                    'Septic Tank' => 'Septic Tank Konvensional',
+                                    'Biofilter' => 'Bio Septic Tank / Biofilter',
+                                    'IPAL Komunal' => 'IPAL Terpusat / Komunal',
+                                    'Lainnya' => 'Lainnya'
+                                ];
+                                $currentIpal = old('jenis_ipal', $laporan->jenis_ipal ?? '');
+                            @endphp
+                            
+                            <select name="jenis_ipal" id="jenis_ipal" class="form-select">
+                                <option value="">-- Pilih Jenis IPAL --</option>
+                                @foreach ($jenisIpalList as $value => $label)
+                                    <option value="{{ $value }}" @selected($currentIpal === $value)>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Pengelolaan Sampah</label>
-                        <select name="pengelolaan_sampah" class="form-select">
-                            <option value="">Pilih</option>
-                            <option value="ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'ada')>Ada</option>
-                            <option value="tidak_ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'tidak_ada')>Tidak Ada</option>
-                        </select>
-                    </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Pengelolaan Sampah</label>
+                            <select name="pengelolaan_sampah" id="pengelolaan_sampah" class="form-select">
+                                <option value="">Pilih</option>
+                                <option value="ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'ada')>Ada</option>
+                                <option value="tidak_ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'tidak_ada')>Tidak Ada</option>
+                            </select>
+                        </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">Jenis Pengelolaan</label>
-                        <input type="text" name="jenis_pengelolaan" class="form-control" value="{{ old('jenis_pengelolaan', $laporan->jenis_pengelolaan ?? '') }}">
+                        <div class="col-md-3">
+                            <label class="form-label">Jenis Pengelolaan</label>
+                            @php
+                                $jenisPengelolaanList = [
+                                    'Diangkut Dinas/Petugas' => 'Diangkut Petugas Kebersihan/DLHK',
+                                    'Dibuang ke TPS' => 'Dibuang ke TPS Terdekat',
+                                    'Dikelola Mandiri' => 'Dikelola Mandiri (Kompos/Daur Ulang)',
+                                    'Maggot' => 'Biokonversi Maggot (BSF)',
+                                    'Pihak Ketiga' => 'Bekerja Sama dengan Pihak Swasta',
+                                    'Lainnya' => 'Lainnya'
+                                ];
+                                $currentPengelolaan = old('jenis_pengelolaan', $laporan->jenis_pengelolaan ?? '');
+                            @endphp
+                            
+                            <select name="jenis_pengelolaan" id="jenis_pengelolaan" class="form-select">
+                                <option value="">-- Pilih Jenis Pengelolaan --</option>
+                                @foreach ($jenisPengelolaanList as $value => $label)
+                                    <option value="{{ $value }}" @selected($currentPengelolaan === $value)>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
         <div class="card mb-3">
             <div class="card-body">
@@ -425,11 +461,60 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    
-    // ==========================================
-    // SWEETALERT2 POP-UP NOTIFICATIONS
-    // ==========================================
-    
+    const ketersediaanIpal = document.getElementById('ketersediaan_ipal');
+    const jenisIpal = document.getElementById('jenis_ipal');
+    const pengelolaanSampah = document.getElementById('pengelolaan_sampah');
+    const jenisPengelolaan = document.getElementById('jenis_pengelolaan');
+
+    // Fungsi disable/enable IPAL
+    function toggleIpal() {
+        console.log('toggleIpal called, value:', ketersediaanIpal?.value); // DEBUG
+        if (!ketersediaanIpal || !jenisIpal) return;
+        
+        if (ketersediaanIpal.value === 'ada') {
+            jenisIpal.disabled = false;
+            console.log('IPAL enabled');
+        } else {
+            jenisIpal.disabled = true;
+            jenisIpal.value = '';
+            console.log('IPAL disabled');
+        }
+    }
+
+    // Fungsi disable/enable Sampah
+    function toggleSampah() {
+        console.log('toggleSampah called, value:', pengelolaanSampah?.value); // DEBUG
+        if (!pengelolaanSampah || !jenisPengelolaan) return;
+        
+        if (pengelolaanSampah.value === 'ada') {
+            jenisPengelolaan.disabled = false;
+            console.log('Sampah enabled');
+        } else {
+            jenisPengelolaan.disabled = true;
+            jenisPengelolaan.value = '';
+            console.log('Sampah disabled');
+        }
+    }
+
+    // PENTING: Jalankan saat halaman load pertama kali
+    if (ketersediaanIpal) {
+        toggleIpal();
+        // Tambahkan event listener
+        ketersediaanIpal.addEventListener('change', function(e) {
+            console.log('ketersediaanIpal changed to:', e.target.value);
+            toggleIpal();
+        });
+    }
+
+    if (pengelolaanSampah) {
+        toggleSampah();
+        // Tambahkan event listener
+        pengelolaanSampah.addEventListener('change', function(e) {
+            console.log('pengelolaanSampah changed to:', e.target.value);
+            toggleSampah();
+        });
+    }
+
     @if(session('success'))
         Swal.fire({
             icon: 'success',
@@ -464,16 +549,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     @endif
 
-    // --- IKL / SLHS logic (existing) ---
+    // ==========================================
+    // 3. IKL / SLHS LOGIC
+    // ==========================================
+    
     const statusIkl = document.getElementById('statusIkl');
     const statusSlhs = document.getElementById('statusSlhs');
-
     const iklSearchBox = document.getElementById('iklSearchBox');
     const iklSearchInput = document.getElementById('iklSearchInput');
     const btnCariIkl = document.getElementById('btnCariIkl');
     const iklResults = document.getElementById('iklResults');
     const selectedApiData = document.getElementById('selectedApiData');
-
     const slhsTglTerbitBox = document.getElementById('slhsTglTerbitBox');
     const slhsTglBerakhirBox = document.getElementById('slhsTglBerakhirBox');
     const slhsLinkBox = document.getElementById('slhsLinkBox');
@@ -544,11 +630,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const nilaiIkl = document.getElementById('nilaiIkl');
                     const hasilIkl = document.getElementById('hasilIkl');
-                    const tanggalPenilaian = document.getElementById('tanggalPenilaian');
 
                     if (nilaiIkl) nilaiIkl.value = item.nilai_ikl ?? '';
                     if (hasilIkl) hasilIkl.value = item.hasil_ikl ?? '';
-                    if (tanggalPenilaian) tanggalPenilaian.value = item.tanggal_penilaian ?? '';
 
                     iklResults.innerHTML = `
                         <div class="list-group-item list-group-item-success">
@@ -564,10 +648,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (statusIkl) statusIkl.addEventListener('change', toggleIklSearch);
-    if (statusSlhs) statusSlhs.addEventListener('change', toggleSlhsFields);
-
-    if (btnCariIkl) btnCariIkl.addEventListener('click', searchIkl);
+    if (statusIkl) {
+        statusIkl.addEventListener('change', toggleIklSearch);
+    }
+    if (statusSlhs) {
+        statusSlhs.addEventListener('change', toggleSlhsFields);
+    }
+    if (btnCariIkl) {
+        btnCariIkl.addEventListener('click', searchIkl);
+    }
     if (iklSearchInput) {
         iklSearchInput.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
@@ -580,12 +669,13 @@ document.addEventListener('DOMContentLoaded', function () {
     toggleIklSearch();
     toggleSlhsFields();
 
-    // --- Kecamatan / Kelurahan dependent selects ---
+    // ==========================================
+    // 4. KECAMATAN / KELURAHAN DEPENDENT SELECT
+    // ==========================================
+    
     const selectKec = document.getElementById('selectKecamatan');
     const selectKel = document.getElementById('selectKelurahan');
-
     const kelurahanData = @json($kelurahanData);
-
     const oldKec = @json($oldKec);
     const oldKel = @json($oldKel);
 
@@ -627,13 +717,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- Sasaran Manfaat logic: cache field wrappers once per row ---
+    // ==========================================
+    // 5. SASARAN MANFAAT LOGIC
+    // ==========================================
+    
     function getSasaranState(row) {
         if (!row) return null;
-
-        if (row._sasaranState) {
-            return row._sasaranState;
-        }
+        if (row._sasaranState) return row._sasaranState;
 
         const fields = {};
         row.querySelectorAll('[data-sasaran-field]').forEach(function (field) {
@@ -659,7 +749,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function clearFieldValue(field) {
         if (!field) return;
-
         const control = field.querySelector('input, select, textarea');
         if (!control) return;
 
@@ -667,7 +756,6 @@ document.addEventListener('DOMContentLoaded', function () {
             control.value = '';
             return;
         }
-
         control.value = control.type === 'number' ? '' : '';
     }
 
@@ -676,7 +764,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!state || !state.kategori) return;
 
         const kategori = state.kategori.value || '';
-
         const visibleFields = new Set(['kategori', 'hapus', 'detail_jangkauan']);
 
         if (kategori === 'Sekolah') {
@@ -720,7 +807,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     opt.hidden = false;
                     return;
                 }
-
                 opt.hidden = allowed.length > 0 && !allowed.includes(opt.value);
             });
 
@@ -760,7 +846,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initAllSasaranRows();
 
-    // Add new row logic
     const btnTambah = document.getElementById('btnTambahSasaran');
     const sasaranWrapper = document.getElementById('sasaranWrapper');
     const templateHtml = document.getElementById('sasaranTemplate') ? document.getElementById('sasaranTemplate').innerHTML : null;
@@ -780,10 +865,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const newRow = div.firstElementChild;
             sasaranWrapper.appendChild(newRow);
             bindSasaranRow(newRow);
-            // scroll into view
             newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     }
+
 });
 </script>
 @endsection
