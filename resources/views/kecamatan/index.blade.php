@@ -4,6 +4,8 @@
 
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{{ asset('css/kecamatan/kelayakan.css') }}">
+
 
 <style>
     .card-summary {
@@ -26,7 +28,7 @@
     }
 </style>
 
-<div class="container-fluid py-4">
+<div class="container-fluid py-4 civic civic-fade">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3 class="mb-0 fw-bold">Dashboard Kecamatan</h3>

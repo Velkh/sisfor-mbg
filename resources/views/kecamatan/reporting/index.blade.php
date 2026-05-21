@@ -3,7 +3,9 @@
 @section('title', 'Data Unit Usaha Kecamatan')
 
 @section('content')
-<div class="container-fluid">
+<link rel="stylesheet" href="{{ asset('css/kecamatan/kelayakan.css') }}">
+
+<div class="container-fluid civic civic-fade">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="mb-0"><i class="fas fa-building me-2"></i>Data Unit Usaha</h4>

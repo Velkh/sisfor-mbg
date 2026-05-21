@@ -3,7 +3,9 @@
 @section('title', 'Rekap Laporan')
 
 @section('content')
-    <div class="container-fluid">
+<link rel="stylesheet" href="{{ asset('css/kecamatan/kelayakan.css') }}">
+
+    <div class="container-fluid civic civic-fade">
         <div class="card mb-4">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Laporan</h5>

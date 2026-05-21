@@ -444,6 +444,18 @@ a { text-decoration: none; color: inherit; }
     color: var(--muted);
 }
 
+.footer { background: var(--g900); color: rgba(255,255,255,.68); padding: 60px 48px 30px; }
+.footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 44px; padding-bottom: 44px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.footer-brand-name { font-family: 'Fraunces', serif; font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
+.footer-brand-sub { font-size: .77rem; color: rgba(255,255,255,.5); margin-bottom: 14px; line-height: 1.6; }
+.footer-address { font-size: .8rem; line-height: 1.85; }
+.footer-col-title { font-family: 'Fraunces', serif; color: #fff; font-size: .93rem; margin-bottom: 14px; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.footer-links a { font-size: .8rem; color: rgba(255,255,255,.62); transition: color .2s; }
+.footer-links a:hover { color: var(--g400); }
+.footer-bottom { max-width: 1200px; margin: 24px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: .77rem; color: rgba(255,255,255,.32); }
+.footer-bottom strong { color: rgba(255,255,255,.6); }
+
 @media (max-width: 1000px) {
     .menu-grid { grid-template-columns: repeat(2, 1fr); }
 }
