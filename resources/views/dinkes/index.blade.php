@@ -37,8 +37,8 @@
 <div class="container-fluid py-4 civic civic-fade">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h3 class="mb-0 fw-bold">Dashboard Kelayakan SPPG</h3>
-            <p class="text-muted mb-0">Ringkasan status kelayakan IKL tingkat kabupaten/kota.</p>
+            <h3 class="mb-0 fw-bold">Dashboard Kepatuhan IKL dan SLHS</h3>
+            <p class="text-muted mb-0">Ringkasan status kelayakan IKL tingkat Kota.</p>
         </div>
         <div>
             <span class="badge bg-light text-dark border p-2">
