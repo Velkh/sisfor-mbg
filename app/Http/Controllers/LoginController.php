@@ -56,7 +56,7 @@ class LoginController extends Controller
             if ($user->role === 'admin_dinkes') {
                 return redirect()->intended(route('admin.dashboard'));
             } elseif ($user->role === 'admin_kecamatan') {
-                return redirect()->intended(route('kecamatan.'));
+                return redirect()->intended(route('kecamatan.dashboard'));
             } else {
                 return redirect()->intended(route('home'));
             }
