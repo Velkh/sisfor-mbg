@@ -83,7 +83,7 @@
     </nav>
     <div class="wrap">
         <div class="title">{{ strtoupper($item->jenis_usaha) }}</div>
-        <div class="subtitle">{{ $item->nama_sppg ?? 'Nama SPPG Tidak Tersedia' }}</div>
+        <div class="subtitle">{{ $item->nama_unit ?? 'Nama Unit Tidak Tersedia' }}</div>
 
         <section class="card" id="profil">
             <div class="card-body">
@@ -118,8 +118,8 @@
                                 <td>{{ $item->kecamatan?->nama_kecamatan ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <td>Nama Mitra</td>
-                                <td>{{ $item->nama_mitra ?? '-' }}</td>
+                                <td>Jumlah Penjamah Terlatih</td>
+                                <td>{{ $item->jumlah_penjamah_terlatih ?? 0 }} orang</td>
                             </tr>
                             <tr>
                                 <td>Jumlah Pegawai</td>
@@ -180,76 +180,11 @@
             <div class="sasaran-header">Sasaran Penerima</div>
             <div class="sasaran-layout">
                 <div class="sidebar-menu">
-                    <button class="tab-btn active" data-target="tab-rekap">Rekap Sasaran</button>
                     <button class="tab-btn" data-target="tab-data">Data Sasaran</button>
-                    <button class="tab-btn" data-target="tab-peta">Peta Lokasi</button>
                 </div>
 
                 <div class="sidebar-content">
-
-                    <div id="tab-rekap" class="tab-content active">
-                        <div class="group-title">Satuan Pendidikan</div>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="badge-circle bg-sma">SMA</div>
-                                <div class="stat-title">SMA & Sederajat</div>
-                                <div class="stat-value">{{ number_format($sma['sekolah'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Sekolah</div>
-                                <div class="stat-value">{{ number_format($sma['siswa'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Siswa</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="badge-circle bg-smp">SMP</div>
-                                <div class="stat-title">SMP & Sederajat</div>
-                                <div class="stat-value">{{ number_format($smp['sekolah'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Sekolah</div>
-                                <div class="stat-value">{{ number_format($smp['siswa'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Siswa</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="badge-circle bg-sd">SD</div>
-                                <div class="stat-title">SD & Sederajat</div>
-                                <div class="stat-value">{{ number_format($sd['sekolah'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Sekolah</div>
-                                <div class="stat-value">{{ number_format($sd['siswa'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Siswa</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="badge-circle bg-tk">TK</div>
-                                <div class="stat-title">TK / PAUD</div>
-                                <div class="stat-value">{{ number_format($tk['sekolah'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Sekolah</div>
-                                <div class="stat-value">{{ number_format($tk['siswa'], 0, ',', '.') }}</div>
-                                <div class="stat-label">Siswa</div>
-                            </div>
-                        </div>
-
-                        <div class="group-title">Kelompok B3</div>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-title">POSYANDU</div>
-                                <div class="stat-value">{{ number_format($posyandu, 0, ',', '.') }}</div>
-                                <div class="stat-label">Unit</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">BALITA</div>
-                                <div class="stat-value">{{ number_format((int) $laporans->sum('jumlah_balita'), 0, ',', '.') }}</div>
-                                <div class="stat-label">Anak</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">BUMIL</div>
-                                <div class="stat-value">{{ number_format((int) $laporans->sum('jumlah_bumil'), 0, ',', '.') }}</div>
-                                <div class="stat-label">Penerima</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-title">BUSUI</div>
-                                <div class="stat-value">{{ number_format((int) $laporans->sum('jumlah_busui'), 0, ',', '.') }}</div>
-                                <div class="stat-label">Penerima</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="tab-data" class="tab-content">
+                    <div id="tab-data" class="tab-content active">
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -281,16 +216,58 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <div id="tab-peta" class="tab-content">
-                        <div style="width: 100%; height: 300px; background: #e0e0e0; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #888;">
-                            Area Peta Lokasi (Sematkan Leaflet JS di sini)
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>
     </div>
+     <footer class="footer">
+                <div class="footer-grid">
+                    <div>
+                        <div class="footer-brand-name">Dashboard SLHS</div>
+                        <div class="footer-brand-sub">Sistem Informasi Pengawasan<br>Higiene Sanitasi Pangan</div>
+                        <div class="footer-address"> Jalan Margonda Raya No.54, Depok 16431<br> Gedung Balai Kota Depok </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="footer-col-title">Link</h4>
+                        <ul class="footer-links">
+                            <li><a href="#hero">Beranda</a></li>
+                            <li><a href="#about">Tentang SLHS</a></li>
+                            <li><a href="{{ route('login') }}">Login Sistem</a></li>
+                            <li><a href="#faq">FAQ Syarat IKL</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="footer-col-title">Pusat</h4>
+                        <ul class="footer-links">
+                            <li><a href="https://kemkes.go.id/" target="_blank">Kementerian Kesehatan</a></li>
+                            <li><a href="https://badanpangan.go.id/" target="_blank">Badan Pangan Nasional</a></li>
+                            <li><a href="https://www.pom.go.id/" target="_blank">Badan POM</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="footer-col-title">Daerah</h4>
+                        <ul class="footer-links">
+                            <li><a href="https://depok.go.id/" target="_blank">Pemkot Depok</a></li>
+                            <li><a href="https://dinkes.depok.go.id/" target="_blank">Dinas Kesehatan Depok</a></li>
+                            <li><a href="https://dpmptsp.depok.go.id/" target="_blank">DPMPTSP Depok</a></li>
+                            <li><a href="https://diskominfo.depok.go.id/" target="_blank">Diskominfo Depok</a></li>
+                        </ul>
+                        <h4 class="footer-col-title" style="margin-top:18px;">Portal Layanan</h4>
+                        <ul class="footer-links">
+                            <li><a href="https://oss.go.id/" target="_blank">OSS RBA</a></li>
+                            <li><a href="https://opendata.depok.go.id/" target="_blank">Opendata Depok</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="footer-bottom">
+                    <span><strong>Dinas Kesehatan & Diskominfo</strong> Kota Depok</span>
+                    <span>Copyright &copy; {{ date('Y') }}</span>
+                </div>
+            </footer>
 
     <script>
         const tabBtns = document.querySelectorAll('.tab-btn');
