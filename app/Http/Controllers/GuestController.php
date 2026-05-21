@@ -190,7 +190,7 @@ class GuestController extends Controller
         ]); 
     } 
 
-    public function showSppg(int $sppg): View 
+    public function showUnit(int $unit): View 
     { 
         $item = UnitUsaha::query() 
             ->with([ 
@@ -201,12 +201,13 @@ class GuestController extends Controller
                 'laporanSlhs',
                 'fotos',
             ]) 
-            ->findOrFail($sppg);
+            ->findOrFail($unit);
 
-        $item->setAttribute('nama_sppg', $item->nama_unit_usaha);
+        $item->setAttribute('nama_unit', $item->nama_unit_usaha);
         $item->setAttribute('nama_kepala', $item->nama_pemilik);
         $item->setAttribute('jenis_usaha', $item->jenis_usaha ?? '-');
         $item->setAttribute('jumlah_pegawai', $item->jumlah_pegawai ?? 0);
+        $item->setAttribute('jumlah_penjamah_terlatih',$item->jumlah_penjamah_terlatih ?? 0);
         $item->setAttribute('kapasitas_porsi', 0);
         $item->setAttribute('foto_kepala', null);
         $item->load('fotos');
@@ -239,9 +240,6 @@ class GuestController extends Controller
         ]); 
     } 
 
-    /**
-     * API: Get kecamatan data untuk section "Daftar SPPG"
-     */
     public function getKecamatanData(?Request $request, ?int $kecamatanId = null): JsonResponse
     {
         $q = trim((string) $request->query('q'));
@@ -407,10 +405,6 @@ class GuestController extends Controller
         }
     }
 
-    /**
-     * Rekap Kelompok Penerima per Kecamatan
-     * Kolom: KECAMATAN, SMA SEDERAJAT, SMP SEDERAJAT, SD SEDERAJAT, TKA/PAUD SEDERAJAT, POSYANDU, JUMLAH
-     */
     private function rekapKelompokPenerima(): JsonResponse
     {
         $kecamatans = Kecamatan::query()
@@ -418,54 +412,29 @@ class GuestController extends Controller
             ->get();
 
         $rows = $kecamatans->map(function ($kec) {
-            $laporans = SasaranManfaat::whereHas('unitUsaha', function (Builder $query) use ($kec) {
-                $query->where('id_kecamatan', $kec->id_kecamatan);
-            })->get();
+            $units = UnitUsaha::where('id_kecamatan', $kec->id_kecamatan)->get();
 
-            $sma = $laporans->where('kategori', 'Sekolah')->where('tipe_instansi', 'SMA')
-                ->pluck('nama_instansi')
-                ->filter()
-                ->unique()
-                ->count();
-            
-            $smp = $laporans->where('kategori', 'Sekolah')->where('tipe_instansi', 'SMP')
-                ->pluck('nama_instansi')
-                ->filter()
-                ->unique()
-                ->count();
-            
-            $sd = $laporans->where('kategori', 'Sekolah')->where('tipe_instansi', 'SD')
-                ->pluck('nama_instansi')
-                ->filter()
-                ->unique()
-                ->count();
-            
-            $tk = $laporans->where('kategori', 'Sekolah')->where('tipe_instansi', 'TK')
-                ->pluck('nama_instansi')
-                ->filter()
-                ->unique()
-                ->count();
-            
-            $posyandu = $laporans->where('kategori', 'B3')->where('tipe_instansi', 'Posyandu')
-                ->pluck('nama_instansi')
-                ->filter()
-                ->unique()
-                ->count();
-            
-            $umum = (int) $laporans->where('kategori', 'Umum')->count();
+            $sppg = $units->where('jenis_usaha', 'sppg')->count();
+            $tpp = $units->where('jenis_usaha', 'tpp')->count();
+            $dam = $units->where('jenis_usaha', 'dam')->count();
+            $kantin = $units->where('jenis_usaha', 'kantin')->count();
 
+            $totalPegawai = (int) $units->sum('jumlah_pegawai');
+            $totalPenjamahTerlatih = (int) $units->sum('jumlah_penjamah_terlatih');
 
-            $jumlah = $sma + $smp + $sd + $tk + $posyandu + $umum;
+            $aktif = $units->where('status_aktif', true)->count();
+            $nonaktif = $units->where('status_aktif', false)->count();
 
             return [
                 'kecamatan' => $kec->nama_kecamatan,
-                'sma_sederajat' => $sma,
-                'smp_sederajat' => $smp,
-                'sd_sederajat' => $sd,
-                'tka_paud_sederajat' => $tk,
-                'posyandu' => $posyandu,
-                'umum' => $umum,
-                'jumlah' => $jumlah,
+                'sppg' => $sppg,
+                'tpp' => $tpp,
+                'dam' => $dam,
+                'kantin' => $kantin,
+                'jumlah_pegawai' => $totalPegawai,
+                'jumlah_penjamah_terlatih' => $totalPenjamahTerlatih,
+                'aktif' => $aktif,
+                'nonaktif' => $nonaktif,
             ];
         })->toArray();
 
@@ -475,10 +444,6 @@ class GuestController extends Controller
         ]);
     }
 
-    /**
-     * Rekap Penerima per Kecamatan
-     * Kolom: #, KECAMATAN, SMA SEDERAJAT, SMP SEDERAJAT, SD SEDERAJAT, TKA/PAUD SEDERAJAT, BALITA, BUMIL, BUSUI, JUMLAH
-     */
     private function rekapPenerima(): JsonResponse
     {
         $kecamatans = Kecamatan::query()
