@@ -17,9 +17,9 @@ use App\Http\Controllers\Kecamatan\DashboardController as KecamatanDashboardCont
 Route::get('/', [GuestController::class, 'index'])->name('guest.index');
 
 Route::get('/rekap', [GuestController::class, 'rekap'])->name('guest.rekap');
-Route::get('/sppg/{sppg}', [GuestController::class, 'showSppg'])->whereNumber('sppg')->name('guest.sppg.show');
+Route::get('/unit/{unit}', [GuestController::class, 'showUnit'])->whereNumber('unit')->name('guest.sppg.show');
 Route::get('/api/rekap/kecamatan/{id?}', [GuestController::class, 'getKecamatanData'])->name('api.rekap.kecamatan');
-Route::get('/api/rekap/{type}', [GuestController::class, 'getRekapByKecamatan'])->name('api.rekap.type');//
+Route::get('/api/rekap/{type}', [GuestController::class, 'getRekapByKecamatan'])->name('api.rekap.type');
 
 // Login routes
 Route::middleware('guest')->group(function () {
