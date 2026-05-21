@@ -105,7 +105,7 @@
             <div class="card-body">
                 <div class="recap-buttons">
                     <button class="recap-btn active" data-type="sppg">Data Rekap Unit Usaha</button>
-                    <button class="recap-btn" data-type="kelompok-penerima">Data Rekap Kelompok Penerima</button>
+                    <button class="recap-btn" data-type="kelompok-penerima">Data Rekap Sebaran Unit</button>
                     <button class="recap-btn" data-type="penerima">Data Rekap Penerima</button>
                 </div>
 
@@ -139,18 +139,19 @@
                             <thead>
                                 <tr>
                                     <th>KECAMATAN</th>
-                                    <th>SMA SEDERAJAT</th>
-                                    <th>SMP SEDERAJAT</th>
-                                    <th>SD SEDERAJAT</th>
-                                    <th>TKA/PAUD SEDERAJAT</th>
-                                    <th>POSYANDU</th>
-                                    <th>UMUM</th>
-                                    <th>JUMLAH</th>
+                                    <th>SPPG</th>
+                                    <th>TPP</th>
+                                    <th>DAM</th>
+                                    <th>KANTIN</th>
+                                    <th>JUMLAH PEGAWAI</th>
+                                    <th>JUMLAH PENJAMAH TERLATIH</th>
+                                    <th>AKTIF</th>
+                                    <th>NONAKTIF</th>
                                 </tr>
                             </thead>
                             <tbody id="table-kelompok-penerima">
                                 <tr>
-                                    <td colspan="7" class="loading-state"><div class="loading-spinner"></div> Loading...</td>
+                                    <td colspan="9" class="loading-state"><div class="loading-spinner"></div> Loading...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -431,7 +432,7 @@
                 return;
             }
 
-            const colspan = type === 'kelompok-penerima' ? 7 : type === 'penerima' ? 10 : 8;
+            const colspan = type === 'kelompok-penerima' ? 9 : type === 'penerima' ? 10 : 8;
             tableBody.innerHTML = `<tr><td colspan="${colspan}" class="loading-state"><div class="loading-spinner"></div> Loading...</td></tr>`;
 
             try {
@@ -483,20 +484,21 @@
                 const tableBody = document.getElementById('table-kelompok-penerima');
 
                 if (!rows.length) {
-                    tableBody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada data.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" class="empty">Belum ada data.</td></tr>';
                     return;
                 }
 
                 tableBody.innerHTML = rows.map((row) => `
                     <tr>
                         <td>${escapeHtml(row.kecamatan)}</td>
-                        <td>${row.sma_sederajat}</td>
-                        <td>${row.smp_sederajat}</td>
-                        <td>${row.sd_sederajat}</td>
-                        <td>${row.tka_paud_sederajat}</td>
-                        <td>${row.posyandu}</td>
-                        <td>${row.umum}</td>
-                        <td><strong>${row.jumlah}</strong></td>
+                        <td>${row.sppg}</td>
+                        <td>${row.tpp}</td>
+                        <td>${row.dam}</td>
+                        <td>${row.kantin}</td>
+                        <td>${row.jumlah_pegawai}</td>
+                        <td>${row.jumlah_penjamah_terlatih}</td>
+                        <td>${row.aktif}</td>
+                        <td>${row.nonaktif}</td>
                     </tr>
                 `).join('');
                 return;
@@ -530,7 +532,7 @@
 
         function renderDaftarSppg(rows) {
             const tableBody = document.getElementById('table-daftar-sppg');
-            const baseDetailUrl = "{{ route('guest.sppg.show', ['sppg' => '___ID___']) }}";
+            const baseDetailUrl = "{{ route('guest.sppg.show', ['unit' => '___ID___']) }}";
 
             if (!rows.length) {
                 tableBody.innerHTML = '<tr><td colspan="8" class="empty">Belum ada data Unit Usaha di Wilayah Ini.</td></tr>';
