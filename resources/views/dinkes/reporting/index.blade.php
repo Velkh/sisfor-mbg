@@ -25,12 +25,11 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    <div class="card mb-3">
+    <div class="card">
         <div class="card-body">
             <form method="GET" action="{{ url()->current() }}">
                 <div class="row g-2 align-items-center">
-                    
-                    <div class="col-md-5">
+                                        <div class="col-md-3">
                         <input
                             type="text"
                             name="q"
@@ -39,8 +38,17 @@
                             value="{{ $filters['q'] ?? '' }}"
                         >
                     </div>
-
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <select name="jenis_usaha" class="form-select">
+                            <option value="">Semua Jenis Usaha</option>
+                            <option value="sppg" @selected(($filters['jenis_usaha'] ?? '') === 'sppg')>SPPG</option>
+                            <option value="catering" @selected(($filters['jenis_usaha'] ?? '') === 'catering')>Catering</option>
+                            <option value="restoran" @selected(($filters['jenis_usaha'] ?? '') === 'restoran')>Restoran</option>
+                            <option value="dam" @selected(($filters['jenis_usaha'] ?? '') === 'dam')>DAM</option>
+                            <option value="kantin" @selected(($filters['jenis_usaha'] ?? '') === 'kantin')>Kantin</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <select name="id_kecamatan" class="form-select">
                             <option value="">Semua Kecamatan</option>
                             @foreach ($kecamatans as $kec)
@@ -54,7 +62,6 @@
                             @endforeach
                         </select>
                     </div>
-
                     <div class="col-md-3 d-flex gap-2">
                         <button class="btn btn-outline-primary w-50" type="submit">
                             <i class="fas fa-filter"></i> Filter
@@ -67,7 +74,7 @@
             </form>
         </div>
     </div>
-
+    
     <div class="card">
         <div class="card-header">
             <h5 class="mb-0">Daftar Unit Usaha</h5>

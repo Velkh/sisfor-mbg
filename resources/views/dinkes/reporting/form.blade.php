@@ -31,13 +31,12 @@
                     'jumlah_jiwa' => $row->jumlah_jiwa,
                 ];
             })->toArray()
-            : []; // Array kosong agar default tidak ada baris
+            : [];
     }
 
     $kecamatans = $kecamatans ?? collect();
     $kelurahans = $kelurahans ?? collect();
 
-    // Build a plain array for JS to consume
     $kelurahanData = $kelurahans->map(function($it){
         return [
             'id' => $it->id_kelurahan ?? $it->id ?? null,
@@ -46,8 +45,16 @@
         ];
     })->toArray();
 
+    $kecamatanData = $kecamatans->map(function($kec){
+        return [
+            'id' => $kec->id_kecamatan ?? $kec->id ?? null,
+            'name' => $kec->nama ?? $kec->nama_kecamatan ?? ($kec->name ?? ''),
+        ];
+    })->toArray();
+
     $oldKec = old('id_kecamatan', $unit->id_kecamatan ?? '');
     $oldKel = old('id_kelurahan', $unit->id_kelurahan ?? '');
+    $oldApiId = old('api_unit_id', $unit->api_unit_id ?? '');
 @endphp
 
 <div class="container-fluid civic civic-fade">
@@ -67,15 +74,39 @@
             @method('PUT')
         @endif
 
+        <!-- ========================================
+             SECTION 1: CARI DATA UNIT USAHA (TOP)
+             ======================================== -->
+        <div class="card mb-3">
+            <div class="card-header"><h5 class="mb-0"><i class="fas fa-search me-2"></i>Cari Data Unit Usaha & Nilai IKL</h5></div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Cari Nama Unit Usaha</label>
+                        <div class="input-group">
+                            <input type="text" id="searchUnitInput" class="form-control" placeholder="Cari nama unit usaha, contoh: SPPG tapos">
+                            <button type="button" id="btnCariUnit" class="btn btn-outline-primary">Cari</button>
+                            @if($isEdit && $oldApiId)
+                                <button type="button" id="btnSyncFromApi" class="btn btn-outline-info" title="Sinkronisasi data terbaru dari API">
+                                    <i class="fas fa-sync-alt me-1"></i>Re-sync
+                                </button>
+                            @endif
+                        </div>
+                        <div id="searchResults" class="list-group mt-2"></div>
+                        <input type="hidden" name="api_unit_id" id="apiUnitId" value="{{ $oldApiId }}">
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="card mb-3">
             <div class="card-header"><h5 class="mb-0">Data Unit Usaha</h5></div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Jenis Usaha</label>
-                        <select name="jenis_usaha" class="form-select" required>
+                        <select name="jenis_usaha" id="jenisUsaha" class="form-select" required>
                             <option value="">Pilih</option>
-                            @foreach (['sppg' => 'SPPG', 'tpp' => 'TPP', 'dam' => 'DAM', 'kantin' => 'Kantin'] as $key => $label)
+                            @foreach (['catering' => 'Catering', 'restoran' => 'Restoran', 'sppg' => 'SPPG', 'dam' => 'DAM', 'kantin' => 'Kantin'] as $key => $label)
                                 <option value="{{ $key }}" @selected(old('jenis_usaha', $unit->jenis_usaha ?? '') === $key)>{{ $label }}</option>
                             @endforeach
                         </select>
@@ -83,27 +114,28 @@
 
                     <div class="col-md-5">
                         <label class="form-label">Nama Unit Usaha</label>
-                        <input type="text" name="nama_unit_usaha" class="form-control" value="{{ old('nama_unit_usaha', $unit->nama_unit_usaha ?? '') }}" required>
+                        <input type="text" name="nama_unit_usaha" id="namaUnitUsaha" class="form-control" value="{{ old('nama_unit_usaha', $unit->nama_unit_usaha ?? '') }}" required>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label">Nama Pemilik</label>
-                        <input type="text" name="nama_pemilik" class="form-control" value="{{ old('nama_pemilik', $unit->nama_pemilik ?? '') }}" required>
+                        <input type="text" name="nama_pemilik" id="namaPemilik" class="form-control" value="{{ old('nama_pemilik', $unit->nama_pemilik ?? '') }}" required>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Alamat</label>
-                        <textarea name="alamat" class="form-control" rows="2" required>{{ old('alamat', $unit->alamat ?? '') }}</textarea>
+                        <textarea name="alamat" id="alamat" class="form-control" rows="2" required>{{ old('alamat', $unit->alamat ?? '') }}</textarea>
                     </div>
-
+                    <input type="hidden" name="latitude" id="inputLatitude" value="{{ old('latitude', $unit->latitude ?? '') }}">
+                    <input type="hidden" name="longitude" id="inputLongitude" value="{{ old('longitude', $unit->longitude ?? '') }}">
                     <div class="col-md-2">
                         <label class="form-label">Jumlah Pegawai</label>
-                        <input type="number" min="0" name="jumlah_pegawai" class="form-control" value="{{ old('jumlah_pegawai', $unit->jumlah_pegawai ?? 0) }}">
+                        <input type="number" min="0" name="jumlah_pegawai" id="jumlahPegawai" class="form-control" value="{{ old('jumlah_pegawai', $unit->jumlah_pegawai ?? 0) }}">
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label">Penjamah Terlatih</label>
-                        <input type="number" min="0" name="jumlah_penjamah_terlatih" class="form-control" value="{{ old('jumlah_penjamah_terlatih', $unit->jumlah_penjamah_terlatih ?? 0) }}">
+                        <input type="number" min="0" name="jumlah_penjamah_terlatih" id="jumlahPenjamahTerlatih" class="form-control" value="{{ old('jumlah_penjamah_terlatih', $unit->jumlah_penjamah_terlatih ?? 0) }}">
                     </div>
 
                     <div class="col-md-4">
@@ -129,7 +161,7 @@
 
                     <div class="col-md-4">
                         <label class="form-label">Puskesmas</label>
-                        <select name="id_puskesmas" class="form-select" required>
+                        <select name="id_puskesmas" id="selectPuskesmas" class="form-select" required>
                             <option value="">Pilih Puskesmas</option>
                             @foreach ($puskesmas as $puskesmasItem)
                                 @php
@@ -146,6 +178,9 @@
             </div>
         </div>
 
+        <!-- ========================================
+             SECTION 3: DATA LAPORAN SLHS
+             ======================================== -->
         <div class="card mb-3">
             <div class="card-header"><h5 class="mb-0">Data Laporan SLHS</h5></div>
             <div class="card-body">
@@ -160,26 +195,14 @@
                         </select>
                     </div>
 
-                    <div class="col-md-9" id="iklSearchBox" style="display: none;">
-                        <label class="form-label">Cari Data IKL</label>
-                        <div class="input-group">
-                            <input type="text" id="iklSearchInput" class="form-control" placeholder="Cari nama usaha, contoh: Solaria">
-                            <button type="button" id="btnCariIkl" class="btn btn-outline-primary">Cari</button>
-                        </div>
-                        <div id="iklResults" class="list-group mt-2"></div>
-                        <input type="hidden" name="selected_api_data" id="selectedApiData">
-                    </div>
-
                     <div class="col-md-3">
                         <label class="form-label">Nilai IKL</label>
-                        <input type="number" name="nilai_ikl" id="nilaiIkl" class="form-control" readonly
-                            value="{{ old('nilai_ikl', $laporan->nilai_ikl ?? '') }}">
+                        <input type="number" name="nilai_ikl" id="nilaiIkl" class="form-control" value="{{ old('nilai_ikl', $laporan->nilai_ikl ?? '') }}">
                     </div>
 
                     <div class="col-md-3">
                         <label class="form-label">Hasil IKL</label>
-                        <input type="text" name="hasil_ikl" id="hasilIkl" class="form-control" readonly
-                            value="{{ old('hasil_ikl', $laporan->hasil_ikl ?? '') }}">
+                        <input type="text" name="hasil_ikl" id="hasilIkl" class="form-control" value="{{ old('hasil_ikl', $laporan->hasil_ikl ?? '') }}">
                     </div>
 
                     <div class="col-md-3">
@@ -209,73 +232,69 @@
                         <input type="text" name="link_slhs" class="form-control" value="{{ old('link_slhs', $laporan->link_slhs ?? '') }}">
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label class="form-label">Ketersediaan IPAL</label>
-                            <select name="ketersediaan_ipal" id="ketersediaan_ipal" class="form-select">
-                                <option value="">Pilih</option>
-                                <option value="ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'ada')>Ada</option>
-                                <option value="tidak_ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'tidak_ada')>Tidak Ada</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Jenis IPAL</label>
-                            @php
-                                $jenisIpalList = [
-                                    'Grease Trap' => 'Grease Trap (Penangkap Lemak)',
-                                    'Septic Tank' => 'Septic Tank Konvensional',
-                                    'Biofilter' => 'Bio Septic Tank / Biofilter',
-                                    'IPAL Komunal' => 'IPAL Terpusat / Komunal',
-                                    'Lainnya' => 'Lainnya'
-                                ];
-                                $currentIpal = old('jenis_ipal', $laporan->jenis_ipal ?? '');
-                            @endphp
-                            
-                            <select name="jenis_ipal" id="jenis_ipal" class="form-select">
-                                <option value="">-- Pilih Jenis IPAL --</option>
-                                @foreach ($jenisIpalList as $value => $label)
-                                    <option value="{{ $value }}" @selected($currentIpal === $value)>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Pengelolaan Sampah</label>
-                            <select name="pengelolaan_sampah" id="pengelolaan_sampah" class="form-select">
-                                <option value="">Pilih</option>
-                                <option value="ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'ada')>Ada</option>
-                                <option value="tidak_ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'tidak_ada')>Tidak Ada</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Jenis Pengelolaan</label>
-                            @php
-                                $jenisPengelolaanList = [
-                                    'Diangkut Dinas/Petugas' => 'Diangkut Petugas Kebersihan/DLHK',
-                                    'Dibuang ke TPS' => 'Dibuang ke TPS Terdekat',
-                                    'Dikelola Mandiri' => 'Dikelola Mandiri (Kompos/Daur Ulang)',
-                                    'Maggot' => 'Biokonversi Maggot (BSF)',
-                                    'Pihak Ketiga' => 'Bekerja Sama dengan Pihak Swasta',
-                                    'Lainnya' => 'Lainnya'
-                                ];
-                                $currentPengelolaan = old('jenis_pengelolaan', $laporan->jenis_pengelolaan ?? '');
-                            @endphp
-                            
-                            <select name="jenis_pengelolaan" id="jenis_pengelolaan" class="form-select">
-                                <option value="">-- Pilih Jenis Pengelolaan --</option>
-                                @foreach ($jenisPengelolaanList as $value => $label)
-                                    <option value="{{ $value }}" @selected($currentPengelolaan === $value)>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ketersediaan IPAL</label>
+                        <select name="ketersediaan_ipal" id="ketersediaan_ipal" class="form-select">
+                            <option value="tidak_ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'tidak_ada')>Tidak Ada</option>
+                            <option value="ada" @selected(old('ketersediaan_ipal', $laporan->ketersediaan_ipal ?? '') === 'ada')>Ada</option>
+                        </select>
                     </div>
 
+                    <div class="col-md-3">
+                        <label class="form-label">Jenis IPAL</label>
+                        @php
+                            $jenisIpalList = [
+                                'Greasetrap dengan bak penyaringan' => 'Greasetrap dengan bak penyaringan',
+                                'IPAL Standar dengan tabung filtrasi' => 'IPAL Standar dengan tabung filtrasi',
+                                'Kolam Penampungan' => 'Kolam Penampungan'
+                            ];
+                            $currentIpal = old('jenis_ipal', $laporan->jenis_ipal ?? '');
+                        @endphp
+                        
+                        <select name="jenis_ipal" id="jenis_ipal" class="form-select">
+                            <option value="">-- Pilih Jenis IPAL --</option>
+                            @foreach ($jenisIpalList as $value => $label)
+                                <option value="{{ $value }}" @selected($currentIpal === $value)>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Pengelolaan Sampah</label>
+                        <select name="pengelolaan_sampah" id="pengelolaan_sampah" class="form-select">
+                            <option value="tidak_ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'tidak_ada')>Tidak Ada</option>
+                            <option value="ada" @selected(old('pengelolaan_sampah', $laporan->pengelolaan_sampah ?? '') === 'ada')>Ada</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Detail Pengelolaan Sampah</label>
+                        @php
+                            $pengelolaanSampahList = [
+                                'Organik dikelola komunitas/peternak, Anorganik diangkut petugas' => 'Organik dikelola komunitas/peternak, Anorganik diangkut petugas',
+                                'Seluruh sampah (organik & anorganik) diangkut petugas' => 'Seluruh sampah (organik & anorganik) diangkut petugas'
+                            ];
+                            $currentSampah = old('jenis_pengelolaan', $laporan->jenis_pengelolaan ?? '');
+                        @endphp
+                        
+                        <select name="jenis_pengelolaan" id="jenis_pengelolaan" class="form-select">
+                            <option value="">-- Pilih Pengelolaan Sampah --</option>
+                            @foreach ($pengelolaanSampahList as $value => $label)
+                                <option value="{{ $value }}" @selected($currentSampah === $value)>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             SECTION 4: FOTO UNIT USAHA
+             ======================================== -->
         <div class="card mb-3">
             <div class="card-body">
                 <label class="form-label">Foto Unit Usaha</label>
@@ -284,6 +303,9 @@
             </div>
         </div>
 
+        <!-- ========================================
+             SECTION 5: SASARAN MANFAAT
+             ======================================== -->
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Sasaran Manfaat</h5>
@@ -368,7 +390,6 @@
                     @endforeach
                 </div>
 
-                {{-- Template for new rows (hidden) --}}
                 <template id="sasaranTemplate">
                     <div class="border rounded p-3 mb-3 sasaran-row" data-index="__INDEX__">
                         <div class="row g-2">
@@ -448,7 +469,6 @@
                         </div>
                     </div>
                 </template>
-                {{-- end template --}}
             </div>
         </div>
 
@@ -461,59 +481,265 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const ketersediaanIpal = document.getElementById('ketersediaan_ipal');
-    const jenisIpal = document.getElementById('jenis_ipal');
-    const pengelolaanSampah = document.getElementById('pengelolaan_sampah');
-    const jenisPengelolaan = document.getElementById('jenis_pengelolaan');
+    const API_JENIS_MAP = {
+        'jasa_boga': 'sppg',
+        'restoran': 'restoran',
+        'rumah_makan': 'catering',
+        'sentra_kantin': 'kantin',
+        'depot_air_minum': 'dam',
+        'catering': 'catering',
+        'sppg': 'sppg',
+        'dam': 'dam',
+        'kantin': 'kantin',
+    };
 
-    // Fungsi disable/enable IPAL
-    function toggleIpal() {
-        console.log('toggleIpal called, value:', ketersediaanIpal?.value); // DEBUG
-        if (!ketersediaanIpal || !jenisIpal) return;
-        
-        if (ketersediaanIpal.value === 'ada') {
-            jenisIpal.disabled = false;
-            console.log('IPAL enabled');
-        } else {
-            jenisIpal.disabled = true;
-            jenisIpal.value = '';
-            console.log('IPAL disabled');
+    function mapJenisFromApi(apiJenis) {
+        if (!apiJenis) return '';
+        const normalized = String(apiJenis).toLowerCase().trim();
+        return API_JENIS_MAP[normalized] || '';
+    }
+    const kecamatanData = @json($kecamatanData);
+    const kelurahanData = @json($kelurahanData);
+    const oldKec = @json($oldKec);
+    const oldKel = @json($oldKel);
+
+    function findKecamatanIdByName(name) {
+        if (!name) return null;
+        const normalized = String(name).toUpperCase().trim();
+        const found = kecamatanData.find(k => 
+            String(k.name).toUpperCase().trim() === normalized
+        );
+        return found ? found.id : null;
+    }
+
+    function findKelurahanIdByName(name, kecId = null) {
+        if (!name) return null;
+        const normalized = String(name).toUpperCase().trim();
+        const found = kelurahanData.find(k => {
+            const nameMatch = String(k.name).toUpperCase().trim() === normalized;
+            const kecMatch = kecId ? (String(k.kecamatan_id) === String(kecId)) : true;
+            return nameMatch && kecMatch;
+        });
+        return found ? found.id : null;
+    }
+
+    const searchUnitInput = document.getElementById('searchUnitInput');
+    const btnCariUnit = document.getElementById('btnCariUnit');
+    const searchResults = document.getElementById('searchResults');
+    const apiUnitId = document.getElementById('apiUnitId');
+
+    async function searchUnit() {
+        const keyword = searchUnitInput.value.trim();
+        if (!keyword) {
+            searchResults.innerHTML = '';
+            return;
+        }
+
+        searchResults.innerHTML = '<div class="list-group-item">Mencari...</div>';
+
+        try {
+            const response = await fetch('{{ route('admin.reporting.ikl.search') }}?search=' + encodeURIComponent(keyword));
+            const payload = await response.json();
+
+            if (!payload.success || !Array.isArray(payload.data) || payload.data.length === 0) {
+                searchResults.innerHTML = '<div class="list-group-item text-muted">Data tidak ditemukan.</div>';
+                return;
+            }
+
+            searchResults.innerHTML = '';
+            payload.data.forEach(function (item) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'list-group-item list-group-item-action';
+                button.innerHTML = `
+                    <div class="fw-semibold">${item.nama}</div>
+                    <div class="small text-muted">
+                        Pengelola: ${item.pengelola} | Skor: ${item.nilai_ikl}
+                    </div>
+                `;
+
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    fillFormFromApiData(item);
+                });
+
+                searchResults.appendChild(button);
+            });
+        } catch (err) {
+            console.error('Search error:', err);
+            searchResults.innerHTML = '<div class="list-group-item text-danger">Terjadi kesalahan.</div>';
         }
     }
 
-    // Fungsi disable/enable Sampah
-    function toggleSampah() {
-        console.log('toggleSampah called, value:', pengelolaanSampah?.value); // DEBUG
-        if (!pengelolaanSampah || !jenisPengelolaan) return;
-        
-        if (pengelolaanSampah.value === 'ada') {
-            jenisPengelolaan.disabled = false;
-            console.log('Sampah enabled');
-        } else {
-            jenisPengelolaan.disabled = true;
-            jenisPengelolaan.value = '';
-            console.log('Sampah disabled');
+    function fillFormFromApiData(apiData) {
+        if (apiUnitId) {
+            apiUnitId.value = apiData.id || '';
         }
+        if (document.getElementById('namaUnitUsaha')) {
+            document.getElementById('namaUnitUsaha').value = apiData.nama || '';
+        }
+        if (document.getElementById('namaPemilik')) {
+            document.getElementById('namaPemilik').value = apiData.pengelola || '';
+        }
+        if (document.getElementById('alamat')) {
+            document.getElementById('alamat').value = apiData.alamat || '';
+        }
+        if (document.getElementById('jumlahPegawai')) {
+            document.getElementById('jumlahPegawai').value = apiData.penjamah_pangan_total || 0;
+        }
+        if (document.getElementById('jumlahPenjamahTerlatih')) {
+            document.getElementById('jumlahPenjamahTerlatih').value = apiData.penjamah_pangan_bersertifikat || 0;
+        }
+
+        const inputLat = document.getElementById('inputLatitude');
+        const inputLng = document.getElementById('inputLongitude');
+        
+        if (apiData.koordinat && String(apiData.koordinat).includes(',')) {
+            const parts = String(apiData.koordinat).split(',');
+            if (inputLat) inputLat.value = parts[0].trim();
+            if (inputLng) inputLng.value = parts[1].trim();
+        } else {
+            if (inputLat) inputLat.value = '';
+            if (inputLng) inputLng.value = '';
+        }
+        if (document.getElementById('jenisUsaha')) {
+            const mappedJenis = mapJenisFromApi(apiData.jenis);
+            if (mappedJenis) {
+                document.getElementById('jenisUsaha').value = mappedJenis;
+            }
+        }
+        if (document.getElementById('selectKecamatan')) {
+            const kecId = findKecamatanIdByName(apiData.kecamatan);
+            if (kecId) {
+                document.getElementById('selectKecamatan').value = kecId;
+                document.getElementById('selectKecamatan').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    const kelId = findKelurahanIdByName(apiData.kelurahan, kecId);
+                    if (kelId && document.getElementById('selectKelurahan')) {
+                        document.getElementById('selectKelurahan').value = kelId;
+                    }
+                }, 100);
+            }
+        }
+        if (document.getElementById('nilaiIkl')) {
+            document.getElementById('nilaiIkl').value = apiData.nilai_ikl || '';
+        }
+        if (document.getElementById('hasilIkl')) {
+            document.getElementById('hasilIkl').value = apiData.hasil_ikl || '';
+        }
+        if (document.getElementById('statusIkl') && apiData.nilai_ikl) {
+            document.getElementById('statusIkl').value = 'selesai';
+        }
+        searchResults.innerHTML = `
+            <div class="list-group-item list-group-item-success">
+                <i class="fas fa-check me-2"></i>Dipilih: ${apiData.nama}
+            </div>
+        `;
+        document.querySelector('.card:nth-of-type(2)').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    // PENTING: Jalankan saat halaman load pertama kali
-    if (ketersediaanIpal) {
-        toggleIpal();
-        // Tambahkan event listener
-        ketersediaanIpal.addEventListener('change', function(e) {
-            console.log('ketersediaanIpal changed to:', e.target.value);
-            toggleIpal();
+    if (btnCariUnit) {
+        btnCariUnit.addEventListener('click', searchUnit);
+    }
+    if (searchUnitInput) {
+        searchUnitInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                searchUnit();
+            }
         });
     }
 
-    if (pengelolaanSampah) {
-        toggleSampah();
-        // Tambahkan event listener
-        pengelolaanSampah.addEventListener('change', function(e) {
-            console.log('pengelolaanSampah changed to:', e.target.value);
-            toggleSampah();
+    const btnSyncFromApi = document.getElementById('btnSyncFromApi');
+
+    if (btnSyncFromApi) {
+        btnSyncFromApi.addEventListener('click', async function (e) {
+            e.preventDefault();
+            const namaUnit = document.getElementById('namaUnitUsaha').value.trim();
+            if (!namaUnit) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Nama unit usaha belum diisi'
+                });
+                return;
+            }
+            
+            try {
+                const response = await fetch('{{ route('admin.reporting.ikl.search') }}?search=' + encodeURIComponent(namaUnit));
+                const payload = await response.json();
+                
+                if (!payload.success || !Array.isArray(payload.data) || payload.data.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Data tidak ditemukan di API'
+                    });
+                    return;
+                }
+                
+                const item = payload.data[0];
+                fillFormFromApiData(item);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Data telah disinkronisasi dari API',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                console.error('Sync error:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: 'Terjadi kesalahan saat sinkronisasi'
+                });
+            }
         });
     }
+
+    const selectKec = document.getElementById('selectKecamatan');
+    const selectKel = document.getElementById('selectKelurahan');
+
+    function populateKelurahan(kecamatanId, selectedKelId = null) {
+        if (!selectKel) return;
+        selectKel.innerHTML = '<option value="">Pilih Kelurahan</option>';
+        if (!kecamatanId) {
+            selectKel.disabled = true;
+            return;
+        }
+        selectKel.disabled = false;
+        const list = kelurahanData.filter(k => String(k.kecamatan_id) === String(kecamatanId));
+        if (list.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'Tidak ada kelurahan';
+            selectKel.appendChild(opt);
+            return;
+        }
+        list.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name || ('Kelurahan ' + item.id);
+            if (selectedKelId && String(item.id) === String(selectedKelId)) opt.selected = true;
+            selectKel.appendChild(opt);
+        });
+    }
+
+    if (selectKec) {
+        if (oldKec) {
+            selectKec.value = oldKec;
+            populateKelurahan(oldKec, oldKel);
+        } else {
+            selectKel.disabled = true;
+        }
+
+        selectKec.addEventListener('change', function () {
+            populateKelurahan(this.value, null);
+        });
+    }
+
 
     @if(session('success'))
         Swal.fire({
@@ -549,31 +775,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     @endif
 
-    // ==========================================
-    // 3. IKL / SLHS LOGIC
-    // ==========================================
-    
-    const statusIkl = document.getElementById('statusIkl');
     const statusSlhs = document.getElementById('statusSlhs');
-    const iklSearchBox = document.getElementById('iklSearchBox');
-    const iklSearchInput = document.getElementById('iklSearchInput');
-    const btnCariIkl = document.getElementById('btnCariIkl');
-    const iklResults = document.getElementById('iklResults');
-    const selectedApiData = document.getElementById('selectedApiData');
     const slhsTglTerbitBox = document.getElementById('slhsTglTerbitBox');
     const slhsTglBerakhirBox = document.getElementById('slhsTglBerakhirBox');
     const slhsLinkBox = document.getElementById('slhsLinkBox');
-
-    function toggleIklSearch() {
-        const show = statusIkl && statusIkl.value === 'selesai';
-        if (iklSearchBox) iklSearchBox.style.display = show ? 'block' : 'none';
-
-        if (!show) {
-            if (iklSearchInput) iklSearchInput.value = '';
-            if (iklResults) iklResults.innerHTML = '';
-            if (selectedApiData) selectedApiData.value = '';
-        }
-    }
 
     function toggleSlhsFields() {
         const show = statusSlhs && statusSlhs.value === 'selesai';
@@ -593,134 +798,48 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    async function searchIkl() {
-        if (!iklSearchInput) return;
-        const keyword = iklSearchInput.value.trim();
-        if (!keyword) {
-            if (iklResults) iklResults.innerHTML = '';
-            return;
-        }
-
-        if (iklResults) iklResults.innerHTML = '<div class="list-group-item">Mencari...</div>';
-
-        try {
-            const response = await fetch('{{ route('admin.reporting.ikl.search') }}?search=' + encodeURIComponent(keyword));
-            const payload = await response.json();
-
-            if (!payload.success || !Array.isArray(payload.data) || payload.data.length === 0) {
-                iklResults.innerHTML = '<div class="list-group-item text-muted">Data tidak ditemukan.</div>';
-                return;
-            }
-
-            iklResults.innerHTML = '';
-            payload.data.forEach(function (item) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'list-group-item list-group-item-action';
-                button.innerHTML = `
-                    <div class="fw-semibold">${item.nama}</div>
-                    <div class="small text-muted">
-                        Skor: ${item.nilai_ikl} | Tanggal: ${item.tanggal_penilaian || '-'}
-                    </div>
-                `;
-
-                button.addEventListener('click', function () {
-                    if (selectedApiData) selectedApiData.value = JSON.stringify(item);
-                    if (iklSearchInput) iklSearchInput.value = item.nama;
-
-                    const nilaiIkl = document.getElementById('nilaiIkl');
-                    const hasilIkl = document.getElementById('hasilIkl');
-
-                    if (nilaiIkl) nilaiIkl.value = item.nilai_ikl ?? '';
-                    if (hasilIkl) hasilIkl.value = item.hasil_ikl ?? '';
-
-                    iklResults.innerHTML = `
-                        <div class="list-group-item list-group-item-success">
-                            Dipilih: ${item.nama} (${item.nilai_ikl})
-                        </div>
-                    `;
-                });
-
-                iklResults.appendChild(button);
-            });
-        } catch (err) {
-            if (iklResults) iklResults.innerHTML = '<div class="list-group-item text-danger">Terjadi kesalahan.</div>';
-        }
-    }
-
-    if (statusIkl) {
-        statusIkl.addEventListener('change', toggleIklSearch);
-    }
     if (statusSlhs) {
         statusSlhs.addEventListener('change', toggleSlhsFields);
     }
-    if (btnCariIkl) {
-        btnCariIkl.addEventListener('click', searchIkl);
-    }
-    if (iklSearchInput) {
-        iklSearchInput.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                searchIkl();
-            }
-        });
-    }
-
-    toggleIklSearch();
     toggleSlhsFields();
 
-    // ==========================================
-    // 4. KECAMATAN / KELURAHAN DEPENDENT SELECT
-    // ==========================================
-    
-    const selectKec = document.getElementById('selectKecamatan');
-    const selectKel = document.getElementById('selectKelurahan');
-    const kelurahanData = @json($kelurahanData);
-    const oldKec = @json($oldKec);
-    const oldKel = @json($oldKel);
+    const ketersediaanIpal = document.getElementById('ketersediaan_ipal');
+    const jenisIpal = document.getElementById('jenis_ipal');
 
-    function populateKelurahan(kecamatanId, selectedKelId = null) {
-        if (!selectKel) return;
-        selectKel.innerHTML = '<option value="">Pilih Kelurahan</option>';
-        if (!kecamatanId) {
-            selectKel.disabled = true;
-            return;
-        }
-        selectKel.disabled = false;
-        const list = kelurahanData.filter(k => String(k.kecamatan_id) === String(kecamatanId));
-        if (list.length === 0) {
-            const opt = document.createElement('option');
-            opt.value = '';
-            opt.textContent = 'Tidak ada kelurahan';
-            selectKel.appendChild(opt);
-            return;
-        }
-        list.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item.id;
-            opt.textContent = item.name || ('Kelurahan ' + item.id);
-            if (String(item.id) === String(selectedKelId)) opt.selected = true;
-            selectKel.appendChild(opt);
-        });
-    }
-
-    if (selectKec) {
-        if (oldKec) {
-            selectKec.value = oldKec;
-            populateKelurahan(oldKec, oldKel);
+    function toggleIpal() {
+        if (!ketersediaanIpal || !jenisIpal) return;
+        
+        if (ketersediaanIpal.value === 'ada') {
+            jenisIpal.disabled = false;
         } else {
-            selectKel.disabled = true;
+            jenisIpal.disabled = true;
+            jenisIpal.value = '';
         }
-
-        selectKec.addEventListener('change', function () {
-            populateKelurahan(this.value, null);
-        });
     }
 
-    // ==========================================
-    // 5. SASARAN MANFAAT LOGIC
-    // ==========================================
-    
+    if (ketersediaanIpal) {
+        toggleIpal();
+        ketersediaanIpal.addEventListener('change', toggleIpal);
+    }
+    const pengelolaanSampah = document.getElementById('pengelolaan_sampah');
+    const jenisPengelolaanSampah = document.getElementById('jenis_pengelolaan');
+
+    function toggleJenisPengelolaan() {
+        if (!pengelolaanSampah || !jenisPengelolaanSampah) return;
+        
+        if (pengelolaanSampah.value === 'ada') {
+            jenisPengelolaanSampah.disabled = false;
+        } else {
+            jenisPengelolaanSampah.disabled = true;
+            jenisPengelolaanSampah.value = '';
+        }
+    }
+
+    if (pengelolaanSampah) {
+        toggleJenisPengelolaan();
+        pengelolaanSampah.addEventListener('change', toggleJenisPengelolaan);
+    }
+
     function getSasaranState(row) {
         if (!row) return null;
         if (row._sasaranState) return row._sasaranState;
@@ -756,7 +875,7 @@ document.addEventListener('DOMContentLoaded', function () {
             control.value = '';
             return;
         }
-        control.value = control.type === 'number' ? '' : '';
+        control.value = '';
     }
 
     function setVisibilityForRow(row) {
@@ -789,13 +908,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 clearFieldValue(state.fields[key]);
             }
         });
-
-        if (state.jumlahJiwa) {
-            const label = state.fields.jumlah_jiwa ? state.fields.jumlah_jiwa.querySelector('.form-label') : null;
-            if (label) {
-                label.textContent = kategori === 'Umum' ? 'Jumlah Orang Per Hari' : 'Jumlah Jiwa';
-            }
-        }
 
         if (state.tipe) {
             const allowed = kategori === 'Sekolah'
@@ -868,7 +980,6 @@ document.addEventListener('DOMContentLoaded', function () {
             newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     }
-
 });
 </script>
 @endsection

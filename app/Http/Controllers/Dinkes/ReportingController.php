@@ -31,6 +31,10 @@ class ReportingController extends Controller
             });
         }
 
+        if ($request->filled('jenis_usaha')) {
+            $query->where('jenis_usaha', $request->input('jenis_usaha'));
+        }
+
         if ($request->filled('id_kecamatan')) {
             $query->where('id_kecamatan', $request->input('id_kecamatan'));
         }
@@ -216,8 +220,12 @@ class ReportingController extends Controller
                 'kelurahan' => (string) ($row['kelurahan'] ?? '-'),
                 'kontak' => (string) ($row['kontak'] ?? '-'),
                 'tanggal_penilaian' => (string) ($row['tanggal_penilaian'] ?? ''),
+                'jenis' => (string) ($row['jenis'] ?? ''),
+                'penjamah_pangan_total' => (int) ($row['penjamah_pangan_total'] ?? 0),
+                'penjamah_pangan_bersertifikat' => (int) ($row['penjamah_pangan_bersertifikat'] ?? 0),        
                 'nilai_ikl' => $nilaiIkl,
                 'hasil_ikl' => $nilaiIkl >= 80 ? 'memenuhi' : 'tidak_memenuhi',
+                'koordinat' => (string) ($row['koordinat'] ?? ''),
             ];
         })->values();
 
@@ -230,10 +238,12 @@ class ReportingController extends Controller
     private function validatePayload(Request $request): array
     {
         return $request->validate([
-            'jenis_usaha' => ['required', 'in:sppg,tpp,dam,kantin'],
-            'nama_unit_usaha' => ['required', 'string', 'max:255'],
+            'api_unit_id' => ['nullable', 'integer'],
+            'jenis_usaha' => ['required', 'in:catering,restoran,sppg,dam,kantin'],            'nama_unit_usaha' => ['required', 'string', 'max:255'],
             'nama_pemilik' => ['required', 'string', 'max:255'],
             'alamat' => ['required', 'string'],
+            'latitude' => ['nullable', 'string', 'max:255'],
+            'longitude' => ['nullable', 'string', 'max:255'],
             'jumlah_pegawai' => ['nullable', 'integer', 'min:0'],
             'jumlah_penjamah_terlatih' => ['nullable', 'integer', 'min:0'],
             'id_kecamatan' => ['required', 'integer'],
@@ -366,10 +376,13 @@ class ReportingController extends Controller
             'id_kecamatan' => $validated['id_kecamatan'],
             'id_kelurahan' => $validated['id_kelurahan'],
             'id_puskesmas' => $validated['id_puskesmas'],
+            'api_unit_id' => $validated['api_unit_id'] ?? null,
             'jenis_usaha' => $validated['jenis_usaha'],
             'nama_unit_usaha' => $validated['nama_unit_usaha'],
             'nama_pemilik' => $validated['nama_pemilik'],
             'alamat' => $validated['alamat'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'jumlah_pegawai' => $validated['jumlah_pegawai'] ?? 0,
             'jumlah_penjamah_terlatih' => $validated['jumlah_penjamah_terlatih'] ?? 0,
             'status_aktif' => true,
