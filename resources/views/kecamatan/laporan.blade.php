@@ -18,14 +18,6 @@
                             <label class="form-label">Cari Unit Usaha / Puskesmas</label>
                             <input type="text" name="q" class="form-control" value="{{ $filters['q'] }}" placeholder="Cari...">
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Periode Awal</label>
-                            <input type="date" name="dari" class="form-control" value="{{ $filters['dari'] }}">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Periode Akhir</label>
-                            <input type="date" name="sampai" class="form-control" value="{{ $filters['sampai'] }}">
-                        </div>
                         <div class="col-md-3">
                             <label class="form-label">Kategori Sasaran</label>
                             <select name="kategori" class="form-select">
