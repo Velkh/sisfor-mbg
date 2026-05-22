@@ -10,57 +10,6 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-    
-    <style>
-        .foto-lokasi-header {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #f3f4f6;
-            padding-bottom: 0.5rem;
-        }
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        .gallery-item {
-            width: 100%;
-            height: 160px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-        .gallery-item:hover {
-            transform: scale(1.02);
-        }
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .gallery-placeholder {
-            width: 100%;
-            height: 160px;
-            border-radius: 12px;
-            background-color: #f9fafb;
-            border: 2px dashed #d1d5db;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af;
-            font-size: 0.9rem;
-            grid-column: 1 / -1; /* Agar membentang penuh jika kosong */
-        }
-        
-        /* Tambahan style dasar untuk tab (jika belum ada di profilsppg.css) */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .tab-btn.active { font-weight: bold; background-color: #e5e7eb; border-radius: 6px; }
-    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -84,6 +33,7 @@
             <li> <a href="{{ route('guest.rekap') }}" class="btn-green">Kembali</a></li>
         </ul>
     </nav>
+    
     <div class="wrap">
         <div class="title">{{ strtoupper($item->jenis_usaha) }}</div>
         <div class="subtitle">{{ $item->nama_unit_usaha ?? 'Nama Unit Tidak Tersedia' }}</div>
@@ -99,11 +49,11 @@
                                 <span>👤</span>
                             @endif
                         </div>
-                        <div style="font-weight:700;">Pemilik Unit Usaha</div>
+                        <div style="font-weight:700; margin-top: 10px;">Pemilik Unit Usaha</div>
                     </div>
 
-                    <div>
-                        <table class="detail-table">
+                    <div style="width: 100%;">
+                        <table class="detail-table" style="width: 100%;">
                             <tr>
                                 <td>Nama Pemilik Usaha</td>
                                 <td>{{ $item->nama_pemilik ?? '-' }}</td>
@@ -151,53 +101,69 @@
             </div>
         </section>
 
-        <section class="sasaran-section" id="sasaran" style="margin-top: 24px;">
-            <div class="sasaran-header">Informasi Lanjutan</div>
+        <section class="card" id="sasaran" style="margin-top: 24px; border: none; box-shadow: none; background: transparent; padding: 0;">
+            <div class="foto-lokasi-header" style="margin-bottom: 16px; padding-left: 5px;">Informasi Lanjutan</div>
+            
             <div class="sasaran-layout">
                 <div class="sidebar-menu">
-                    <button class="tab-btn active" data-target="tab-map">Peta Lokasi</button>
-                    <button class="tab-btn" data-target="tab-data">Data Sasaran</button>
+                    <button class="tab-btn active" data-target="tab-map">
+                        Peta Lokasi
+                    </button>
+                    <button class="tab-btn" data-target="tab-data">
+                        Data Sasaran
+                    </button>
                 </div>
 
                 <div class="sidebar-content">
                     
                     <div id="tab-map" class="tab-content active">
-                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; height: 400px; width: 100%;">
-                            <div id="map" style="width: 100%; height: 100%;"></div>
+                        <div class="content-box">
+                            <div class="leaflet-container-wrapper" style="height: 400px; width: 100%;">
+                                <div id="map" style="width: 100%; height: 100%; z-index: 1;"></div>
+                            </div>
                         </div>
                     </div>
 
                     <div id="tab-data" class="tab-content">
-                        <table class="data-table" style="width: 100%; text-align: left; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background-color: #f3f4f6;">
-                                    <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">No</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Kelompok Penerima</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Tipe</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Status</th>
-                                    <th style="padding: 12px; border-bottom: 2px solid #e5e7eb;">Penerima</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($laporans ?? [] as $lap)
-                                    @php
-                                        $penerima = (int) ($lap->jumlah_siswa ?? 0) + (int) ($lap->jumlah_bumil ?? 0)
-                                            + (int) ($lap->jumlah_busui ?? 0) + (int) ($lap->jumlah_balita ?? 0) + (int) ($lap->jumlah_jiwa ?? 0);
-                                    @endphp
-                                    <tr>
-                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">{{ $loop->iteration }}</td>
-                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;"><strong>{{ $lap->nama_instansi ?? '-' }}</strong></td>
-                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">{{ $lap->tipe_instansi ?? '-' }}</td>
-                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">{{ $lap->status ?? '-' }}</td>
-                                        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">{{ number_format($penerima, 0, ',', '.') }}</td>
+                        <div class="content-box" style="overflow-x: auto;">
+                            <table class="data-table" style="width: 100%; text-align: left; border-collapse: collapse; min-width: 600px;">
+                                <thead>
+                                    <tr style="background-color: #f9fafb;">
+                                        <th style="padding: 16px; border-bottom: 1px solid #e5e7eb; color: #4b5563; font-weight: 600;">No</th>
+                                        <th style="padding: 16px; border-bottom: 1px solid #e5e7eb; color: #4b5563; font-weight: 600;">Kelompok Penerima</th>
+                                        <th style="padding: 16px; border-bottom: 1px solid #e5e7eb; color: #4b5563; font-weight: 600;">Tipe</th>
+                                        <th style="padding: 16px; border-bottom: 1px solid #e5e7eb; color: #4b5563; font-weight: 600;">Status</th>
+                                        <th style="padding: 16px; border-bottom: 1px solid #e5e7eb; color: #4b5563; font-weight: 600;">Penerima</th>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" style="text-align: center; color: #999; padding: 20px;">Belum ada data sasaran.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @forelse ($laporans ?? [] as $lap)
+                                        @php
+                                            $penerima = (int) ($lap->jumlah_siswa ?? 0) + (int) ($lap->jumlah_bumil ?? 0)
+                                                + (int) ($lap->jumlah_busui ?? 0) + (int) ($lap->jumlah_balita ?? 0) + (int) ($lap->jumlah_jiwa ?? 0);
+                                        @endphp
+                                        <tr style="transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'">
+                                            <td style="padding: 16px; border-bottom: 1px solid #f3f4f6;">{{ $loop->iteration }}</td>
+                                            <td style="padding: 16px; border-bottom: 1px solid #f3f4f6;"><strong>{{ $lap->nama_instansi ?? '-' }}</strong></td>
+                                            <td style="padding: 16px; border-bottom: 1px solid #f3f4f6;">
+                                                <span style="background-color: #e0e7ff; color: #3730a3; padding: 4px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 600;">
+                                                    {{ $lap->tipe_instansi ?? '-' }}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 16px; border-bottom: 1px solid #f3f4f6;">{{ $lap->status ?? '-' }}</td>
+                                            <td style="padding: 16px; border-bottom: 1px solid #f3f4f6; font-weight: 600;">{{ number_format($penerima, 0, ',', '.') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; color: #9ca3af; padding: 40px;">
+                                                <div style="font-size: 28px; margin-bottom: 10px;">📋</div>
+                                                Belum ada data sasaran manfaat yang terdaftar.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                 </div>
@@ -250,7 +216,7 @@
         
         <div class="footer-bottom">
             <span><strong>Dinas Kesehatan & Diskominfo</strong> Kota Depok</span>
-            <span>Copyright &copy; {{ date('Y') }}</span>
+            <span>Copyright © {{ date('Y') }}</span>
         </div>
     </footer>
 
@@ -262,17 +228,13 @@
 
             tabBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    // Hapus class active dari semua tombol dan konten
                     tabBtns.forEach(b => b.classList.remove('active'));
                     tabContents.forEach(c => c.classList.remove('active'));
 
-                    // Tambahkan class active ke tombol yang diklik dan konten targetnya
                     btn.classList.add('active');
                     const targetContent = document.getElementById(btn.dataset.target);
                     targetContent.classList.add('active');
 
-                    // FIX LEAFLET BUG: Peta sering error (grey area) jika ditaruh di dalam tab tersembunyi
-                    // map.invalidateSize() memaksa peta mengukur ulang kotaknya setelah ditampilkan
                     if (btn.dataset.target === 'tab-map' && map) {
                         setTimeout(() => { map.invalidateSize(); }, 100);
                     }
@@ -280,35 +242,32 @@
             });
 
             // === 2. LOGIKA PETA LEAFLET ===
-            // Ambil koordinat dari unit, default ke Balaikota Depok jika kosong
             const lat = {{ $item->latitude ?? -6.4025 }};
             const lng = {{ $item->longitude ?? 106.7942 }};
             const adaKoordinat = {{ ($item->latitude && $item->longitude) ? 'true' : 'false' }};
 
-            // Buat peta, render ke elemen id="map"
             const map = L.map('map').setView([lat, lng], adaKoordinat ? 16 : 12);
 
-            // Muat peta jalan
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // Pasang pin jika koordinat valid
             if (adaKoordinat) {
                 const marker = L.marker([lat, lng]).addTo(map);
                 
                 const popupHTML = `
                     <div style="text-align: center; min-width: 180px;">
-                        <h6 style="margin-bottom: 5px; font-weight: bold;">{{ $item->nama_unit_usaha }}</h6>
-                        <p style="margin-bottom: 10px; font-size: 12px; color: #666;">
+                        <h6 style="margin-bottom: 5px; font-weight: bold; font-family: 'Plus Jakarta Sans', sans-serif;">
+                            {{ $item->nama_unit_usaha }}
+                        </h6>
+                        <p style="margin-bottom: 12px; font-size: 12px; color: #6b7280; line-height: 1.4;">
                             {{ $item->alamat }}
                         </p>
-                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" 
+                        <a href="http://googleusercontent.com/maps.google.com/?q=${lat},${lng}" 
                            target="_blank" 
-                           class="btn-green" 
-                           style="display: inline-block; padding: 6px 12px; font-size: 12px;">
-                           Buka di Google Maps
+                           style="display: block; background-color: #10b981; color: white; padding: 8px 12px; font-size: 13px; text-decoration: none; border-radius: 6px; font-weight: 600; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">
+                           🗺️ Navigasi ke Lokasi
                         </a>
                     </div>
                 `;
@@ -316,7 +275,7 @@
                 marker.bindPopup(popupHTML).openPopup();
             } else {
                 const marker = L.marker([lat, lng]).addTo(map);
-                marker.bindPopup("<div style='text-align:center'><b>Koordinat belum disetel</b><br>Menampilkan titik default</div>").openPopup();
+                marker.bindPopup("<div style='text-align:center; font-family: inherit;'><b>Koordinat belum disetel</b><br>Menampilkan titik Balai Kota Depok</div>").openPopup();
             }
         });
     </script>
