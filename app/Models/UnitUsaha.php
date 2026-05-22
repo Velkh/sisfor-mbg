@@ -16,6 +16,7 @@ class UnitUsaha extends Model
         'id_kecamatan',
         'id_kelurahan',
         'id_puskesmas',
+        'api_unit_id',
         'jenis_usaha',
         'nama_unit_usaha',
         'nama_pemilik',
@@ -23,6 +24,8 @@ class UnitUsaha extends Model
         'jumlah_pegawai',
         'jumlah_penjamah_terlatih',
         'status_aktif',
+        'latitude',
+        'longitude', 
     ];
 
     protected function casts(): array
