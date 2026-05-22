@@ -104,8 +104,8 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <p class="text-muted mb-1 fw-semibold">Penerima Manfaat</p>
-                            <h2 class="mb-0 fw-bold text-info">{{ number_format($totalPenerima) }}</h2>
+                            <p class="text-muted mb-1 fw-semibold">Memiliki SLHS</p>
+                            <h2 class="mb-0 fw-bold text-info">{{ number_format($totalBerslhs) }}</h2>
                         </div>
                         <div class="icon-box bg-info bg-opacity-10 text-info">
                             <i class="fas fa-users-shield"></i>
@@ -134,7 +134,7 @@
         <div class="col-xl-4 col-lg-5">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-0 pt-4 pb-0">
-                    <h5 class="fw-bold"><i class="fas fa-chart-pie text-primary me-2"></i>Rasio Kelayakan IKL</h5>
+                    <h5 class="fw-bold"><i class="fas fa-chart-pie text-primary me-2"></i>Rasio Lulus IKL</h5>
                 </div>
                 <div class="card-body d-flex justify-content-center align-items-center">
                     <div style="width: 80%;">
@@ -299,7 +299,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const kecamatanData = @json($sebaranKecamatan);
     const labelsBar = kecamatanData.map(item => item.nama_kecamatan || item.nama);
     const dataSppg = kecamatanData.map(item => item.sppg_count || 0);
-    const dataTpp = kecamatanData.map(item => item.tpp_count || 0);
+    const dataCatering = kecamatanData.map(item => item.catering_count || 0);
+    const dataRestoran = kecamatanData.map(item => item.restoran_count || 0);
     const dataDam = kecamatanData.map(item => item.dam_count || 0);
     const dataKantin = kecamatanData.map(item => item.kantin_count || 0);
 
@@ -310,9 +311,10 @@ document.addEventListener("DOMContentLoaded", function() {
             labels: labelsBar,
             datasets: [
                 { label: 'SPPG', data: dataSppg, backgroundColor: 'rgba(13, 110, 253, 0.8)', borderRadius: 4 },
-                { label: 'TPP', data: dataTpp, backgroundColor: 'rgba(25, 135, 84, 0.8)', borderRadius: 4 },
+                { label: 'Catering', data: dataCatering, backgroundColor: 'rgba(25, 135, 84, 0.8)', borderRadius: 4 },
+                { label: 'Restoran', data: dataRestoran, backgroundColor: 'rgba(255, 193, 7, 0.8)', borderRadius: 4 },
                 { label: 'DAM', data: dataDam, backgroundColor: 'rgba(13, 202, 240, 0.8)', borderRadius: 4 },
-                { label: 'Kantin', data: dataKantin, backgroundColor: 'rgba(255, 193, 7, 0.8)', borderRadius: 4 }
+                { label: 'Kantin', data: dataKantin, backgroundColor: 'rgba(220, 53, 69, 0.8)', borderRadius: 4 }
             ]
         },
         options: {
@@ -320,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function() {
             plugins: { legend: { display: true, position: 'top' } },
             scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
         }
-    });
+});
 
     // 2. Data untuk Grafik Donat
     const totalSemua = {{ $totalUnitUsaha }};

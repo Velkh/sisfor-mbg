@@ -22,13 +22,7 @@ use Illuminate\Contracts\View\View;
         })->count();
 
         $totalBerslhs = UnitUsaha::whereHas('laporanSlhs', function ($q) {
-            $q->where('status_ikl', 'selesai')
-                ->where('hasil_ikl', 'memenuhi')
-                ->where('nilai_ikl', '>=', 80)
-                ->where(function ($sub) {
-                    $sub->whereNull('status_slhs')
-                        ->orWhere('status_slhs', '!=', 'selesai');
-                });
+            $q->where('status_slhs','selesai');
         })->count();
 
         $totalProsesIkl = UnitUsaha::whereHas('laporanSlhs', function ($q) {
@@ -43,9 +37,7 @@ use Illuminate\Contracts\View\View;
                     $sub->whereNull('status_slhs')
                         ->orWhere('status_slhs', '!=', 'selesai');
                 });
-        })->count();
-
-        
+        })->count();     
 
         $sebaranKecamatan = Kecamatan::query()
             ->withCount([
@@ -54,6 +46,12 @@ use Illuminate\Contracts\View\View;
                 },
                 'unitUsahas as tpp_count' => function ($query) {
                     $query->where('jenis_usaha', 'tpp');
+                },
+                'unitUsahas as catering_count' => function($query){
+                    $query->where('jenis_usaha', 'catering');
+                },
+                'unitUsahas as restoran_count' => function($query){
+                    $query->where('jenis_usaha', 'restoran');
                 },
                 'unitUsahas as dam_count' => function ($query) {
                     $query->where('jenis_usaha', 'dam');
