@@ -24,7 +24,7 @@ class EvaluationController extends Controller
         $itemsQuery = $this->buildFilteredQuery($filters);
         $items = (clone $itemsQuery)
             ->orderByDesc('created_at')
-            ->paginate(10)
+            ->paginate(6)
             ->withQueryString();
 
         // Statistik kartu: global, tidak ikut filter

@@ -42,9 +42,16 @@ class SlhsController extends Controller {
         );
 
         $unit->load(['laporanSlhs', 'sasaranManfaat', 'kelurahan', 'puskesmas']);
+        $items = UnitUsaha::query()
+            ->with(['laporanSlhs', 'sasaranManfaat', 'kelurahan', 'puskesmas'])
+            ->where('id_kecamatan', $user->id_kecamatan)
+            ->whereIn('jenis_usaha', $allowedJenisUsaha)
+            ->orderByDesc('created_at')
+            ->paginate(10);
 
-        return view('kecamatan.kelayakan-show', [
+        return view('kecamatan.kelayakan', [
             'unit' => $unit,
+            'items' => $items,
         ]);
     }
 
