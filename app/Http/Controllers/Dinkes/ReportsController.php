@@ -17,6 +17,7 @@ class ReportsController extends Controller
             'q' => ['nullable', 'string', 'max:255'],
             'id_kecamatan' => ['nullable', 'integer'],
             'jenis_sasaran' => ['nullable', 'in:Sekolah,B3,Umum'],
+            'kategori' => ['nullable', 'in:all,sppg,catering,restoran,dam,kantin'],
 
         ]);
 
@@ -45,6 +46,7 @@ class ReportsController extends Controller
                     $q->where('kategori', $jenisSasaran);
                 });
             })
+            ->when($kategori !== 'all', fn ($builder) => $builder->where('jenis_usaha', $kategori))
             ->orderBy('nama_unit_usaha')
             ->paginate(10)
             ->withQueryString();
