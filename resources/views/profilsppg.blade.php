@@ -264,7 +264,7 @@
                         <p style="margin-bottom: 12px; font-size: 12px; color: #6b7280; line-height: 1.4;">
                             {{ $item->alamat }}
                         </p>
-                        <a href="http://googleusercontent.com/maps.google.com/?q=${lat},${lng}" 
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" 
                            target="_blank" 
                            style="display: block; background-color: #10b981; color: white; padding: 8px 12px; font-size: 13px; text-decoration: none; border-radius: 6px; font-weight: 600; box-shadow: 0 2px 4px rgba(16,185,129,0.3);">
                            🗺️ Navigasi ke Lokasi
