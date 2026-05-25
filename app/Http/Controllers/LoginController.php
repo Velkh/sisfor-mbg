@@ -43,7 +43,6 @@ class LoginController extends Controller
         $password = $request->input('password');
         $remember = $request->filled('remember');
 
-        // Custom authentication for username-based login
         $user = User::where('username', $username)->first();
 
         if ($user && Hash::check($password, $user->password)) {
@@ -52,7 +51,6 @@ class LoginController extends Controller
 
             Log::info('User logged in successfully: ' . $user->username);
 
-            // Redirect based on user role
             if ($user->role === 'admin_dinkes') {
                 return redirect()->intended(route('admin.dashboard'));
             } elseif ($user->role === 'admin_kecamatan') {
