@@ -21,7 +21,6 @@ Route::get('/unit/{unit}', [GuestController::class, 'showUnit'])->whereNumber('u
 Route::get('/api/rekap/kecamatan/{id?}', [GuestController::class, 'getKecamatanData'])->name('api.rekap.kecamatan');
 Route::get('/api/rekap/{type}', [GuestController::class, 'getRekapByKecamatan'])->name('api.rekap.type');
 
-// Login routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
@@ -30,7 +29,6 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-    // Admin Dinkes Routes
     Route::middleware('admin_dinkes')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/kelayakan', [DinkesController::class, 'kelayakan'])->name('kelayakan');
@@ -49,6 +47,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/data/{sppg}', [EvaluationController::class, 'show'])->name('data.show');
         Route::get('/data/export/pdf', [EvaluationController::class, 'exportPdf'])->name('data.export.pdf');
         Route::get('/data/export/excel', [EvaluationController::class, 'exportExcel'])->name('data.export.excel');
+        
         Route::get('/reporting', [ReportingController::class, 'index'])->name('reporting.index');
         Route::get('/reporting/create', [ReportingController::class, 'create'])->name('reporting.create');
         Route::post('/reporting', [ReportingController::class, 'store'])->name('reporting.store');
@@ -67,6 +66,7 @@ Route::middleware('admin_kecamatan')->prefix('kecamatan')->name('kecamatan.')->g
     Route::get('/laporan-unit', [LaporanUnitController::class, 'index'])->name('laporan-unit.index');
     Route::get('/laporan-unit/create', [LaporanUnitController::class, 'create'])->name('laporan-unit.create');
     Route::post('/laporan-unit', [LaporanUnitController::class, 'store'])->name('laporan-unit.store');
+    Route::get('laporan-unit/ikl/search', [LaporanUnitController::class, 'searchIkl'])->name('laporan-unit.ikl.search');
     Route::get('/laporan-unit/{unit}', [LaporanUnitController::class, 'show'])->name('laporan-unit.show');
 
     Route::get('/kelayakan',[SlhsController::class, 'index'])->name('kelayakan.index');
