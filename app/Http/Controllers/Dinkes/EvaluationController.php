@@ -174,7 +174,7 @@ class EvaluationController extends Controller
             $evaluasiClass = 'danger';
         }
 
-        return view('dinkes.kelayakan-detail', [
+        return view('dinkes.kelayakan', [
             'item' => $item,
             'laporan' => $laporan,
             'evaluasiText' => $evaluasiText,
