@@ -73,10 +73,6 @@
         @if ($isEdit)
             @method('PUT')
         @endif
-
-        <!-- ========================================
-             SECTION 1: CARI DATA UNIT USAHA (TOP)
-             ======================================== -->
         <div class="card mb-3">
             <div class="card-header"><h5 class="mb-0"><i class="fas fa-search me-2"></i>Cari Data Unit Usaha & Nilai IKL</h5></div>
             <div class="card-body">
@@ -178,9 +174,6 @@
             </div>
         </div>
 
-        <!-- ========================================
-             SECTION 3: DATA LAPORAN SLHS
-             ======================================== -->
         <div class="card mb-3">
             <div class="card-header"><h5 class="mb-0">Data Laporan SLHS</h5></div>
             <div class="card-body">
@@ -208,7 +201,6 @@
                     <div class="col-md-3">
                         <label class="form-label">Status SLHS</label>
                         <select name="status_slhs" id="statusSlhs" class="form-select">
-                            <option value="">Pilih</option>
                             @foreach (['belum_mengajukan', 'sudah_mengajukan', 'selesai'] as $value)
                                 <option value="{{ $value }}" @selected(old('status_slhs', $laporan->status_slhs ?? '') === $value)>
                                     {{ ucfirst(str_replace('_', ' ', $value)) }}
@@ -292,9 +284,6 @@
             </div>
         </div>
 
-        <!-- ========================================
-             SECTION 4: FOTO UNIT USAHA
-             ======================================== -->
         <div class="card mb-3">
             <div class="card-body">
                 <label class="form-label">Foto Unit Usaha</label>
@@ -303,9 +292,6 @@
             </div>
         </div>
 
-        <!-- ========================================
-             SECTION 5: SASARAN MANFAAT
-             ======================================== -->
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Sasaran Manfaat</h5>

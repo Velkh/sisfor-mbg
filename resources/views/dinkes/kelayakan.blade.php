@@ -15,7 +15,7 @@
             $memenuhiCount = ($stats['laik_higiene'] ?? 0) + ($stats['bersyarat'] ?? 0);
             $tidakCount = $stats['belum_layak'] ?? 0;
         @endphp
-
+    
         <div class="civic-header">
             <div>
                 <div class="civic-title">Data Kelayakan</div>

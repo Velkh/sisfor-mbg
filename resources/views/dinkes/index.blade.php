@@ -47,9 +47,7 @@
         </div>
     </div>
 
-    <!-- ROW 1: SUMMARY CARDS -->
     <div class="row g-4 mb-4">
-        <!-- Total Unit -->
         <div class="col-lg-3 col-md-12">
             <div class="card card-summary shadow-sm h-100 bg-white border-start border-primary border-4">
                 <div class="card-body">
@@ -66,7 +64,6 @@
             </div>
         </div>
 
-        <!-- Memenuhi IKL -->
         <div class="col-xl-3 col-md-6">
             <div class="card card-summary shadow-sm h-100 bg-white border-start border-success border-4">
                 <div class="card-body">
@@ -83,7 +80,6 @@
             </div>
         </div>
 
-        <!-- Tidak Memenuhi IKL -->
         <div class="col-lg-3 col-md-6">
             <div class="card card-summary shadow-sm h-100 bg-white border-start border-danger border-4">
                 <div class="card-body">
@@ -116,9 +112,7 @@
         </div>
     </div>
 
-    <!-- ROW 2: CHARTS -->
     <div class="row g-4 mb-4">
-        <!-- Grafik Sebaran Kecamatan -->
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-0 pt-4 pb-0">
@@ -130,7 +124,6 @@
             </div>
         </div>
 
-        <!-- Grafik Rasio Kelayakan -->
         <div class="col-xl-4 col-lg-5">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-0 pt-4 pb-0">
@@ -145,7 +138,6 @@
         </div>
     </div>
 
-    <!-- ROW 3: LINE CHART (TREN BULANAN) -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card shadow-sm border-0 h-100">
@@ -153,16 +145,13 @@
                     <h5 class="fw-bold"><i class="fas fa-chart-line text-primary me-2"></i>Tren Penambahan Unit Usaha Tahun {{ $tahunIni }}</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Atur height di sini agar grafiknya tidak terlalu tinggi -->
                     <canvas id="lineChart" height="80"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ROW 3: NEW ALERTS (MENGAJUKAN & JATUH TEMPO) -->
     <div class="row g-4 mb-4">
-        <!-- Tabel SLHS Mengajukan -->
         <div class="col-xl-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
@@ -198,7 +187,6 @@
             </div>
         </div>
 
-        <!-- Tabel SLHS Jatuh Tempo -->
         <div class="col-xl-6">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white border-bottom pt-4 pb-3 d-flex justify-content-between align-items-center">
@@ -219,9 +207,8 @@
                             <tbody>
                                 @forelse($slhsJatuhTempo as $item)
                                     @php
-                                        // Hitung sisa hari dari sekarang ke tanggal berakhir
                                         $tglBerakhir = \Carbon\Carbon::parse($item->laporanSlhs->tgl_berakhir_slhs);
-                                        $sisaHari = \Carbon\Carbon::now()->diffInDays($tglBerakhir, false); // false agar bisa negatif jika terlewat
+                                        $sisaHari = \Carbon\Carbon::now()->diffInDays($tglBerakhir, false); 
                                     @endphp
                                 <tr>
                                     <td class="ps-4 fw-semibold">{{ $item->nama_unit_usaha }}</td>
@@ -248,7 +235,6 @@
         </div>
     </div>
 
-    <!-- ROW 4: RECENT DATA TABLE -->
     <div class="row">
         <div class="col-12">
             <div class="card shadow-sm border-0">
@@ -291,11 +277,9 @@
     </div>
 </div>
 
-<!-- SCRIPTS UNTUK RENDER CHART -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     
-    // 1. Data untuk Grafik Bar
     const kecamatanData = @json($sebaranKecamatan);
     const labelsBar = kecamatanData.map(item => item.nama_kecamatan || item.nama);
     const dataSppg = kecamatanData.map(item => item.sppg_count || 0);
@@ -324,7 +308,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 });
 
-    // 2. Data untuk Grafik Donat
     const totalSemua = {{ $totalUnitUsaha }};
     const totalMemenuhi = {{ $totalLulusIkl }};
     const totalTidakMemenuhi = totalSemua - totalMemenuhi;
@@ -361,24 +344,22 @@ const trenBulananData = @json($grafikBulanan);
             datasets: [{
                 label: 'Jumlah Unit Usaha Baru',
                 data: trenBulananData,
-                borderColor: 'rgba(13, 110, 253, 1)', // Warna Garis Biru
-                backgroundColor: 'rgba(13, 110, 253, 0.1)', // Warna area bawah garis (transparan)
+                borderColor: 'rgba(13, 110, 253, 1)', 
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
                 borderWidth: 3,
                 pointBackgroundColor: 'rgba(13, 110, 253, 1)',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
                 pointRadius: 5,
                 pointHoverRadius: 7,
-                fill: true, // Membuat area di bawah garis terisi warna
-                tension: 0.4 // Membuat garis melengkung halus (curvy)
+                fill: true, 
+                tension: 0.4 
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { display: false } // Legend disembunyikan karena sudah jelas dari judul
-            },
-            scales: {
+                legend: { display: false }
                 y: { 
                     beginAtZero: true, 
                     ticks: { precision: 0 } 
