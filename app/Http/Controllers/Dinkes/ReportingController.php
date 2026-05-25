@@ -191,7 +191,7 @@ class ReportingController extends Controller
         ]);
 
         $response = Http::get(
-            rtrim(config('services.dsimfoniku.base_url'), '/') . '/tpp',
+            rtrim((string)config('services.dsimfoniku.base_url'), '/') . '/tpp',
             ['search' => $validated['search']]
         );
 
@@ -335,7 +335,7 @@ class ReportingController extends Controller
         }
 
         $response = Http::get(
-            rtrim(config('services.dsimfoniku.base_url'), '/') . '/tpp',
+            rtrim((string)config('services.dsimfoniku.base_url'), '/') . '/tpp',
             ['search' => $namaUnitUsaha]
         );
 
