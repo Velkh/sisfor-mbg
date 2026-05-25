@@ -7,6 +7,7 @@ use App\Models\Kelurahan;
 use App\Models\Puskesmas;
 use App\Models\UnitUsaha;
 use App\Models\FotoUnit;
+use App\Models\LaporanSlhs;
 use App\Models\SasaranManfaat;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -141,6 +142,22 @@ class LaporanUnitController extends Controller
                 'status_aktif' => true,
             ]);
 
+            if (data_get($validated, 'nilai_ikl'))  {
+                LaporanSlhs::create([
+                    'id_unit_usaha' => $unit->id_unit_usaha,
+                    'status_ikl' => 'selesai',
+                    'nilai_ikl' => $validated['nilai_ikl'],
+                    'hasil_ikl' => $validated['nilai_ikl'] >= 80 ? 'memenuhi' : 'tidak_memenuhi',
+                ]);
+            } else {
+                LaporanSlhs::create([
+                    'id_unit_usaha' => $unit->id_unit_usaha,
+                    'status_ikl' => 'belum_mengajukan',
+                    'nilai_ikl' => null,
+                    'hasil_ikl' => null,
+                ]);
+            }
+            
             if ($request->hasFile('foto_unit_usaha')) {
                 foreach ($request->file('foto_unit_usaha') as $file) {
                     $path = $file->store('foto-unit-usaha', 'public');
@@ -190,6 +207,7 @@ class LaporanUnitController extends Controller
             'alamat' => ['required', 'string'],
             'jumlah_pegawai' => ['nullable', 'integer', 'min:0'],
             'jumlah_penjamah_terlatih' => ['nullable', 'integer', 'min:0'],
+            'nilai_ikl' => ['nullable', 'integer', 'min:0', 'max:100'],
             'latitude' => ['nullable', 'string', 'max:255'],
             'longitude' => ['nullable', 'string', 'max:255'],
             'id_kelurahan' => [
