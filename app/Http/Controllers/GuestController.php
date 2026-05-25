@@ -111,81 +111,57 @@ class GuestController extends Controller
             ); 
             return $kecamatan; 
         }); 
-
-        $rekapTotalSppg = UnitUsaha::count(); 
-        $rekapTotalKelompok = SasaranManfaat::count(); 
-        $rekapTotalPenerima = (int) SasaranManfaat::query()
-            ->selectRaw('COALESCE(SUM(COALESCE(jumlah_siswa, 0) + COALESCE(jumlah_bumil, 0) + COALESCE(jumlah_busui, 0) + COALESCE(jumlah_balita, 0) + COALESCE(jumlah_jiwa, 0)), 0) as total')
-            ->value('total');
-
-        $pendidikanCards = [ 
-            $this->buildPendidikanCard('SMA', 'SMA & Sederajat', 'SMA', 'sma'), 
-            $this->buildPendidikanCard('SMP', 'SMP & Sederajat', 'SMP', 'smp'), 
-            $this->buildPendidikanCard('SD', 'SD & Sederajat', 'SD', 'sd'), 
-            $this->buildPendidikanCard('TK', 'TK / PAUD & Sederajat', 'TK', 'tk'), 
-        ]; 
-
-        $kelompokB3Cards = [ 
-            [ 
-                'kode' => 'POSYANDU', 
-                'judul' => 'POSYANDU', 
-                'nilai' => (int) SasaranManfaat::where('kategori', 'B3')->where('tipe_instansi', 'Posyandu')->distinct('nama_instansi')->count('nama_instansi'), 
-                'subNilai' => 'Unit', 
-            ], 
-            [ 
-                'kode' => 'BALITA', 
-                'judul' => 'BALITA', 
-                'nilai' => (int) SasaranManfaat::where('kategori', 'B3')->sum('jumlah_balita'), 
-                'subNilai' => 'Anak', 
-            ], 
-            [ 
-                'kode' => 'BUMIL', 
-                'judul' => 'BUMIL', 
-                'nilai' => (int) SasaranManfaat::where('kategori', 'B3')->sum('jumlah_bumil'), 
-                'subNilai' => 'Penerima', 
-            ], 
-            [ 
-                'kode' => 'BUSUI', 
-                'judul' => 'BUSUI', 
-                'nilai' => (int) SasaranManfaat::where('kategori', 'B3')->sum('jumlah_busui'), 
-                'subNilai' => 'Penerima', 
-            ], 
-        ];
+    
+        $unitUsahaSlhsCounts = UnitUsaha::query()
+        ->whereHas('laporanSlhs', function ($q) {
+            $q->where('status_slhs', 'selesai');
+        })
+        ->selectRaw('jenis_usaha, COUNT(*) as total')
+        ->groupBy('jenis_usaha')
+        ->pluck('total', 'jenis_usaha');
         
-        $unitUsahaCards = [
-            [
-                'judul' => 'SPPG',
-                'nilai' => (int) ($unitUsahaCounts['sppg'] ?? 0),
-                'subNilai' => 'Unit',
-            ],
-            [
-                'judul' => 'TPP',
-                'nilai' => (int) ($unitUsahaCounts['tpp'] ?? 0),
-                'subNilai' => 'Unit',
-            ],
-            [
-                'judul' => 'DAM',
-                'nilai' => (int) ($unitUsahaCounts['dam'] ?? 0),
-                'subNilai' => 'Unit',
-            ],
-            [
-                'judul' => 'Kantin',
-                'nilai' => (int) ($unitUsahaCounts['kantin'] ?? 0),
-                'subNilai' => 'Unit',
-            ],
-        ];
+            $totalAllUnits = UnitUsaha::count();
+            $unitUsahaCards = [
+                [
+                    'judul'         => 'Total Unit',
+                    'nilai'         => $totalAllUnits,
+                    'subNilai'      => 'Unit',
+                    'filter_jenis'  => '', 
+                    'filter_status' => '',
+                ]
+            ];
 
+            $jenisUnit = [
+                'SPPG'     => 'sppg',
+                'Catering' => 'catering',
+                'Restoran' => 'restoran',
+                'DAM'      => 'dam',
+                'Kantin'   => 'kantin',
+            ];
+
+            foreach ($jenisUnit as $label => $key) {
+                $unitUsahaCards[] = [
+                    'judul'         => $label,
+                    'nilai'         => (int) ($unitUsahaCounts[$key] ?? $unitUsahaCounts[strtolower($label)] ?? $unitUsahaCounts[strtoupper($label)] ?? 0),
+                    'subNilai'      => 'Unit',
+                    'filter_jenis'  => $label,
+                    'filter_status' => '',
+                ];
+                
+                $unitUsahaCards[] = [
+                    'judul'         => "$label - Sudah SLHS",
+                    'nilai'         => (int) ($unitUsahaSlhsCounts[$key] ?? $unitUsahaSlhsCounts[strtolower($label)] ?? $unitUsahaSlhsCounts[strtoupper($label)] ?? 0),
+                    'subNilai'      => 'Unit',
+                    'filter_jenis'  => $label,
+                    'filter_status' => 'sudah_slhs',
+                ];
+            }
         return view('rekapdaerah', [ 
             'rows' => $rows, 
             'kecamatanOptions' => $kecamatanOptions, 
             'rekapPerKecamatan' => $rekapPerKecamatan, 
             'selectedKecamatanId' => $filters['kecamatan_id'],
             'q' => $filters['q'],
-            'rekapTotalSppg' => $rekapTotalSppg, 
-            'rekapTotalKelompok' => $rekapTotalKelompok, 
-            'rekapTotalPenerima' => $rekapTotalPenerima, 
-            'pendidikanCards' => $pendidikanCards, 
-            'kelompokB3Cards' => $kelompokB3Cards,
             'unitUsahaCards' => $unitUsahaCards, 
         ]); 
     } 
@@ -222,7 +198,7 @@ class GuestController extends Controller
         };
 
         $sma = $getSchoolStats('SMA');
-        $smp = $getSchoolStats('SMP');
+        $smp = $getSchoolStats('SMP'); 
         $sd  = $getSchoolStats('SD');
         $tk  = $getSchoolStats('TK');
 
@@ -244,6 +220,7 @@ class GuestController extends Controller
     {
         $q = trim((string) $request->query('q'));
         $jenisUsaha = $request->query('jenis_usaha');
+        $statusSlhs = $request->query('status_slhs'); 
 
         $kecamatanId = $kecamatanId ?? (int) $request->query('kecamatan_id');
 
@@ -277,9 +254,15 @@ class GuestController extends Controller
             $baseQuery->where('jenis_usaha', $jenisUsaha);
         }
 
+        if ($statusSlhs === 'sudah_slhs') {
+            $baseQuery->whereHas('laporanSlhs', function ($q) {
+                $q->where('status_slhs', 'selesai');
+            });
+        }
+
         $rows = (clone $baseQuery)
             ->latest('created_at')
-            ->get();
+            ->paginate(15);
 
         $formattedRows = $rows->map(function ($row) {
             $totalPenerima = (int) ($row->total_siswa ?? 0)
@@ -324,24 +307,17 @@ class GuestController extends Controller
         ]);
     }
 
-    /**
-     * API: Get rekap data per kecamatan untuk 3 tabel rekap
-     * Type: sppg, kelompok-penerima, penerima
-     */
     public function getRekapByKecamatan(string $type): JsonResponse
     {
         return match ($type) {
-            'sppg' => $this->rekapSppg(),
+            'sppg','unit' => $this->rekapSppg(),
             'kelompok-penerima' => $this->rekapKelompokPenerima(),
             'penerima' => $this->rekapPenerima(),
             default => response()->json(['success' => false, 'message' => 'Tipe tidak valid'], 400)
         };
     }
 
-    /**
-     * Rekap SPPG per Kecamatan
-     * Kolom: #, KECAMATAN, JUMLAH SPPG, MEMENUHI IKL, BELUM MEMENUHI IKL, BELUM MENGAJUKAN IKL, SUDAH SLHS, BELUM SLHS
-     */
+
     private function rekapSppg(): JsonResponse
     {
         try {
@@ -416,6 +392,8 @@ class GuestController extends Controller
 
             $sppg = $units->where('jenis_usaha', 'sppg')->count();
             $tpp = $units->where('jenis_usaha', 'tpp')->count();
+            $catering = $units->where('jenis_usaha','catering')->count();
+            $restoran = $units->where('jenis_usaha','restoran')->count();
             $dam = $units->where('jenis_usaha', 'dam')->count();
             $kantin = $units->where('jenis_usaha', 'kantin')->count();
 
@@ -429,6 +407,8 @@ class GuestController extends Controller
                 'kecamatan' => $kec->nama_kecamatan,
                 'sppg' => $sppg,
                 'tpp' => $tpp,
+                'restoran'=>$restoran,
+                'catering'=>$catering,
                 'dam' => $dam,
                 'kantin' => $kantin,
                 'jumlah_pegawai' => $totalPegawai,
@@ -495,18 +475,20 @@ class GuestController extends Controller
         ]);
     }
 
-    private function validatedFilters(Request $request): array 
+private function validatedFilters(Request $request): array 
     { 
         $validated = $request->validate([ 
             'kecamatan_id' => ['nullable', 'exists:kecamatan,id_kecamatan'], 
-            'jenis_usaha' => ['nullable', 'string', 'max:255'],
-            'q' => ['nullable', 'string', 'max:255'],
+            'jenis_usaha'  => ['nullable', 'string', 'max:255'],
+            'q'            => ['nullable', 'string', 'max:255'],
+            'status_slhs'  => ['nullable', 'string', 'max:255'], 
         ]); 
 
         return [ 
             'kecamatan_id' => isset($validated['kecamatan_id']) ? (int) $validated['kecamatan_id'] : null, 
-            'jenis_usaha' => $validated['jenis_usaha'] ?? null,
-            'q' => $validated['q'] ?? null,
+            'jenis_usaha'  => $validated['jenis_usaha'] ?? null,
+            'q'            => $validated['q'] ?? null,
+            'status_slhs'  => $validated['status_slhs'] ?? null, 
         ]; 
     } 
 
@@ -528,7 +510,12 @@ class GuestController extends Controller
                     ->orWhere('alamat', 'like', "%{$search}%");
             });
         }
-    } 
+        if (! empty($filters['status_slhs']) && $filters['status_slhs'] === 'sudah_slhs') {
+            $query->whereHas('laporanSlhs', function ($q) {
+                $q->where('status_slhs', 'selesai'); 
+            });
+        }
+    }
 
     private function buildPendidikanCard(string $kode, string $judul, string $tipeInstansi, string $warna): array 
     { 
