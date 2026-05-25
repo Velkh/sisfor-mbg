@@ -126,6 +126,151 @@
         .footer-bottom { max-width: 1200px; margin: 24px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: .77rem; color: rgba(255,255,255,.32); }
         .footer-bottom strong { color: rgba(255,255,255,.6); }
 
+        /* =========================================
+        SECTION ALUR PROSES IKL - SLHS (HOMEPAGE)
+        ========================================= */
+        .process-section {
+            padding: 80px 0;
+            background-color: #faf8f3; /* Warna cream lembut selaras dengan tema */
+            border-top: 1px solid #ddd7cb;
+            border-bottom: 1px solid #ddd7cb;
+        }
+
+        .process-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .process-header h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            color: #0d3b1e;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+
+        .process-header p {
+            color: #5e5e5e;
+            font-size: 1.05rem;
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .process-timeline {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+            z-index: 1;
+        }
+
+        /* Garis putus-putus horizontal (Desktop) */
+        .timeline-line {
+            position: absolute;
+            top: 40px; /* Setengah dari tinggi icon (80px) */
+            left: 12%;
+            right: 12%;
+            height: 4px;
+            background: repeating-linear-gradient(to right, #c8e3d3 0, #c8e3d3 12px, transparent 12px, transparent 24px);
+            z-index: -1;
+        }
+
+        .process-step {
+            flex: 1;
+            text-align: center;
+            padding: 0 15px;
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #ffffff;
+            border: 3px solid #1a7a3f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: #1a7a3f;
+            box-shadow: 0 6px 16px rgba(26, 122, 63, 0.12);
+            transition: transform 0.3s ease, background-color 0.3s;
+        }
+
+        .process-step:hover .step-icon {
+            transform: translateY(-5px) scale(1.05);
+            background-color: #edfaf2;
+        }
+
+        /* Penekanan untuk langkah terakhir (SLHS Terbit) */
+        .step-icon.highlight {
+            background-color: #1a7a3f;
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(26, 122, 63, 0.25);
+        }
+
+        .step-content h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #155c30;
+            margin-bottom: 10px;
+        }
+
+        .step-content p {
+            font-size: 0.9rem;
+            color: #5e5e5e;
+            line-height: 1.5;
+        }
+
+        /* =========================================
+        RESPONSIVE MOBILE UNTUK ALUR PROSES
+        ========================================= */
+        @media (max-width: 768px) {
+            .process-section {
+                padding: 50px 0;
+            }
+
+            .process-timeline {
+                flex-direction: column;
+                gap: 30px;
+                padding-left: 10px;
+            }
+            
+            /* Ubah garis menjadi vertikal di HP */
+            .timeline-line {
+                top: 20px;
+                bottom: 20px;
+                left: 45px; /* Menengah icon (10px padding + 35px setengah icon) */
+                right: auto;
+                width: 4px;
+                height: auto;
+                background: repeating-linear-gradient(to bottom, #c8e3d3 0, #c8e3d3 12px, transparent 12px, transparent 24px);
+            }
+
+            .process-step {
+                display: flex;
+                text-align: left;
+                align-items: flex-start;
+                padding: 0;
+            }
+
+            .step-icon {
+                margin: 0 20px 0 0;
+                flex-shrink: 0;
+                width: 70px;
+                height: 70px;
+            }
+
+            .step-content {
+                padding-top: 5px;
+            }
+
+            .step-content h3 {
+                font-size: 1.1rem;
+                margin-bottom: 5px;
+            }
+        }
         /* ================= Responsive ================= */
         @media(max-width: 1024px) {
             .hero-inner { grid-template-columns: 1fr; gap: 24px; }

@@ -142,6 +142,64 @@
         </div>
     </section>
 
+    <section id="alur" class="process-section">
+        <div class="wrap" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+            <div class="process-header">
+                <h2>Alur Penerbitan SLHS</h2>
+                <p>Langkah-langkah dari pengajuan IKL hingga Sertifikat Laik Higiene Sanitasi resmi diterbitkan untuk sarana usaha Anda.</p>
+            </div>
+
+            <div class="process-timeline">
+                <!-- Garis Penghubung -->
+                <div class="timeline-line"></div>
+
+                <!-- Step 1 -->
+                <div class="process-step">
+                    <div class="step-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>1. Pengajuan</h3>
+                        <p>Pelaku usaha mendaftarkan sarana dan mengajukan permohonan pendataan melalui sistem atau loket.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="process-step">
+                    <div class="step-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><polyline points="11 8 11 12 14 15"></polyline></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>2. Inspeksi (IKL)</h3>
+                        <p>Petugas Sanitarian Puskesmas / Dinkes melakukan Inspeksi Kesehatan Lingkungan langsung ke lokasi usaha.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="process-step">
+                    <div class="step-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>3. Evaluasi & Uji</h3>
+                        <p>Penilaian instrumen IKL (harus ≥ 80) dan pengujian sampel air / makanan di laboratorium (jika dipersyaratkan).</p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="process-step">
+                    <div class="step-icon highlight">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    </div>
+                    <div class="step-content">
+                        <h3>4. Terbit SLHS</h3>
+                        <p>Jika memenuhi syarat (MS), Sertifikat Laik Higiene Sanitasi resmi diterbitkan sebagai bukti aman pangan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="stats" class="stats-section">
         <div class="stats-inner">
             <div class="sec-header">
@@ -174,34 +232,6 @@
                     <div class="stat-lbl">SLHS Terbit</div>
                     <div class="stat-val">{{ number_format($slhsTerbit ?? 0, 0, ',', '.') }}</div>
                     <div class="stat-sub">Sertifikat resmi</div>
-                </div>
-            </div>
-
-            <!-- Baris 2 -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span class="stat-abbr">PK</span>
-                    <div class="stat-lbl">Penjamah Terlatih</div>
-                    <div class="stat-val">{{ number_format($penjamahTerlatih ?? 0, 0, ',', '.') }}</div>
-                    <div class="stat-sub">Lulus PKPSS</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-abbr">SKL</span>
-                    <div class="stat-lbl">Cakupan Sekolah</div>
-                    <div class="stat-val">{{ number_format($cakupanSekolah ?? 0, 0, ',', '.') }}</div>
-                    <div class="stat-sub">Institusi pendidikan</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-abbr">B3</span>
-                    <div class="stat-lbl">Cakupan B3</div>
-                    <div class="stat-val">{{ number_format($cakupanB3 ?? 0, 0, ',', '.') }}</div>
-                    <div class="stat-sub">Posyandu/instansi</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-abbr gd">PM</span>
-                    <div class="stat-lbl">Penerima Manfaat</div>
-                    <div class="stat-val">{{ number_format($penerimaManfaat ?? 0, 0, ',', '.') }}</div>
-                    <div class="stat-sub">Orang per hari</div>
                 </div>
             </div>
         </div>
