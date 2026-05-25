@@ -95,6 +95,78 @@
 
     .card-body { padding: 14px 16px; }
 
+    .clickable-card {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: 2px solid transparent;
+    }
+    .clickable-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        border-color: #c8e3d3;
+    }
+    .clickable-card.active-card {
+        background-color: var(--g50);
+        border-color: var(--g700);
+        box-shadow: 0 4px 12px rgba(26, 122, 63, 0.15);
+    }
+    .clickable-card.active-card .stats-title,
+    .clickable-card.active-card .stats-main {
+        color: var(--g800);
+    }
+
+    /* 2. Kotak Pencarian & Tombol Reset */
+    .search-box {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    .search-box input { flex: 1; }
+    .btn-reset {
+        background: #f8d7da !important;
+        color: #842029 !important;
+        border: 1px solid #f5c2c7 !important;
+        white-space: nowrap;
+    }
+    .btn-reset:hover {
+        background: #f5c2c7 !important;
+    }
+
+    /* 3. Tab Pills (Pengganti Dropdown Select) */
+    .category-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+    }
+    .cat-tab {
+        padding: 8px 16px;
+        background: #f4f8ff;
+        border: 1px solid #cddcf9;
+        color: #3d5a7a;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .cat-tab:hover { background: #e8f1ff; }
+    .cat-tab.active {
+        background: var(--g700);
+        color: white;
+        border-color: var(--g700);
+    }
+
+    /* 4. Responsif untuk Search Box */
+    @media (min-width: 768px) {
+        .filter-form {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .search-box { max-width: 600px; }
+    }
+
     .summary-wrap {
         background: transparent;
         border: none;
@@ -445,6 +517,8 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
+
+    
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
@@ -466,3 +540,122 @@
             grid-template-columns: 1fr;
         }
     }
+
+    /* ==========================================================================
+   TAMBAHAN RESPONSIVE MOBILE (Tanpa Merusak Base Style)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    /* 1. Amankan Wrapper & Padding Dasar */
+    .wrap {
+        padding: 0 12px;
+        margin-top: 15px;
+    }
+    .card {
+        padding: 16px;
+    }
+
+    /* 2. Header (Top Inner) menjadi vertikal */
+    .top-inner {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+    .top-inner .title h1 {
+        font-size: 1.5rem;
+    }
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 3. Form Filter & Pencarian menjadi vertikal */
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch; /* Paksa input memenuhi lebar HP */
+    }
+    .search-box {
+        flex-direction: column;
+    }
+    .filter-form input,
+    .filter-form select,
+    .filter-form button,
+    .search-box button {
+        width: 100%;
+        min-width: unset; /* Timpa min-width 220px dari base style */
+    }
+
+    /* 4. Tab Pills Kategori di-scroll menyamping jika tidak muat */
+    .category-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .cat-tab {
+        white-space: nowrap; /* Teks tidak turun ke baris baru */
+        flex-shrink: 0; /* Tab tidak mengecil */
+    }
+
+    /* 5. Sidebar Menu Kecamatan menjadi Dropdown/Scroll Horizontal */
+    .content-grid {
+        display: flex;
+        flex-direction: column;
+    }
+    .kec-list {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .kec-list li {
+        margin-top: 0;
+        margin-right: 8px;
+    }
+    .kec-link {
+        white-space: nowrap;
+        font-size: 0.8rem;
+        padding: 8px 12px;
+    }
+
+    /* 6. Pengamanan Tabel agar tidak gepeng */
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid var(--border); /* Tambah border agar jelas area scroll-nya */
+        border-radius: 8px;
+    }
+    table {
+        min-width: 800px; /* Paksa tabel lebar, sisanya di-scroll */
+    }
+
+    /* 7. Footer menjadi vertikal */
+    .footer {
+        padding: 40px 20px 20px;
+    }
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+/* Penyesuaian Ekstra untuk HP Layar Sangat Kecil (iPhone SE / lama) */
+@media (max-width: 480px) {
+    .stats-card {
+        min-height: auto;
+        padding: 12px 10px;
+    }
+    .stats-main {
+        font-size: 1.5rem;
+    }
+    .stats-title {
+        min-height: 40px; /* Pastikan judul card tidak terpotong */
+    }
+}
