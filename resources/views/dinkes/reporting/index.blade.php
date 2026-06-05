@@ -79,8 +79,8 @@
         <div class="card-header">
             <h5 class="mb-0">Daftar Unit Usaha</h5>
         </div>
-        <div class="card-body border rounded-3 overflow-hidden">
-            <div class="table-responsive border rounded-3 overflow-hidden">
+        <div class="card-body border rounded-3 overflow-auto">
+            <div class="table-responsive border rounded-3 overflow-auto">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
@@ -104,20 +104,24 @@
                                 <td>{{ $item->jumlah_pegawai }}</td>
                                 <td>{{ ucfirst(str_replace('_', ' ', $item->laporanSlhs->status_ikl ?? '-')) }}</td>
                                 <td>{{ ucfirst(str_replace('_', ' ', $item->laporanSlhs->status_slhs ?? '-')) }}</td>
-                                <td class="d-flex gap-1">
-                                    <a href="{{ route('admin.reporting.show', $item->id_unit_usaha) }}" class="btn btn-sm btn-outline-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('admin.reporting.edit', $item->id_unit_usaha) }}" class="btn btn-sm btn-outline-warning">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
-                                    <form action="{{ route('admin.reporting.destroy', $item->id_unit_usaha) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                <td >
+                                    <div class="d-flex gap-1">
+                                        <a href="{{ route('admin.reporting.show', $item->id_unit_usaha) }}" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <a href="{{ route('admin.reporting.edit', $item->id_unit_usaha) }}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        
+                                        <form action="{{ route('admin.reporting.destroy', $item->id_unit_usaha) }}" method="POST" class="m-0" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty

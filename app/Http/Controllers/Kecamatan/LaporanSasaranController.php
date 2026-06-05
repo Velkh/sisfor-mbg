@@ -44,6 +44,11 @@ class LaporanSasaranController extends Controller
             ])
             ->where('id_kecamatan', $user->id_kecamatan)
             ->when($allowedJenisUsaha !== [], fn ($q) => $q->whereIn('jenis_usaha', $allowedJenisUsaha))
+            ->when($kategori !== 'all', function ($query) use ($kategori): void {
+                $query->whereHas('sasaranManfaat', function ($relation) use ($kategori): void {
+                    $relation->where('kategori', $kategori);
+                });
+            })
             ->when($q !== '', function ($builder) use ($q): void {
                 $builder->where(function ($sub) use ($q): void {
                     $sub->where('nama_unit_usaha', 'like', '%' . $q . '%')

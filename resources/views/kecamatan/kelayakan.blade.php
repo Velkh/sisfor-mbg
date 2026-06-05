@@ -26,6 +26,31 @@
             <h5 class="mb-0"><i class="fas fa-check-double me-2"></i>Daftar Kelayakan Unit Usaha</h5>
         </div>
         <div class="card-body">
+            <form method="GET" class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <input type="text" name="nama" class="form-control" placeholder="Cari nama unit..." value="{{ request('nama') }}">
+                </div>
+                <div class="col-md-2">
+                    <select name="status_ikl" class="form-select">
+                        <option value="">Semua status IKL</option>
+                        <option value="belum_mengajukan" {{ request('status_ikl') === 'belum_mengajukan' ? 'selected' : '' }}>Belum mengajukan</option>
+                        <option value="sudah_mengajukan" {{ request('status_ikl') === 'sudah_mengajukan' ? 'selected' : '' }}>Sudah mengajukan</option>
+                        <option value="selesai" {{ request('status_ikl') === 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status_slhs" class="form-select">
+                        <option value="">Semua SLHS</option>
+                        <option value="belum_mengajukan" {{ request('status_slhs') === 'belum_mengajukan' ? 'selected' : '' }}>Belum mengajukan</option>
+                        <option value="sudah_mengajukan" {{ request('status_slhs') === 'sudah_mengajukan' ? 'selected' : '' }}>Sudah mengajukan</option>
+                        <option value="selesai" {{ request('status_slhs') === 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary">Filter</button>
+                    <a href="{{ route('kecamatan.kelayakan.index') }}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>

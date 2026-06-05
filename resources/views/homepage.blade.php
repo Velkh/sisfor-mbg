@@ -40,18 +40,31 @@
             <li><a href="#about">Tentang</a></li>
             <li><a href="#stats">Statistik</a></li>
             
-            @auth
-                <li class="user-info">
-                    <span class="username">{{ auth()->user()->username }}</span>
-                    <span class="badge">{{ auth()->user()->role }}</span>
-                    <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                        @csrf
-                        <button type="submit" class="btn-login-nav btn-logout">Keluar</button>
-                    </form>
-                </li>
-            @else
-                <li><a href="{{ route('login') }}" class="btn-login-nav">Login</a></li>
-            @endauth
+        @auth
+            @php
+                $role = auth()->user()->role ?? '';
+                if ($role === 'admin_dinkes') {
+                    $dashboardUrl = route('admin.dashboard');
+                } elseif ($role === 'admin_kecamatan') {
+                    $dashboardUrl = route('kecamatan.dashboard');
+                } else {
+                    $dashboardUrl = route('guest.index');
+                }
+            @endphp
+
+            <li><a href="{{ $dashboardUrl }}" class="btn-login-nav">Masuk</a></li>
+
+            <li class="user-info">
+                <span class="username">{{ auth()->user()->username }}</span>
+                <span class="badge">{{ auth()->user()->role }}</span>
+                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="btn-login-nav btn-logout">Keluar</button>
+                </form>
+            </li>
+        @else
+            <li><a href="{{ route('login') }}" class="btn-login-nav">Login</a></li>
+        @endauth
         </ul>
     </nav>
 
@@ -121,25 +134,52 @@
                             Setiap penjamah makanan wajib mengikuti Pelatihan Keamanan Pangan Siap Saji (PKPSS) agar memahami prinsip dasar higiene perorangan dan tata cara mengelola makanan dengan aman.
                         </div>
                     </details>
-                    
-                    <details class="point">
-                        <summary>Alur Penerbitan SLHS <svg class="arr" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></summary>
-                        <div class="point-body">
-                            • Pengajuan formulir dan dokumen persyaratan melalui sistem.<br>
-                            • Pelaksanaan IKL oleh tim petugas kesehatan (Puskesmas/Dinkes).<br>
-                            • Pemeriksaan hasil uji laboratorium (jika dipersyaratkan).<br>
-                            • Penerbitan SLHS melalui DPMPTSP atau sistem perizinan terkait jika dinyatakan memenuhi syarat (MS).
-                        </div>
-                    </details>
                 </div>
             </div>    
             
             <div class="about-img-wrap">
-                <!-- Foto operasional sanitarian Kota Depok sedang inspeksi -->
-                <img src="images/inspeksi.webp" alt="Seorang petugas sanitarian Kota Depok sedang melakukan inspeksi higienitas menggunakan alat pengukur suhu pada permukaan persiapan makanan di dapur SPPG yang bersih dan modern, menekankan urgensi SLHS." class="about-img new-operational-photo">
-                <div class="float-badge">Higiene<br><small>Prioritas Utama</small></div>
+                <div class="mockup-wrapper">  
+                    <!-- Jendela Mockup Dashboard 3D -->
+                    <div class="mockup-window">
+                        <!-- Header Jendela -->
+                        <div class="mockup-header">
+                            <span class="m-dot red"></span>
+                            <span class="m-dot yellow"></span>
+                            <span class="m-dot green"></span>
+                        </div>
+                        
+                        <!-- Isi Dashboard Skeleton -->
+                        <div class="mockup-body">
+                            <div class="mockup-sidebar"></div>
+                            <div class="mockup-content">
+                                <div class="mockup-topbar"></div>
+                                
+                                <div class="mockup-cards">
+                                    <!-- Kartu Grafik Batang -->
+                                    <div class="m-card">
+                                        <div class="m-chart-bar">
+                                            <div class="m-bar" style="height: 40%"></div>
+                                            <div class="m-bar" style="height: 70%"></div>
+                                            <div class="m-bar" style="height: 50%"></div>
+                                            <div class="m-bar" style="height: 90%"></div>
+                                        </div>
+                                    </div>
+                                    <!-- Kartu Grafik Donut -->
+                                    <div class="m-card">
+                                        <div class="m-circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lencana Melayang (Animasi Floating) -->
+                    <div class="mockup-float-badge">
+                        <span class="check-icon">✓</span> SLHS Terverifikasi
+                    </div>
+
+                </div>
             </div>
-        </div>
     </section>
 
     <section id="alur" class="process-section">

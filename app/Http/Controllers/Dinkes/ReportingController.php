@@ -15,6 +15,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
+use Throwable;
 
 class ReportingController extends Controller
 {
@@ -126,12 +128,12 @@ class ReportingController extends Controller
 
     public function update(Request $request, UnitUsaha $unit): RedirectResponse
     {
-        $validated = $this->validatePayload($request);
+        $validated = $this->validatePayload($request, $unit);
         $laporanPayload = $this->buildLaporanPayload($validated);
 
         DB::transaction(function () use ($validated, $unit, $request, $laporanPayload): void {
             $unit->update($this->payloadUnitUsaha($validated));
-            
+
             if ($request->hasFile('foto_unit_usaha')) {
                 foreach ($request->file('foto_unit_usaha') as $file) {
                     $path = $file->store('foto-unit-usaha', 'public');
@@ -190,56 +192,77 @@ class ReportingController extends Controller
             'search' => ['required', 'string', 'max:255'],
         ]);
 
-        $response = Http::get(
-            rtrim((string)config('services.dsimfoniku.base_url'), '/') . '/tpp',
-            ['search' => $validated['search']]
-        );
+        try {
+            $response = Http::timeout(10)
+                ->retry(2, 200)
+                ->get(
+                    rtrim((string) config('services.dsimfoniku.base_url'), '/') . '/tpp',
+                    ['search' => $validated['search']]
+                );
 
-        if (! $response->successful()) {
+            if (! $response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengambil data dari API.',
+                    'data' => [],
+                ], 503);
+            }
+
+            $rows = data_get($response->json(), 'data', []);
+            if (! is_array($rows)) {
+                $rows = [];
+            }
+
+            $results = collect($rows)->map(function (array $row): array {
+                $nilaiIkl = (int) ($row['skor'] ?? 0);
+
+                return [
+                    'id' => $row['id'] ?? null,
+                    'nama' => (string) ($row['nama'] ?? '-'),
+                    'pengelola' => (string) ($row['pengelola'] ?? '-'),
+                    'alamat' => (string) ($row['alamat'] ?? '-'),
+                    'kecamatan' => (string) ($row['kecamatan'] ?? '-'),
+                    'kelurahan' => (string) ($row['kelurahan'] ?? '-'),
+                    'kontak' => (string) ($row['kontak'] ?? '-'),
+                    'tanggal_penilaian' => (string) ($row['tanggal_penilaian'] ?? ''),
+                    'jenis' => (string) ($row['jenis'] ?? ''),
+                    'penjamah_pangan_total' => (int) ($row['penjamah_pangan_total'] ?? 0),
+                    'penjamah_pangan_bersertifikat' => (int) ($row['penjamah_pangan_bersertifikat'] ?? 0),
+                    'nilai_ikl' => $nilaiIkl,
+                    'hasil_ikl' => $nilaiIkl >= 80 ? 'memenuhi' : 'tidak_memenuhi',
+                    'koordinat' => (string) ($row['koordinat'] ?? ''),
+                ];
+            })->values();
+
+            return response()->json([
+                'success' => true,
+                'data' => $results,
+            ]);
+        } catch (Throwable $e) {
+            report($e);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengambil data dari API.',
+                'message' => 'API eksternal sedang tidak tersedia.',
                 'data' => [],
-            ], 500);
+            ], 503);
         }
-
-        $rows = data_get($response->json(), 'data', []);
-        if (! is_array($rows)) {
-            $rows = [];
-        }
-
-        $results = collect($rows)->map(function (array $row): array {
-            $nilaiIkl = (int) ($row['skor'] ?? 0);
-
-            return [
-                'id' => $row['id'] ?? null,
-                'nama' => (string) ($row['nama'] ?? '-'),
-                'pengelola' => (string) ($row['pengelola'] ?? '-'),
-                'alamat' => (string) ($row['alamat'] ?? '-'),
-                'kecamatan' => (string) ($row['kecamatan'] ?? '-'),
-                'kelurahan' => (string) ($row['kelurahan'] ?? '-'),
-                'kontak' => (string) ($row['kontak'] ?? '-'),
-                'tanggal_penilaian' => (string) ($row['tanggal_penilaian'] ?? ''),
-                'jenis' => (string) ($row['jenis'] ?? ''),
-                'penjamah_pangan_total' => (int) ($row['penjamah_pangan_total'] ?? 0),
-                'penjamah_pangan_bersertifikat' => (int) ($row['penjamah_pangan_bersertifikat'] ?? 0),        
-                'nilai_ikl' => $nilaiIkl,
-                'hasil_ikl' => $nilaiIkl >= 80 ? 'memenuhi' : 'tidak_memenuhi',
-                'koordinat' => (string) ($row['koordinat'] ?? ''),
-            ];
-        })->values();
-
-        return response()->json([
-            'success' => true,
-            'data' => $results,
-        ]);
     }
 
-    private function validatePayload(Request $request): array
+private function validatePayload(Request $request, ?UnitUsaha $unit = null): array
     {
+        $apiUnitIdRules = ['nullable', 'integer'];
+
+        if ($unit) {
+            $apiUnitIdRules[] = Rule::unique('unit_usahas', 'api_unit_id')
+                ->ignore($unit->id_unit_usaha, 'id_unit_usaha');
+        } else {
+            $apiUnitIdRules[] = 'unique:unit_usahas,api_unit_id';
+        }
         return $request->validate([
-            'api_unit_id' => ['nullable', 'integer'],
-            'jenis_usaha' => ['required', 'in:catering,restoran,sppg,dam,kantin'],            'nama_unit_usaha' => ['required', 'string', 'max:255'],
+            'api_unit_id' => $apiUnitIdRules,
+            'jenis_usaha' => ['required', 'in:catering,restoran,sppg,dam,kantin'],
+            'nama_unit_usaha' => ['required', 'string', 'max:255'],
             'nama_pemilik' => ['required', 'string', 'max:255'],
             'alamat' => ['required', 'string'],
             'latitude' => ['nullable', 'string', 'max:255'],
@@ -249,7 +272,6 @@ class ReportingController extends Controller
             'id_kecamatan' => ['required', 'integer'],
             'id_kelurahan' => ['required', 'integer'],
             'id_puskesmas' => ['required', 'integer'],
-
             'nilai_ikl' => ['nullable', 'integer', 'min:0'],
             'hasil_ikl' => ['nullable', 'in:memenuhi,tidak_memenuhi'],
             'selected_api_data' => ['nullable', 'string'],
@@ -262,10 +284,8 @@ class ReportingController extends Controller
             'jenis_ipal' => ['nullable', 'string', 'max:255'],
             'pengelolaan_sampah' => ['nullable', 'in:ada,tidak_ada'],
             'jenis_pengelolaan' => ['nullable', 'string', 'max:255'],
-
             'foto_unit_usaha' => ['nullable', 'array'],
             'foto_unit_usaha.*' => ['image', 'max:5048'],
-
             'sasaran' => ['array'],
             'sasaran.*.kategori' => ['required', 'in:Sekolah,B3,Umum'],
             'sasaran.*.tipe_instansi' => ['nullable', 'in:TK,SD,SMP,SMA,Posyandu,TPP,DAM,Kantin,Lainnya'],
@@ -277,6 +297,8 @@ class ReportingController extends Controller
             'sasaran.*.jumlah_balita' => ['nullable', 'integer', 'min:0'],
             'sasaran.*.detail_jangkauan' => ['nullable', 'string'],
             'sasaran.*.jumlah_jiwa' => ['nullable', 'integer', 'min:0'],
+        ], [
+            'api_unit_id.unique' => 'Data unit tidak boleh duplikat.',
         ]);
     }
 
@@ -300,28 +322,45 @@ class ReportingController extends Controller
             'pengelolaan_sampah' => $validated['pengelolaan_sampah'] ?? null,
             'jenis_pengelolaan' => $validated['jenis_pengelolaan'] ?? null,
         ];
+        $nilaiIklManual = $validated['nilai_ikl'] ?? null;
+        $hasilIklManual = $validated['hasil_ikl'] ?? null;
 
-            if ($validated['status_ikl'] === 'selesai') {
-            $apiData = null;
+        if ($nilaiIklManual !== null && $nilaiIklManual !== '') {
+            $nilaiIkl = (int) $nilaiIklManual;
+            $payload['nilai_ikl'] = $nilaiIkl;
+            $payload['hasil_ikl'] = $nilaiIkl >= 80 ? 'memenuhi' : 'tidak_memenuhi';
 
-            if (! empty($validated['selected_api_data'])) {
-                $decoded = json_decode($validated['selected_api_data'], true);
-                if (is_array($decoded)) {
-                    $apiData = $decoded;
+            return $payload;
+        }
+        if ($hasilIklManual !== null && $hasilIklManual !== '') {
+            $payload['hasil_ikl'] = $hasilIklManual;
+        }       
+        if ($validated['status_ikl'] === 'selesai') {
+            $payload['nilai_ikl'] = $validated['nilai_ikl'] ?? $payload['nilai_ikl'];
+            $payload['hasil_ikl'] = $validated['hasil_ikl'] ?? $payload['hasil_ikl'];
+
+            if (empty($payload['nilai_ikl']) || empty($payload['hasil_ikl'])) {
+                $apiData = null;
+
+                if (! empty($validated['selected_api_data'])) {
+                    $decoded = json_decode($validated['selected_api_data'], true);
+                    if (is_array($decoded)) {
+                        $apiData = $decoded;
+                    }
                 }
-            }
 
-            if (is_array($apiData)) {
-                $payload['nilai_ikl'] = $apiData['nilai_ikl'] ?? null;
-                $payload['hasil_ikl'] = $apiData['hasil_ikl'] ?? null;
-            } else {
-                [$nilaiIkl, $hasilIkl] = $this->resolveIklFromApi(
-                    $validated['status_ikl'],
-                    $validated['nama_unit_usaha']
-                );
+                if (is_array($apiData)) {
+                    $payload['nilai_ikl'] = $apiData['nilai_ikl'] ?? $payload['nilai_ikl'];
+                    $payload['hasil_ikl'] = $apiData['hasil_ikl'] ?? $payload['hasil_ikl'];
+                } else {
+                    [$nilaiIkl, $hasilIkl] = $this->resolveIklFromApi(
+                        $validated['status_ikl'],
+                        $validated['nama_unit_usaha']
+                    );
 
-                $payload['nilai_ikl'] = $nilaiIkl;
-                $payload['hasil_ikl'] = $hasilIkl;
+                    $payload['nilai_ikl'] = $payload['nilai_ikl'] ?? $nilaiIkl;
+                    $payload['hasil_ikl'] = $payload['hasil_ikl'] ?? $hasilIkl;
+                }
             }
         }
 
@@ -334,40 +373,49 @@ class ReportingController extends Controller
             return [null, null];
         }
 
-        $response = Http::get(
-            rtrim((string)config('services.dsimfoniku.base_url'), '/') . '/tpp',
-            ['search' => $namaUnitUsaha]
-        );
+        try {
+            $response = Http::timeout(10)
+                ->retry(2, 200)
+                ->get(
+                    rtrim((string) config('services.dsimfoniku.base_url'), '/') . '/tpp',
+                    ['search' => $namaUnitUsaha]
+                );
 
-        if (! $response->successful()) {
-            return [null, null];
-        }
-
-        $rows = data_get($response->json(), 'data', []);
-        if (! is_array($rows) || $rows === []) {
-            return [null, null];
-        }
-
-        $targetName = mb_strtolower(trim($namaUnitUsaha));
-
-        $selected = collect($rows)->first(function ($row) use ($targetName): bool {
-            if (! is_array($row)) {
-                return false;
+            if (! $response->successful()) {
+                return [null, null];
             }
 
-            $apiName = mb_strtolower(trim((string) ($row['nama'] ?? '')));
+            $rows = data_get($response->json(), 'data', []);
+            if (! is_array($rows) || $rows === []) {
+                return [null, null];
+            }
 
-            return $apiName !== '' && str_contains($apiName, $targetName);
-        });
+            $targetName = mb_strtolower(trim($namaUnitUsaha));
 
-        if (! is_array($selected)) {
-            $selected = $rows[0];
+            $selected = collect($rows)->first(function ($row) use ($targetName): bool {
+                if (! is_array($row)) {
+                    return false;
+                }
+
+                $apiName = mb_strtolower(trim((string) ($row['nama'] ?? '')));
+
+                return $apiName !== '' && str_contains($apiName, $targetName);
+            });
+
+            if (! is_array($selected)) {
+                $selected = $rows[0];
+            }
+
+            $nilaiIkl = (int) ($selected['skor'] ?? 0);
+            $hasilIkl = $nilaiIkl >= 80 ? 'memenuhi' : 'tidak_memenuhi';
+
+            return [$nilaiIkl, $hasilIkl];
+            
+        } catch (Throwable $e) {
+            report($e);
+
+            return [null, null];
         }
-
-        $nilaiIkl = (int) ($selected['skor'] ?? 0);
-        $hasilIkl = $nilaiIkl >= 80 ? 'memenuhi' : 'tidak_memenuhi';
-
-        return [$nilaiIkl, $hasilIkl];
     }
 
     private function payloadUnitUsaha(array $validated): array

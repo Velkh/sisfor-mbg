@@ -192,7 +192,7 @@
                                 <tr>
                                     <td class="ps-4 fw-semibold">{{ $item->nama_unit_usaha }}</td>
                                     <td>{{ $item->nama_pemilik ?? '-' }}</td>
-                                    <td><span class="badge bg-secondary">{{ strtoupper($item->jenis_usaha ?? '-') }}</span></td>
+                                    <td><span class="badge bg-primary">{{ strtoupper($item->jenis_usaha ?? '-') }}</span></td>
                                     <td>{{ $item->created_at->format('d M Y') }}</td>
                                 </tr>
                                 @empty

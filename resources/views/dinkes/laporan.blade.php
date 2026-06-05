@@ -8,7 +8,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/dinkes/kelayakan.css') }}">
-
+<style>
+    .modal-detail-laporan {
+        max-width: 95vw;
+    }
+</style>
     <div class="container-fluid civic civic-fade ">
         <div class="civic-header">
             <div>
@@ -137,7 +141,7 @@
     </div>
 
     <div class="modal fade" id="detailDistribusiModal" tabindex="-1" aria-labelledby="detailDistribusiModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-detail-laporan">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">

@@ -58,7 +58,7 @@
         <div class="filter-card mb-4">
             <form method="GET" action="{{ url()->current() }}">
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <input
                             type="text"
                             name="q"
@@ -67,8 +67,18 @@
                             value="{{ $filters['q'] ?? '' }}"
                         >
                     </div>
+                    <div class="col-md-2">
+                        <select name="jenis_usaha" class="form-select">
+                            <option value="">Semua Jenis Usaha</option>
+                            <option value="sppg" @selected(($filters['jenis_usaha'] ?? '') === 'sppg')>SPPG</option>
+                            <option value="catering" @selected(($filters['jenis_usaha'] ?? '') === 'catering')>Catering</option>
+                            <option value="restoran" @selected(($filters['jenis_usaha'] ?? '') === 'restoran')>Restoran</option>
+                            <option value="dam" @selected(($filters['jenis_usaha'] ?? '') === 'dam')>DAM</option>
+                            <option value="kantin" @selected(($filters['jenis_usaha'] ?? '') === 'kantin')>Kantin</option>
+                        </select>
+                    </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <select name="status_ikl" class="form-select">
                             <option value="">Semua Status IKL</option>
                             <option value="belum_mengajukan" @selected(($filters['status_ikl'] ?? '') === 'belum_mengajukan')>Belum Mengajukan</option>
@@ -94,9 +104,6 @@
                 </div>
 
                 <div class="mt-3 d-flex gap-2 flex-wrap">
-                    <a href="{{ route('admin.data.export.pdf', request()->query()) }}" class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-file-pdf me-2"></i>PDF
-                    </a>
                     <a href="{{ route('admin.data.export.excel', request()->query()) }}" class="btn btn-sm btn-outline-success">
                         <i class="fas fa-file-excel me-2"></i>Excel
                     </a>
@@ -112,7 +119,7 @@
                 <h5 class="mb-0"><i class="fas fa-check-double me-2"></i>Daftar Kelayakan Unit Usaha</h5>
             </div>
             <div class="card-body">
-                <div class="table-responsive border rounded-3 overflow-hidden">
+                <div class="table-responsive border rounded-3 overflow-auto">
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
@@ -159,6 +166,15 @@
                                         $evaluasiText = 'Belum Layak';
                                         $evaluasiClass = 'danger';
                                     }
+
+                                    // Logika untuk mendeteksi SLHS Kadaluarsa
+                                    $tglBerakhir = $laporan?->tgl_berakhir_slhs
+                                        ? \Carbon\Carbon::parse($laporan->tgl_berakhir_slhs)
+                                        : null;
+                                    $isKadaluarsa = $laporan
+                                        && $laporan->status_slhs === 'selesai'
+                                        && $tglBerakhir
+                                        && $tglBerakhir->isPast();
 
                                     $detailPayload = [
                                         'nama_unit_usaha' => $item->nama_unit_usaha,
@@ -217,7 +233,9 @@
                                         </small>
                                     </td>
                                     <td>
-                                        @if (($laporan?->status_slhs ?? null) === 'belum_mengajukan')
+                                        @if ($isKadaluarsa)
+                                            <span class="badge bg-danger">Kadaluarsa</span>
+                                        @elseif (($laporan?->status_slhs ?? null) === 'belum_mengajukan')
                                             <span class="badge bg-secondary">Belum Mengajukan</span>
                                         @elseif (($laporan?->status_slhs ?? null) === 'sudah_mengajukan')
                                             <span class="badge bg-warning text-dark">Sudah Mengajukan</span>

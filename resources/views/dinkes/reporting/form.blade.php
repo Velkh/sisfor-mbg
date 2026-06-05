@@ -178,7 +178,7 @@
             <div class="card-header"><h5 class="mb-0">Data Laporan SLHS</h5></div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-md-3">
+                    <div class="col-md-3 d-none">
                         <label class="form-label">Status IKL</label>
                         <select name="status_ikl" id="statusIkl" class="form-select" required>
                             <option value="">Pilih</option>
@@ -195,7 +195,8 @@
 
                     <div class="col-md-3">
                         <label class="form-label">Hasil IKL</label>
-                        <input type="text" name="hasil_ikl" id="hasilIkl" class="form-control" value="{{ old('hasil_ikl', $laporan->hasil_ikl ?? '') }}">
+                        <input type="text" id="hasilIklDisplay" class="form-control" value="" readonly>
+                        <input type="hidden" name="hasil_ikl" id="hasilIkl" value="{{ old('hasil_ikl', $laporan->hasil_ikl ?? '') }}">
                     </div>
 
                     <div class="col-md-3">
@@ -220,7 +221,7 @@
                     </div>
 
                     <div class="col-md-6" id="slhsLinkBox">
-                        <label class="form-label">Link SLHS</label>
+                        <label class="form-label">Link SLHS / Label HSP</label>
                         <input type="text" name="link_slhs" class="form-control" value="{{ old('link_slhs', $laporan->link_slhs ?? '') }}">
                     </div>
 
@@ -484,6 +485,46 @@ document.addEventListener('DOMContentLoaded', function () {
         const normalized = String(apiJenis).toLowerCase().trim();
         return API_JENIS_MAP[normalized] || '';
     }
+    const statusIkl = document.getElementById('statusIkl');
+    const nilaiIkl = document.getElementById('nilaiIkl');
+    const hasilIkl = document.getElementById('hasilIkl');
+    const hasilIklDisplay = document.getElementById('hasilIklDisplay');
+
+    function syncHasilIkl() {
+        if (!statusIkl || !nilaiIkl || !hasilIkl) return;
+
+        if (statusIkl.value !== 'selesai') {
+            hasilIkl.value = '';
+            return;
+        }
+
+        const nilai = parseInt(nilaiIkl.value, 10);
+
+        if (Number.isNaN(nilai)) {
+            hasilIkl.value = '';
+            return;
+        }
+
+        if (nilai >= 80) {
+            hasilIkl.value = 'memenuhi';
+            hasilIklDisplay.value = 'Memenuhi';
+        } else {
+            hasilIkl.value = 'tidak_memenuhi';
+            hasilIklDisplay.value = 'Tidak Memenuhi';
+        }    
+    }
+
+    if (nilaiIkl) {
+        nilaiIkl.addEventListener('input', syncHasilIkl);
+        nilaiIkl.addEventListener('change', syncHasilIkl);
+    }
+
+    if (statusIkl) {
+        statusIkl.addEventListener('change', syncHasilIkl);
+    }
+
+    syncHasilIkl();
+
     const kecamatanData = @json($kecamatanData);
     const kelurahanData = @json($kelurahanData);
     const oldKec = @json($oldKec);
@@ -607,14 +648,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 100);
             }
         }
-        if (document.getElementById('nilaiIkl')) {
-            document.getElementById('nilaiIkl').value = apiData.nilai_ikl || '';
-        }
-        if (document.getElementById('hasilIkl')) {
-            document.getElementById('hasilIkl').value = apiData.hasil_ikl || '';
-        }
-        if (document.getElementById('statusIkl') && apiData.nilai_ikl) {
-            document.getElementById('statusIkl').value = 'selesai';
+        if (nilaiIkl) nilaiIkl.value = apiData.nilai_ikl ?? '';
+        if (hasilIkl) hasilIkl.value = apiData.hasil_ikl ?? '';
+        if (statusIkl && apiData.nilai_ikl) statusIkl.value = 'selesai';
+
+        // segera sinkronkan tampilan hasil IKL (display) setelah data API dimasukkan
+        if (typeof syncHasilIkl === 'function') {
+            syncHasilIkl();
+        } else if (hasilIklDisplay) {
+            // fallback: gunakan nilai hasil_ikl dari API atau hitung dari nilai_ikl
+            hasilIklDisplay.value = apiData.hasil_ikl === 'memenuhi' ? 'Memenuhi'
+                : apiData.hasil_ikl === 'tidak_memenuhi' ? 'Tidak Memenuhi' : (apiData.nilai_ikl ? (apiData.nilai_ikl >= 80 ? 'Memenuhi' : 'Tidak Memenuhi') : '');
         }
         searchResults.innerHTML = `
             <div class="list-group-item list-group-item-success">

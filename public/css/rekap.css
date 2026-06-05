@@ -1,661 +1,723 @@
-    :root {
-        --g900: #0d3b1e; --g800: #155c30; --g700: #1a7a3f; --g50: #edfaf2;
-        --cream: #faf8f3; --border: #ddd7cb; --text: #1a1a1a; --muted: #5e5e5e;
-        --white: #ffffff; --shadow: 0 8px 24px rgba(0, 0, 0, .06); --r: 12px;
-    }
+/* =============================================================
+   REKAP.CSS — Responsive Stylesheet untuk Pengawasan SLHS
+   ============================================================= */
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ---------- 1. DESIGN TOKENS ---------- */
+:root {
+    --g900: #0d3b1e;
+    --g800: #155c30;
+    --g700: #1a7a3f;
+    --g400: #5cbf7d;
+    --g50:  #edfaf2;
+    --cream: #faf8f3;
+    --border: #ddd7cb;
+    --text:  #1a1a1a;
+    --muted: #5e5e5e;
+    --white: #ffffff;
+    --shadow: 0 8px 24px rgba(0,0,0,.06);
+    --r: 12px;
+}
 
-    body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background: var(--white);
-        color: var(--text);
-        line-height: 1.6;
-    }
+/* ---------- 2. RESET & BASE ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .top {
-        background: linear-gradient(135deg, var(--g900), var(--g700));
-        color: #fff;
-        padding: 34px 18px;
-    }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--white);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
 
-    .top-inner {
-        max-width: 1240px;
-        margin: 0 auto;
-        display: flex;
-        gap: 12px;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-    }
+/* ---------- 3. HEADER ---------- */
+.top {
+    background: linear-gradient(135deg, var(--g900), var(--g700));
+    color: #fff;
+    padding: 34px 18px;
+}
 
-    .title h1 {
-        font-family: 'Fraunces', serif;
-        font-size: clamp(1.35rem, 2.2vw, 1.95rem);
-        line-height: 1.2;
-    }
+.top-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
 
-    .title p {
-        opacity: .88;
-        font-size: .9rem;
-        margin-top: 6px;
-    }
+.title h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.2rem, 2.5vw, 1.95rem);
+    line-height: 1.25;
+}
 
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 14px;
-        border-radius: 10px;
-        border: 1px solid transparent;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: .86rem;
-        cursor: pointer;
-    }
-    .card {
-        max-width: 10000px;
-        margin: 0 auto 24px;
-        padding: 24px;
-        }
+.title p {
+    opacity: .88;
+    font-size: .9rem;
+    margin-top: 6px;
+}
 
-    .btn-outline {
-        border-color: rgba(255,255,255,.45);
-        color: #fff;
-        background: transparent;
-    }
-
-    .btn-outline:hover { background: rgba(255,255,255,.12); }
-
-    .wrap {
-        max-width: 1500px;
-        margin: 20px auto 40px;
-        padding: 0 18px;
-    }
-
-    .card {
-        background: var(--white);
-        border-radius: var(--r);
-        box-shadow: var(--shadow);
-    }
-
-    .card + .card { margin-top: 14px; }
-
-    .card-head {
-        padding: 14px 16px;
-        border-bottom: 1px solid var(--border);
-        text-align: center; /* DITAMBAHKAN AGAR JUDUL KE TENGAH */
-    }
-
-    .card-head h2 {
-        font-size: .95rem;
-        font-weight: 800;
-        color: var(--g800);
-    }
-
-    .card-body { padding: 14px 16px; }
-
-    .clickable-card {
+/* ---------- 4. BUTTONS ---------- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: .86rem;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    border: 2px solid transparent;
-    }
-    .clickable-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
-        border-color: #c8e3d3;
-    }
-    .clickable-card.active-card {
-        background-color: var(--g50);
-        border-color: var(--g700);
-        box-shadow: 0 4px 12px rgba(26, 122, 63, 0.15);
-    }
-    .clickable-card.active-card .stats-title,
-    .clickable-card.active-card .stats-main {
-        color: var(--g800);
-    }
+    transition: background .2s, border-color .2s;
+    white-space: nowrap;
+}
 
-    /* 2. Kotak Pencarian & Tombol Reset */
-    .search-box {
-        display: flex;
-        gap: 10px;
-        width: 100%;
-        margin-bottom: 15px;
-    }
-    .search-box input { flex: 1; }
-    .btn-reset {
-        background: #f8d7da !important;
-        color: #842029 !important;
-        border: 1px solid #f5c2c7 !important;
-        white-space: nowrap;
-    }
-    .btn-reset:hover {
-        background: #f5c2c7 !important;
-    }
+.btn-outline {
+    border-color: rgba(255,255,255,.45);
+    color: #fff;
+    background: transparent;
+}
+.btn-outline:hover { background: rgba(255,255,255,.12); }
 
-    /* 3. Tab Pills (Pengganti Dropdown Select) */
-    .category-tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        width: 100%;
-    }
-    .cat-tab {
-        padding: 8px 16px;
-        background: #f4f8ff;
-        border: 1px solid #cddcf9;
-        color: #3d5a7a;
-        border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .cat-tab:hover { background: #e8f1ff; }
-    .cat-tab.active {
-        background: var(--g700);
-        color: white;
-        border-color: var(--g700);
-    }
+/* ---------- 5. LAYOUT WRAPPER ---------- */
+.wrap {
+    max-width: 1500px;
+    margin: 20px auto 40px;
+    padding: 0 18px;
+}
 
-    /* 4. Responsif untuk Search Box */
-    @media (min-width: 768px) {
-        .filter-form {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .search-box { max-width: 600px; }
-    }
+/* ---------- 6. CARDS ---------- */
+.card {
+    background: var(--white);
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border); /* tambahkan border halus */
+    margin-bottom: 14px;
+    overflow: hidden;
+}
 
-    .summary-wrap {
-        background: transparent;
-        border: none;
-        border-radius: 14px;
-        padding: 18px 0;
-    }
+.card-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+}
 
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-    }
+.card-head h2 {
+    font-size: .95rem;
+    font-weight: 800;
+    color: var(--g800);
+    line-height: 1.4;
+}
 
-    .summary-item {
-        position: relative;
-        background: #ffffff;
-        border: 1px solid #000000;
-        border-radius: 8px;
-        min-height: 132px;
-        padding: 24px 12px 14px;
-        text-align: center;
-    }
+.card-body { padding: 16px 20px; }
 
-    .summary-badge {
-        position: absolute;
-        top: -13px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 30px;
-        height: 30px;
-        border-radius: 999px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: .62rem;
-        font-weight: 800;
-        letter-spacing: .02em;
-        color: #fff;
-    }
+/* ---------- 7. SUMMARY / STATS CARDS ---------- */
+.summary-wrap {
+    background: transparent;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 0;
+}
 
-    .summary-badge.kec { background: #c98b58; }
-    .summary-badge.sppg { background: #7654a8; }
-    .summary-badge.kpm { background: #e1b97a; }
-    .summary-badge.pm { background: #ee9b5f; }
+.group-block { margin-top: 16px; }
 
-    .summary-value {
-        margin-top: 6px;
-        font-size: clamp(1.7rem, 2.6vw, 2.1rem);
-        line-height: 1.05;
-        font-weight: 800;
-        color: #274a68;
-    }
+.group-pill {
+    width: fit-content;
+    margin: 0 auto 10px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #c6d2de;
+    color: #294b68;
+    font-size: .83rem;
+    font-weight: 700;
+    line-height: 1;
+}
 
-    .summary-label {
-        margin-top: 8px;
-        font-size: .82rem;
-        font-weight: 600;
-        color: #5b6d80;
-    }
+.stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    width: 100%;
+    justify-content: center; /* Memastikan jika card cuma sedikit, tetap di tengah */
+}
 
-    .group-block {
-        margin-top: 16px;
-    }
-
-    .group-pill {
-        width: fit-content;
-        margin: 0 auto 10px;
-        padding: 6px 14px;
-        border-radius: 999px;
-        background: #c6d2de;
-        color: #294b68;
-        font-size: .83rem;
-        font-weight: 700;
-        line-height: 1;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 14px;
-    }
-
-    .stats-card {
-        position: relative;
-        background: #ffffff;
-        border: 1px solid #000000;
-        border-radius: 8px;
-        min-height: 154px;
-        padding: 18px 14px 14px;
-        text-align: center;
-    }
-
-    .stats-card .dot {
-        position: absolute;
-        top: -13px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 30px;
-        height: 30px;
-        border-radius: 999px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: .62rem;
-        font-weight: 800;
-    }
-
-    .dot.sma { background: #8f98aa; }
-    .dot.smp { background: #1f6fc4; }
-    .dot.sd { background: #c43317; }
-    .dot.tk { background: #4b9b74; }
-
-    .stats-title {
-        margin-top: 2px;
-        font-size: .74rem;
-        font-weight: 700;
-        color: #4f6072;
-        min-height: 34px;
-    }
-
-    .stats-main {
-        margin-top: 6px;
-        font-size: 2rem;
-        line-height: 1.05;
-        font-weight: 800;
-        color: #274a68;
-    }
-
-    .stats-sub {
-        margin-top: 2px;
-        font-size: .78rem;
-        color: #5f7083;
-        font-weight: 600;
-    }
-
-    .stats-secondary {
-        margin-top: 8px;
-        font-size: 2rem;
-        line-height: 1.05;
-        font-weight: 800;
-        color: #274a68;
-    }
-
-    .content-grid {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 14px;
-        align-items: start;
-    }
-
-    .kec-list { list-style: none; }
-    .kec-list li + li { margin-top: 6px; }
-
-    .kec-link {
-        display: block;
-        text-decoration: none;
-        color: var(--text);
-        background: #fff;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 6px 8px;
-        font-size: .75rem;
-        font-weight: 700;
-    }
-
-    .kec-link:hover {
-        background: var(--g50);
-        border-color: #c8e3d3;
-    }
-
-    .kec-link.active {
-        background: var(--g700);
-        color: #fff;
-        border-color: var(--g700);
-    }
-
-    .table-wrap {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 1050px;
-    }
-
-    th, td {
-        border-bottom: 1px solid #eee9dd;
-        padding: 9px 8px;
-        text-align: left;
-        vertical-align: middle;
-        font-size: .84rem;
-    }
-
-    th {
-        font-size: .74rem;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        color: var(--muted);
-        font-weight: 800;
-        background: #fcfbf8;
-    }
-
-    .name strong {
-        display: block;
-        color: var(--text);
-    }
-
-    .name small {
-        color: var(--muted);
-        font-size: .75rem;
-    }
-
-    .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 3px 8px;
-        border-radius: 999px;
-        font-size: .72rem;
-        font-weight: 700;
-        background: var(--g50);
-        color: var(--g700);
-        border: 1px solid #cfe9d9;
-    }
-
-    .actions .btn {
-        padding: 7px 10px;
-        font-size: .78rem;
-        border-radius: 8px;
-    }
-
-    .actions .btn-detail {
-        background: #f4f8ff;
-        border: 1px solid #cddcf9;
-        color: #1f4ea7;
-    }
-
-    .actions .btn-detail:hover { background: #e8f1ff; }
-
-    .empty {
-        text-align: center;
-        padding: 26px 10px;
-        color: var(--muted);
-    }
-
-    .filter-form {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
-        margin: 0 0 16px;
-    }
-
-    .filter-form input,
-    .filter-form select {
-        padding: 10px 12px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        font-size: .82rem;
-        font-weight: 600;
-        color: var(--text);
-        background: #fff;
-        min-width: 220px;
-    }
-
-    .filter-form input:focus,
-    .filter-form select:focus {
-        outline: none;
-        border-color: #c8e3d3;
-        box-shadow: 0 0 0 2px rgba(26, 122, 63, .12);
-    }
-
-    .filter-form button {
-        padding: 10px 16px;
-        background: var(--g700);
-        color: #fff;
-        border: 1px solid var(--g700);
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: .82rem;
-        cursor: pointer;
-    }
-
-    .filter-form button:hover {
-        background: var(--g800);
-        border-color: var(--g800);
-    }
-
-    .footer { background: var(--g900); color: rgba(255,255,255,.68); padding: 60px 48px 30px; }
-    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 44px; padding-bottom: 44px; border-bottom: 1px solid rgba(255,255,255,.1); }
-    .footer-brand-name { font-family: 'Fraunces', serif; font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
-    .footer-brand-sub { font-size: .77rem; color: rgba(255,255,255,.5); margin-bottom: 14px; line-height: 1.6; }
-    .footer-address { font-size: .8rem; line-height: 1.85; }
-    .footer-col-title { font-family: 'Fraunces', serif; color: #fff; font-size: .93rem; margin-bottom: 14px; }
-    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 7px; }
-    .footer-links a { font-size: .8rem; color: rgba(255,255,255,.62); transition: color .2s; }
-    .footer-links a:hover { color: var(--g400); }
-    .footer-bottom { max-width: 1200px; margin: 24px auto 0; display: flex; justify-content: space-between; align-items: center; font-size: .77rem; color: rgba(255,255,255,.32); }
-    .footer-bottom strong { color: rgba(255,255,255,.6); }
-
-    .recap-buttons {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-        margin-bottom: 30px;
-    }
-    .recap-btn {
-        padding: 15px 20px;
-        background-color: #3d5a7a;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .recap-btn:hover {
-        background-color: #2d4461;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .recap-btn.active {
-        background-color: #ff9800;
-        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
-    }
-    .table-content {
-        display: none;
-    }
-    .table-content.active {
-        display: block;
-    }
-    .loading-state {
-        text-align: center;
-        padding: 30px;
-        color: #999;
-    }
-    .loading-spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #3d5a7a;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
+.stats-card {
+    /* 1. RAHASIA AGAR MELEBAR: */
+    flex: 1 1 160px; 
     
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
+    /* 2. BATAS MAKSIMAL (Opsional tapi penting) */
+    max-width: 280px; 
 
-    @media (max-width: 1050px) {
-        .summary-grid,
-        .stats-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-    }
+    /* --- Gaya visual Anda sebelumnya (tetap dipertahankan) --- */
+    position: relative;
+    background: #ffffff;
+    border: 2px solid #a3c9b3;
+    border-top: 5px solid var(--g700);
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.04);
+    min-height: 140px;
+    padding: 18px 14px 14px;
+    text-align: center;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
 
-    @media (max-width: 560px) {
-        .summary-grid,
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
+/* Clickable card states */
+.clickable-card {
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+    border: 2px solid transparent;
+}
+.clickable-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,.12);
+    border-color: #c8e3d3;
+}
+.clickable-card.active-card {
+    background-color: var(--g50);
+    border-color: var(--g700);
+    box-shadow: 0 4px 12px rgba(26,122,63,.15);
+}
+.clickable-card.active-card .stats-title,
+.clickable-card.active-card .stats-main { color: var(--g800); }
 
-    /* ==========================================================================
-   TAMBAHAN RESPONSIVE MOBILE (Tanpa Merusak Base Style)
-   ========================================================================== */
+.stats-title {
+    margin-top: 2px;
+    font-size: .74rem;
+    font-weight: 700;
+    color: #4f6072;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.stats-main {
+    margin-top: 6px;
+    font-size: 2rem;
+    line-height: 1.05;
+    font-weight: 800;
+    color: #274a68;
+}
+.stats-sub {
+    margin-top: 2px;
+    font-size: .78rem;
+    color: #5f7083;
+    font-weight: 600;
+}
 
-@media (max-width: 768px) {
-    /* 1. Amankan Wrapper & Padding Dasar */
-    .wrap {
-        padding: 0 12px;
-        margin-top: 15px;
-    }
-    .card {
-        padding: 16px;
-    }
+/* ---------- 8. RECAP TABS ---------- */
+.recap-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
 
-    /* 2. Header (Top Inner) menjadi vertikal */
-    .top-inner {
-        flex-direction: column;
-        text-align: center;
-        align-items: center;
-    }
-    .top-inner .title h1 {
-        font-size: 1.5rem;
-    }
-    .btn {
-        width: 100%;
-        justify-content: center;
-    }
+.recap-btn {
+    padding: 14px 18px;
+    background: #3d5a7a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    cursor: pointer;
+    transition: background .2s, transform .2s, box-shadow .2s;
+}
+.recap-btn:hover {
+    background: #2d4461;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.recap-btn.active {
+    background: #ff9800;
+    box-shadow: 0 4px 12px rgba(255,152,0,.3);
+}
 
-    /* 3. Form Filter & Pencarian menjadi vertikal */
-    .filter-form {
-        flex-direction: column;
-        align-items: stretch; /* Paksa input memenuhi lebar HP */
-    }
-    .search-box {
-        flex-direction: column;
-    }
-    .filter-form input,
-    .filter-form select,
-    .filter-form button,
-    .search-box button {
-        width: 100%;
-        min-width: unset; /* Timpa min-width 220px dari base style */
-    }
+.table-content { display: none; }
+.table-content.active { display: block; }
 
-    /* 4. Tab Pills Kategori di-scroll menyamping jika tidak muat */
-    .category-tabs {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 8px;
-        -webkit-overflow-scrolling: touch;
-    }
-    .cat-tab {
-        white-space: nowrap; /* Teks tidak turun ke baris baru */
-        flex-shrink: 0; /* Tab tidak mengecil */
-    }
+/* ---------- 9. FILTER FORM ---------- */
+.filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+}
 
-    /* 5. Sidebar Menu Kecamatan menjadi Dropdown/Scroll Horizontal */
+.search-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+
+.search-box input {
+    flex: 1 1 200px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--text);
+    background: #fff;
+}
+.search-box input:focus {
+    outline: none;
+    border-color: #c8e3d3;
+    box-shadow: 0 0 0 2px rgba(26,122,63,.12);
+}
+
+.search-box button {
+    padding: 10px 16px;
+    background: var(--g700);
+    color: #fff;
+    border: 1px solid var(--g700);
+    border-radius: 10px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .82rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s;
+}
+.search-box button:hover { background: var(--g800); }
+
+.btn-reset {
+    background: #f8d7da !important;
+    color: #842029 !important;
+    border: 1px solid #f5c2c7 !important;
+    white-space: nowrap;
+}
+.btn-reset:hover { background: #f5c2c7 !important; }
+
+/* Tab pills */
+.category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+}
+.cat-tab {
+    padding: 7px 16px;
+    background: #f4f8ff;
+    border: 1px solid #cddcf9;
+    color: #3d5a7a;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .2s, color .2s, border-color .2s;
+}
+.cat-tab:hover { background: #e8f1ff; }
+.cat-tab.active {
+    background: var(--g700);
+    color: #fff;
+    border-color: var(--g700);
+}
+
+/* ---------- 10. CONTENT GRID (SIDEBAR + TABLE) ---------- */
+.content-grid {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+/* Kolom tabel tidak boleh meluber keluar grid */
+.content-grid > aside,
+.content-grid > .table-wrap,
+.content-grid > .table-scroll-outer {
+    min-width: 0;
+    width: 100%;
+}
+
+/* Kecamatan list */
+.kec-list { list-style: none; }
+.kec-list li + li { margin-top: 6px; }
+
+.kec-link {
+    display: block;
+    text-decoration: none;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: .76rem;
+    font-weight: 700;
+    transition: background .15s, border-color .15s, color .15s;
+    word-break: break-word;
+}
+.kec-link:hover { background: var(--g50); border-color: #c8e3d3; }
+.kec-link.active { background: var(--g700); color: #fff; border-color: var(--g700); }
+
+/* ---------- 11. TABLES ---------- */
+
+/* Scroll container dengan fade hint di kanan */
+.table-scroll-outer {
+    position: relative;
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden; /* clip the fade pseudo-element */
+}
+
+/* Fade gradient "ada lebih di kanan" */
+.table-scroll-outer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 52px;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,.92));
+    pointer-events: none;
+    border-radius: 0 8px 8px 0;
+    transition: opacity .3s;
+    z-index: 2;
+}
+/* Sembunyikan fade ketika sudah di ujung kanan */
+.table-scroll-outer.is-scrolled-end::after { opacity: 0; }
+
+/* Hint teks "geser →" — muncul di mobile */
+.table-scroll-hint {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--muted);
+    padding: 6px 4px 2px;
+    user-select: none;
+}
+.table-scroll-hint svg { flex-shrink: 0; }
+
+/* Scrollbar track tipis di bawah tabel */
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    /* Custom scrollbar — tampak di semua browser modern */
+    scrollbar-width: thin;
+    scrollbar-color: #c8e3d3 transparent;
+}
+.table-wrap::-webkit-scrollbar { height: 5px; }
+.table-wrap::-webkit-scrollbar-track { background: transparent; }
+.table-wrap::-webkit-scrollbar-thumb {
+    background: #c8e3d3;
+    border-radius: 999px;
+}
+.table-wrap::-webkit-scrollbar-thumb:hover { background: var(--g700); }
+
+/* Scroll progress bar di atas tabel */
+.table-scroll-bar {
+    height: 3px;
+    background: #eee9dd;
+    border-radius: 999px;
+    margin-bottom: 0;
+    overflow: hidden;
+    display: none; /* ditampilkan lewat JS saat perlu scroll */
+}
+.table-scroll-bar-fill {
+    height: 100%;
+    background: var(--g700);
+    border-radius: 999px;
+    width: 0%;
+    transition: width .1s linear;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+th, td {
+    border-bottom: 1px solid #eee9dd;
+    padding: 9px 10px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: .84rem;
+}
+
+th {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+    font-weight: 800;
+    background: #fcfbf8;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #fdfcf9; }
+
+.name strong { display: block; color: var(--text); }
+.name small { color: var(--muted); font-size: .75rem; }
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    background: var(--g50);
+    color: var(--g700);
+    border: 1px solid #cfe9d9;
+}
+
+.actions .btn {
+    padding: 6px 10px;
+    font-size: .78rem;
+    border-radius: 8px;
+}
+.actions .btn-detail {
+    background: #f4f8ff;
+    border: 1px solid #cddcf9;
+    color: #1f4ea7;
+}
+.actions .btn-detail:hover { background: #e8f1ff; }
+
+.empty {
+    text-align: center;
+    padding: 26px 10px;
+    color: var(--muted);
+}
+
+/* ---------- 12. LOADING STATE ---------- */
+.loading-state {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+}
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3d5a7a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ---------- 13. FOOTER ---------- */
+footer {
+    background: var(--g900);
+    color: rgba(255,255,255,.68);
+    padding: 60px 48px 30px;
+}
+
+.footer-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.8fr 1fr 1fr 1fr;
+    gap: 44px;
+    padding-bottom: 44px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.footer-brand-name { font-family: 'Fraunces', serif; font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
+.footer-brand-sub  { font-size: .77rem; color: rgba(255,255,255,.5); margin-bottom: 14px; line-height: 1.6; }
+.footer-address    { font-size: .8rem; line-height: 1.85; }
+.footer-col-title  { font-family: 'Fraunces', serif; color: #fff; font-size: .93rem; margin-bottom: 14px; }
+
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.footer-links a { font-size: .8rem; color: rgba(255,255,255,.62); text-decoration: none; transition: color .2s; }
+.footer-links a:hover { color: var(--g400); }
+
+.footer-bottom {
+    max-width: 1200px;
+    margin: 24px auto 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .77rem;
+    color: rgba(255,255,255,.32);
+}
+.footer-bottom strong { color: rgba(255,255,255,.6); }
+
+.group-block { margin-bottom: 18px; }
+.group-pill { font-weight:700; margin-bottom:8px; color:#333; }
+.stats-grid { display:flex; gap:12px; flex-wrap:wrap; align-items:stretch; }
+.stats-card { min-width:140px; padding:12px; border-radius:8px; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.05); cursor:pointer; }
+.stats-card .stats-title { font-size:13px; color:#666; }
+.stats-card .stats-main { font-size:20px; font-weight:700; margin-top:6px; }
+.stats-card .stats-sub { font-size:12px; color:#999; margin-top:4px; }
+.stats-card.active-card { outline:3px solid rgba(0,123,255,0.12); }
+.summary-wrap .stats-grid {
+    justify-content: center;
+    justify-items: center;
+}
+
+/* Pastikan juga untuk layout grid fallback */
+.summary-wrap .stats-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+}
+/* =============================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================= */
+
+/* ---- TABLET BESAR (≤ 1200px) ---- */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
     .content-grid {
-        display: flex;
-        flex-direction: column;
-    }
-    .kec-list {
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        padding-bottom: 10px;
-        -webkit-overflow-scrolling: touch;
-    }
-    .kec-list li {
-        margin-top: 0;
-        margin-right: 8px;
-    }
-    .kec-link {
-        white-space: nowrap;
-        font-size: 0.8rem;
-        padding: 8px 12px;
-    }
-
-    /* 6. Pengamanan Tabel agar tidak gepeng */
-    .table-wrap {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        border: 1px solid var(--border); /* Tambah border agar jelas area scroll-nya */
-        border-radius: 8px;
-    }
-    table {
-        min-width: 800px; /* Paksa tabel lebar, sisanya di-scroll */
-    }
-
-    /* 7. Footer menjadi vertikal */
-    .footer {
-        padding: 40px 20px 20px;
+        grid-template-columns: 220px 1fr;
     }
     .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-    .footer-bottom {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
     }
 }
 
-/* Penyesuaian Ekstra untuk HP Layar Sangat Kecil (iPhone SE / lama) */
+/* ---- TABLET (≤ 1024px) ---- */
+@media (max-width: 1024px) {
+    .wrap { padding: 0 16px; }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Sidebar kecamatan jadi scrollable horizontal */
+    .kec-list {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px;
+    }
+    .kec-list li + li { margin-top: 0; }
+    .kec-link {
+        white-space: nowrap;
+        word-break: normal;
+        flex-shrink: 0;
+    }
+
+    .footer {
+        padding: 40px 24px 24px;
+    }
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ---- MOBILE BESAR (≤ 768px) ---- */
+@media (max-width: 768px) {
+    /* Header */
+    .top { padding: 24px 16px; }
+    .top-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .btn { width: 100%; }
+
+    /* Wrapper */
+    .wrap { padding: 0 10px; margin: 14px auto 28px; }
+
+    /* Cards */
+    .card { border-radius: 10px; }
+    .card-head { padding: 12px 14px; }
+    .card-body { padding: 12px 14px; }
+    .filter-form { padding: 12px 14px; }
+
+    /* Stats */
+    .stats-grid { gap: 10px; }
+    .stats-card { min-height: 120px; padding: 14px 10px; }
+    .stats-title { font-size: .7rem; min-height: 28px; }
+    .stats-main  { font-size: 1.7rem; }
+    .stats-sub   { font-size: .72rem; }
+
+    /* Recap buttons */
+    .recap-buttons { grid-template-columns: 1fr; gap: 8px; }
+    .recap-btn { padding: 12px 14px; font-size: .8rem; }
+
+    /* Search box */
+    .search-box { flex-direction: column; }
+    .search-box input,
+    .search-box button { width: 100%; flex: none; }
+
+    /* Category tabs — no-wrap scroll */
+    .category-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+    }
+    .cat-tab { flex-shrink: 0; }
+
+    /* Table — tampilkan hint & progress bar */
+    .table-scroll-hint { display: flex; }
+    .table-scroll-bar  { display: block; }
+    table { min-width: 600px; }
+
+    /* Footer */
+    footer { padding: 36px 16px 20px; }
+    .footer-grid { grid-template-columns: 1fr; gap: 24px; padding-bottom: 28px; }
+    .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+}
+
+/* ---- MOBILE KECIL (≤ 480px) ---- */
 @media (max-width: 480px) {
-    .stats-card {
-        min-height: auto;
-        padding: 12px 10px;
-    }
-    .stats-main {
-        font-size: 1.5rem;
-    }
-    .stats-title {
-        min-height: 40px; /* Pastikan judul card tidak terpotong */
-    }
+    .title h1 { font-size: 1.25rem; }
+    .title p  { font-size: .82rem; }
+
+    .stats-grid { grid-template-columns: 1fr; }
+
+    .stats-card { min-height: auto; padding: 12px 10px; }
+    .stats-title { min-height: auto; }
+    .stats-main  { font-size: 1.5rem; }
+
+    .group-pill { font-size: .78rem; }
+
+    th, td { font-size: .78rem; padding: 8px; }
+
+    .card-head h2 { font-size: .88rem; }
+
+    .actions .btn { font-size: .74rem; padding: 5px 8px; }
+
+    footer { padding: 28px 12px 16px; }
+    .footer-brand-name { font-size: 1rem; }
+    .footer-col-title  { font-size: .88rem; }
+    .footer-links a    { font-size: .76rem; }
+}
+
+/* ---- SANGAT KECIL / iPhone SE (≤ 360px) ---- */
+@media (max-width: 360px) {
+    .wrap { padding: 0 8px; }
+    .title h1 { font-size: 1.1rem; }
+    .stats-main { font-size: 1.3rem; }
+    .cat-tab { padding: 6px 12px; font-size: .75rem; }
 }

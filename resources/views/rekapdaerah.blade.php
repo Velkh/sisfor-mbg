@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/rekap.css') }}">
+    <script src="{{ asset('js/rekap.js') }}"></script>
 </head>
 <body>
     <header class="top">
@@ -17,7 +18,7 @@
             </div>
             <a href="{{ route('guest.index') }}" class="btn btn-outline">Kembali ke Beranda</a>
         </div>
-    </header>
+    </header>   
 
     <main class="wrap">
         <section class="card">
@@ -27,22 +28,50 @@
             </div>
             <div class="card-body">
                 <div class="summary-wrap">
-                    <div class="group-block">
-                        <div class="group-pill">Unit Usaha</div>
-                        <div class="stats-grid">
-                            @foreach (($unitUsahaCards ?? []) as $card)
-                                <!-- Card yang bisa diklik -->
-                                <div class="stats-card clickable-card {{ request('jenis_usaha') == ($card['filter_jenis'] ?? '') && request('status_slhs') == ($card['filter_status'] ?? '') ? 'active-card' : '' }}" 
-                                     data-jenis="{{ $card['filter_jenis'] ?? '' }}" 
-                                     data-status="{{ $card['filter_status'] ?? '' }}"
-                                     title="Klik untuk memfilter tabel di bawah">
-                                    <div class="stats-title">{{ $card['judul'] }}</div>
-                                    <div class="stats-main">{{ number_format((int) ($card['nilai'] ?? 0), 0, ',', '.') }}</div>
-                                    <div class="stats-sub">{{ $card['subNilai'] }}</div>
-                                </div>
-                            @endforeach
-                        </div>
+                     <div class="group-block">
+                    <div class="group-pill">Ringkasan</div>
+                    <div class="stats-grid">
+                    <div class="stats-card clickable-card" data-jenis="" data-status="" title="Total Unit Usaha">
+                        <div class="stats-title">Total TPP</div>
+                        <div class="stats-main">{{ number_format($summaryTotals['total_units'] ?? 0,0,',','.') }}</div>
+                        <div class="stats-sub">Semua unit</div>
                     </div>
+
+                    <div class="stats-card clickable-card" data-jenis="" data-status="sudah_slhs" title="Unit Usaha Sudah SLHS">
+                        <div class="stats-title">TPP BerSLHS</div>
+                        <div class="stats-main">{{ number_format($summaryTotals['total_slhs'] ?? 0,0,',','.') }}</div>
+                        <div class="stats-sub">Sudah SLHS</div>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="group-block">
+                    <div class="group-pill">Jenis TPP</div>
+                    <div class="stats-grid">
+                    @foreach ($jenisUsahaCards as $card)
+                        <div class="stats-card clickable-card" data-jenis="{{ $card['jenis'] }}" data-status="">
+                        <!-- Menggunakan strtoupper di sini -->
+                        <div class="stats-title">{{ strtoupper($card['judul']) }}</div>
+                        <div class="stats-main">{{ number_format((int) ($card['nilai'] ?? 0),0,',','.') }}</div>
+                        <div class="stats-sub">{{ $card['subNilai'] ?? '' }}</div>
+                        </div>
+                    @endforeach
+                    </div>
+                </div>
+
+                <div class="group-block">
+                    <div class="group-pill">TPP BerSLHS</div>
+                    <div class="stats-grid">
+                    @foreach ($jenisUsahaSlhsCards as $card)
+                        <div class="stats-card clickable-card" data-jenis="{{ $card['jenis'] }}" data-status="sudah_slhs">
+                        <!-- Menggunakan strtoupper di sini -->
+                        <div class="stats-title">{{ strtoupper($card['judul']) }}</div>
+                        <div class="stats-main">{{ number_format((int) ($card['nilai'] ?? 0),0,',','.') }}</div>
+                        <div class="stats-sub">{{ $card['subNilai'] ?? 'Sudah SLHS' }}</div>
+                        </div>
+                    @endforeach
+                    </div>
+                </div>
                 </div>
             </div>
         </section>
@@ -169,9 +198,6 @@
                                     <th>Nama Sarana</th>
                                     <th>Status IKL</th>
                                     <th>Status SLHS</th>
-                                    <th>Jumlah Pegawai</th>
-                                    <th>Kelompok Penerima</th>
-                                    <th>Penerima (orang)</th>
                                     <th style="width: 110px;">Aksi</th>
                                 </tr>
                             </thead>
@@ -187,22 +213,49 @@
         </section>
     </main>
     
-    <footer class="footer">
-        <!-- (Kode Footer Sama seperti Sebelumnya) -->
+    <footer>
         <div class="footer-grid">
             <div>
                 <div class="footer-brand-name">Dashboard SLHS</div>
                 <div class="footer-brand-sub">Sistem Informasi Pengawasan<br>Higiene Sanitasi Pangan</div>
                 <div class="footer-address"> Jalan Margonda Raya No.54, Depok 16431<br> Gedung Balai Kota Depok </div>
             </div>
+            
             <div>
                 <h4 class="footer-col-title">Link</h4>
                 <ul class="footer-links">
-                    <li><a href="#">Beranda</a></li>
+                    <li><a href="#hero">Beranda</a></li>
+                    <li><a href="#about">Tentang SLHS</a></li>
                     <li><a href="{{ route('login') }}">Login Sistem</a></li>
+                    <li><a href="#faq">FAQ Syarat IKL</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="footer-col-title">Pusat</h4>
+                <ul class="footer-links">
+                    <li><a href="https://kemkes.go.id/" target="_blank">Kementerian Kesehatan</a></li>
+                    <li><a href="https://badanpangan.go.id/" target="_blank">Badan Pangan Nasional</a></li>
+                    <li><a href="https://www.pom.go.id/" target="_blank">Badan POM</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="footer-col-title">Daerah</h4>
+                <ul class="footer-links">
+                    <li><a href="https://depok.go.id/" target="_blank">Pemkot Depok</a></li>
+                    <li><a href="https://dinkes.depok.go.id/" target="_blank">Dinas Kesehatan Depok</a></li>
+                    <li><a href="https://dpmptsp.depok.go.id/" target="_blank">DPMPTSP Depok</a></li>
+                    <li><a href="https://diskominfo.depok.go.id/" target="_blank">Diskominfo Depok</a></li>
+                </ul>
+                <h4 class="footer-col-title" style="margin-top:18px;">Portal Layanan</h4>
+                <ul class="footer-links">
+                    <li><a href="https://oss.go.id/" target="_blank">OSS RBA</a></li>
+                    <li><a href="https://opendata.depok.go.id/" target="_blank">Opendata Depok</a></li>
                 </ul>
             </div>
         </div>
+        
         <div class="footer-bottom">
             <span><strong>Dinas Kesehatan & Diskominfo</strong> Kota Depok</span>
             <span>Copyright &copy; {{ date('Y') }}</span>
@@ -432,9 +485,6 @@
                             </td>
                             <td>${escapeHtml(row.status_ikl_label)}</td>
                             <td>${escapeHtml(row.status_slhs_label)}</td>
-                            <td>${escapeHtml(row.jumlah_pegawai)}</td>
-                            <td>${escapeHtml(row.kelompok_penerima)}</td>
-                            <td>${escapeHtml(row.total_penerima)}</td>
                             <td class="actions">
                                 <a href="${detailUrl}" class="btn btn-detail">Detail</a>
                             </td>

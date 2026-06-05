@@ -47,6 +47,7 @@ class ReportsController extends Controller
                 });
             })
             ->when($kategori !== 'all', fn ($builder) => $builder->where('jenis_usaha', $kategori))
+            ->where('jenis_usaha', 'sppg')
             ->orderBy('nama_unit_usaha')
             ->paginate(10)
             ->withQueryString();

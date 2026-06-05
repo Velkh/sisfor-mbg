@@ -81,6 +81,7 @@ class EvaluationController extends Controller
     {
         $validated = $request->validate([
             'q' => ['nullable', 'string', 'max:255'],
+            'jenis_usaha' => ['nullable', 'string', 'max:255'],
             'status_ikl' => ['nullable', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
             'status_slhs' => ['nullable', 'in:belum_mengajukan,sudah_mengajukan,selesai'],
             'evaluasi' => ['nullable', 'in:all,memenuhi,tidak_memenuhi'],
@@ -88,6 +89,7 @@ class EvaluationController extends Controller
 
         return [
             'q' => trim((string) ($validated['q'] ?? '')),
+            'jenis_usaha' => trim((string) ($validated['jenis_usaha'] ?? '')),
             'status_ikl' => (string) ($validated['status_ikl'] ?? ''),
             'status_slhs' => (string) ($validated['status_slhs'] ?? ''),
             'evaluasi' => (string) ($validated['evaluasi'] ?? 'all'),
@@ -112,6 +114,10 @@ class EvaluationController extends Controller
                         $relationQuery->where('nama_puskesmas', 'like', '%' . $keyword . '%');
                     });
             });
+        }
+
+        if ($filters['jenis_usaha'] !== '') {
+            $query->where('jenis_usaha', $filters['jenis_usaha']);
         }
 
         if ($filters['status_ikl'] !== '') {
@@ -143,12 +149,15 @@ class EvaluationController extends Controller
         return $query;
     }
 
-    public function exportExcel(Request $request): Response
+    public function exportExcel(Request $request)
     {
-        $filters = $this->validatedFilters($request);
-        $fileName = 'laporan-kelayakan-' . now()->format('Ymd-His') . '.xlsx';
-
-        return Excel::download(new KelayakanExport($filters), $fileName);
+        // Filter bisa kosong atau ada, export sesuai kondisi
+        $filters = $request->all();
+        
+        return Excel::download(
+            new KelayakanExport($filters),
+            'kelayakan_' . now()->format('Y-m-d_His') . '.xlsx'
+        );
     }
 
     public function show(int $unitId): View

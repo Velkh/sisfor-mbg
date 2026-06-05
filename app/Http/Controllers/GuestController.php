@@ -112,57 +112,48 @@ class GuestController extends Controller
             return $kecamatan; 
         }); 
     
-        $unitUsahaSlhsCounts = UnitUsaha::query()
-        ->whereHas('laporanSlhs', function ($q) {
-            $q->where('status_slhs', 'selesai');
-        })
-        ->selectRaw('jenis_usaha, COUNT(*) as total')
-        ->groupBy('jenis_usaha')
-        ->pluck('total', 'jenis_usaha');
-        
-            $totalAllUnits = UnitUsaha::count();
-            $unitUsahaCards = [
-                [
-                    'judul'         => 'Total Unit',
-                    'nilai'         => $totalAllUnits,
-                    'subNilai'      => 'Unit',
-                    'filter_jenis'  => '', 
-                    'filter_status' => '',
-                ]
+
+        $summaryTotals = [
+            'total_units' => UnitUsaha::count(),
+            'total_slhs' => LaporanSlhs::where('status_slhs', 'selesai')->count(),
+        ];
+
+        $slhsCounts = UnitUsaha::query()
+            ->join('laporan_slhs', 'unit_usahas.id_unit_usaha', '=', 'laporan_slhs.id_unit_usaha')
+            ->where('laporan_slhs.status_slhs', 'selesai')
+            ->selectRaw('unit_usahas.jenis_usaha, COUNT(*) as cnt')
+            ->groupBy('unit_usahas.jenis_usaha')
+            ->pluck('cnt', 'unit_usahas.jenis_usaha'); 
+
+        $jenisUsahaCards = [];
+        $jenisUsahaSlhsCards = [];
+
+        foreach ($unitUsahaCounts as $jenis => $total) {
+            
+            $jenisUsahaCards[] = [
+                'jenis'    => $jenis,
+                'nilai'    => (int) $total,
+                'judul'    => $jenis,
+                'subNilai' => 'Jumlah',
             ];
 
-            $jenisUnit = [
-                'SPPG'     => 'sppg',
-                'Catering' => 'catering',
-                'Restoran' => 'restoran',
-                'DAM'      => 'dam',
-                'Kantin'   => 'kantin',
+            $jenisUsahaSlhsCards[] = [
+                'jenis'    => $jenis,
+                'nilai'    => (int) ($slhsCounts[$jenis] ?? 0), 
+                'judul'    => $jenis,
+                'subNilai' => 'Sudah SLHS',
             ];
+        }
 
-            foreach ($jenisUnit as $label => $key) {
-                $unitUsahaCards[] = [
-                    'judul'         => $label,
-                    'nilai'         => (int) ($unitUsahaCounts[$key] ?? $unitUsahaCounts[strtolower($label)] ?? $unitUsahaCounts[strtoupper($label)] ?? 0),
-                    'subNilai'      => 'Unit',
-                    'filter_jenis'  => $label,
-                    'filter_status' => '',
-                ];
-                
-                $unitUsahaCards[] = [
-                    'judul'         => "$label - Sudah SLHS",
-                    'nilai'         => (int) ($unitUsahaSlhsCounts[$key] ?? $unitUsahaSlhsCounts[strtolower($label)] ?? $unitUsahaSlhsCounts[strtoupper($label)] ?? 0),
-                    'subNilai'      => 'Unit',
-                    'filter_jenis'  => $label,
-                    'filter_status' => 'sudah_slhs',
-                ];
-            }
         return view('rekapdaerah', [ 
             'rows' => $rows, 
             'kecamatanOptions' => $kecamatanOptions, 
             'rekapPerKecamatan' => $rekapPerKecamatan, 
             'selectedKecamatanId' => $filters['kecamatan_id'],
             'q' => $filters['q'],
-            'unitUsahaCards' => $unitUsahaCards, 
+            'summaryTotals' => $summaryTotals,
+            'jenisUsahaCards' => $jenisUsahaCards,
+            'jenisUsahaSlhsCards' => $jenisUsahaSlhsCards,
         ]); 
     } 
 

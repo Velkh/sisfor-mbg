@@ -9,8 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 
-    class DashboardController extends Controller
-    {
+class DashboardController extends Controller
+{
     public function index(): View
     {
         $totalUnitUsaha = UnitUsaha::count();
@@ -39,8 +39,10 @@ use Illuminate\Contracts\View\View;
                 });
         })->count();     
 
+        // UPDATE: Penambahan count untuk unit usaha yang sudah memiliki SLHS
         $sebaranKecamatan = Kecamatan::query()
             ->withCount([
+                // --- Penghitungan Total Keseluruhan Unit ---
                 'unitUsahas as sppg_count' => function ($query) {
                     $query->where('jenis_usaha', 'sppg');
                 },
@@ -58,6 +60,32 @@ use Illuminate\Contracts\View\View;
                 },
                 'unitUsahas as kantin_count' => function ($query) {
                     $query->where('jenis_usaha', 'kantin');
+                },
+
+                // --- Penghitungan Unit yang Sudah SLHS ---
+                'unitUsahas as sppg_slhs_count' => function ($query) {
+                    $query->where('jenis_usaha', 'sppg')
+                          ->whereHas('laporanSlhs', fn($q) => $q->where('status_slhs', 'selesai'));
+                },
+                'unitUsahas as tpp_slhs_count' => function ($query) {
+                    $query->where('jenis_usaha', 'tpp')
+                          ->whereHas('laporanSlhs', fn($q) => $q->where('status_slhs', 'selesai'));
+                },
+                'unitUsahas as catering_slhs_count' => function($query){
+                    $query->where('jenis_usaha', 'catering')
+                          ->whereHas('laporanSlhs', fn($q) => $q->where('status_slhs', 'selesai'));
+                },
+                'unitUsahas as restoran_slhs_count' => function($query){
+                    $query->where('jenis_usaha', 'restoran')
+                          ->whereHas('laporanSlhs', fn($q) => $q->where('status_slhs', 'selesai'));
+                },
+                'unitUsahas as dam_slhs_count' => function ($query) {
+                    $query->where('jenis_usaha', 'dam')
+                          ->whereHas('laporanSlhs', fn($q) => $q->where('status_slhs', 'selesai'));
+                },
+                'unitUsahas as kantin_slhs_count' => function ($query) {
+                    $query->where('jenis_usaha', 'kantin')
+                          ->whereHas('laporanSlhs', fn($q) => $q->where('status_slhs', 'selesai'));
                 }
             ])
             ->orderBy('nama_kecamatan')
@@ -82,8 +110,19 @@ use Illuminate\Contracts\View\View;
                   ->whereDate('tgl_berakhir_slhs', '>=', now()); // Yang belum hangus
             })
             ->get()
-            // Urutkan di tingkat Collection berdasarkan tanggal berakhir yang paling dekat dengan hari ini
             ->sortBy(function ($unit) {
+                return $unit->laporanSlhs->tgl_berakhir_slhs;
+            })
+            ->take(5);
+        
+        $slhsKadaluarsa = UnitUsaha::with(['laporanSlhs', 'kecamatan'])
+            ->whereHas('laporanSlhs', function (Builder $q) {
+                $q->where('status_slhs', 'selesai')
+                ->whereNotNull('tgl_berakhir_slhs')
+                ->whereDate('tgl_berakhir_slhs', '<', now());
+            })
+            ->get()
+            ->sortByDesc(function ($unit) {
                 return $unit->laporanSlhs->tgl_berakhir_slhs;
             })
             ->take(5);
@@ -120,6 +159,7 @@ use Illuminate\Contracts\View\View;
             'totalProsesSlhs' => $totalProsesSlhs,
             'recentUnitUsaha' => $recentUnitUsaha,
             'sebaranKecamatan' => $sebaranKecamatan,
+            'slhsKadaluarsa' => $slhsKadaluarsa,
             'pengajuanSlhs' => $pengajuanSlhs,
             'slhsJatuhTempo' => $slhsJatuhTempo,
             'grafikBulanan'    => $grafikBulanan,

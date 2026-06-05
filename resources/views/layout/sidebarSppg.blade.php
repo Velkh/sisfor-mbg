@@ -1,5 +1,11 @@
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <div class="topbar-sppg">
-    <div class="topbar-left"></div>
+    <div class="topbar-left">
+        <button id="sidebarToggle" class="mobile-toggle-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
     
     <div class="topbar-right">
         <div class="user-info">
@@ -15,12 +21,12 @@
     </div>
 </div>
 
-<div class="sidebar-sppg">
+<div class="sidebar-sppg" id="sidebarMenu">
     <div class="sidebar-header">
         <div class="logo-section">
             <img src="{{ asset('images/images.jpeg') }}" alt="Logo BGN" class="logo-img">
             <div class="app-title">
-                <h5>Dinas Kesehatan Kota Depok</h5>
+                <h5>Dinkes Kota Depok</h5>
                 <p>SLHS Monitoring System</p>
             </div>
         </div>
@@ -68,32 +74,70 @@
         </form>
     </div>
 </div>
+
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+
     /* ================= Topbar Styles ================= */
     .topbar-sppg {
         position: fixed;
         top: 0;
-        left: 250px; /* Menyesuaikan lebar sidebar */
+        left: 260px;
         right: 0;
-        height: 65px;
-        background: #0066cc;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        height: 70px;
+        background: rgba(30, 41, 59, 0.98);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0 25px;
+        padding: 0 30px;
         z-index: 999;
+        transition: all 0.3s ease;
+    }
+
+    /* Style untuk tombol mobile (disembunyikan di desktop) */
+    .mobile-toggle-btn {
+        display: none;
+        background: none;
+        border: none;
+        color: #ffffff;
+        font-size: 22px;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 8px;
+        transition: background 0.3s;
+    }
+
+    .mobile-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
     }
 
     .topbar-sppg .user-info {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 15px;
+        padding: 6px 12px;
+        border-radius: 12px;
+        transition: background 0.3s ease;
+        cursor: pointer;
+    }
+
+    .topbar-sppg .user-info:hover {
+        background: rgba(255, 255, 255, 0.06);
     }
 
     .topbar-sppg .user-avatar {
-        font-size: 32px;
-        color: #ffffff; /* Menggunakan warna biru agar senada dengan sidebar */
+        font-size: 38px;
+        color: #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .topbar-sppg .user-details {
@@ -110,8 +154,9 @@
     }
 
     .topbar-sppg .user-role {
-        font-size: 11px;
-        color: #ffffff;
+        font-size: 12px;
+        font-weight: 500;
+        color: #94a3b8;
     }
 
     /* ================= Sidebar Styles ================= */
@@ -119,56 +164,58 @@
         position: fixed;
         left: 0;
         top: 0;
-        width: 250px;
+        width: 260px;
         height: 100vh;
-        background: #0066cc;
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
         display: flex;
         flex-direction: column;
         color: white;
         overflow-y: auto;
         overflow-x: hidden;
-        z-index: 1000;
+        z-index: 1001; /* Ditingkatkan agar di atas overlay */
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
     }
 
     .sidebar-header {
-        padding: 20px 15px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 24px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .logo-section {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
 
     .logo-img {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        border-radius: 12px;
         background: white;
-        padding: 4px;
+        padding: 6px;
         object-fit: contain;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     .app-title h5 {
         margin: 0;
         font-size: 14px;
         font-weight: 700;
-        color: white;
+        color: #ffffff;
+        letter-spacing: 0.3px;
     }
 
     .app-title p {
-        margin: 2px 0 0 0;
+        margin: 4px 0 0 0;
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.8);
+        color: #94a3b8;
         font-weight: 500;
     }
 
-    /* Sidebar Navigation */
     .sidebar-nav {
         flex: 1;
-        padding: 10px 0;
+        padding: 20px 0;
     }
 
     .nav-menu {
@@ -178,48 +225,54 @@
     }
 
     .nav-item {
-        margin: 5px 0;
+        margin: 4px 16px; 
     }
 
     .nav-link {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 20px;
-        color: rgba(255, 255, 255, 0.85);
+        gap: 14px;
+        padding: 12px 16px;
+        color: #cbd5e1;
         text-decoration: none;
-        transition: all 0.3s ease;
-        border-left: 4px solid transparent;
+        border-radius: 10px; 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         font-size: 14px;
+        font-weight: 500;
     }
 
-    .nav-link:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
-        border-left-color: white;
+    .nav-link:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: #ffffff;
+        transform: translateX(5px);
     }
 
     .nav-link.active {
-        background-color: rgba(255, 255, 255, 0.15);
+        background-color: #4338ca;
         color: white;
-        border-left-color: #ffeb3b;
         font-weight: 600;
+        box-shadow: 0 4px 12px rgba(67, 56, 202, 0.4);
     }
 
     .nav-link i {
-        font-size: 16px;
-        min-width: 20px;
+        font-size: 18px;
+        min-width: 24px;
         text-align: center;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link.active i {
+        color: #e0e7ff; 
     }
 
     .nav-link span {
         flex: 1;
     }
 
-    /* Sidebar Footer */
     .sidebar-footer {
-        padding: 10px 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(15, 23, 42, 0.4);
     }
 
     .logout-form {
@@ -232,62 +285,106 @@
         background: none;
         border: none;
         cursor: pointer;
-        padding: 12px 20px;
-        margin: 0;
         font-family: inherit;
-        color: rgba(255, 255, 255, 0.85);
-        transition: all 0.3s ease;
+        color: #f87171; 
     }
 
     .logout-btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
+        background-color: rgba(248, 113, 113, 0.1);
+        color: #ef4444;
+        transform: translateX(5px);
     }
 
-    /* Scrollbar Styling */
-    .sidebar-sppg::-webkit-scrollbar { width: 6px; }
-    .sidebar-sppg::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
-    .sidebar-sppg::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
-    .sidebar-sppg::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+    .sidebar-sppg::-webkit-scrollbar { width: 5px; }
+    .sidebar-sppg::-webkit-scrollbar-track { background: transparent; }
+    .sidebar-sppg::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    .sidebar-sppg::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
-    /* ================= Main Content Layout ================= */
+    /* Overlay Styles */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
     body.sppg-layout {
-        margin-left: 250px;
-        padding-top: 65px; /* Offset untuk menghindari konten tertutup topbar */
-        background-color: #f4f6f9; /* Background abu-abu muda standar dashboard */
+        margin-left: 260px;
+        padding-top: 70px;
+        background-color: #f8fafc;
     }
 
     /* ================= Responsive Design ================= */
-    @media (max-width: 768px) {
+    @media (max-width: 992px) {
         .sidebar-sppg {
-            width: 200px;
+            width: 220px;
         }
         .topbar-sppg {
-            left: 200px;
+            left: 220px;
         }
         body.sppg-layout {
-            margin-left: 200px;
+            margin-left: 220px;
         }
-        .app-title h5 { font-size: 13px; }
-        .app-title p { font-size: 10px; }
-        .nav-link { padding: 10px 15px; font-size: 13px; }
     }
 
-    @media (max-width: 576px) {
+    @media (max-width: 768px) {
+        .mobile-toggle-btn {
+            display: block; /* Menampilkan tombol di mobile */
+        }
+
         .sidebar-sppg {
-            position: absolute; /* Atau fixed tapi disembunyikan menggunakan hamburger menu */
-            width: 100%;
-            height: auto;
-            max-height: 300px;
-            border-radius: 0 0 10px 10px;
-            z-index: 1001; /* Harus di atas topbar jika sedang terbuka */
+            transform: translateX(-100%); 
         }
+
+        /* Class ini ditambahkan oleh JavaScript */
+        .sidebar-sppg.show-sidebar {
+            transform: translateX(0);
+        }
+
+        /* Class ini ditambahkan oleh JavaScript */
+        .sidebar-overlay.show-overlay {
+            display: block;
+            opacity: 1;
+        }
+
         .topbar-sppg {
-            left: 0; /* Full width di mobile */
+            left: 0;
+            padding: 0 15px;
         }
+
+        /* Sembunyikan detail nama dan role agar topbar tidak terlalu sempit di layar kecil */
+        .topbar-sppg .user-details {
+            display: none; 
+        }
+
         body.sppg-layout {
             margin-left: 0;
-            padding-top: 65px;
         }
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        // Fungsi untuk membuka/menutup sidebar
+        function toggleSidebar() {
+            sidebar.classList.toggle('show-sidebar');
+            overlay.classList.toggle('show-overlay');
+        }
+
+        // Event klik pada tombol hamburger
+        toggleBtn.addEventListener('click', toggleSidebar);
+
+        // Event klik pada overlay untuk menutup sidebar
+        overlay.addEventListener('click', toggleSidebar);
+    });
+</script>

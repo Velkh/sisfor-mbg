@@ -5,27 +5,53 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\View\View;
 use App\Models\UnitUsaha;
+use Illuminate\Http\Request;
 
 class SlhsController extends Controller {
-    public function index(): View
-    {
-        $user = Auth::user();
+public function index(Request $request): View
+{
+    $user = Auth::user();
+    abort_unless($user && $user->role === 'admin_kecamatan', 403);
 
-        abort_unless($user && $user->role === 'admin_kecamatan', 403);
+    $allowedJenisUsaha = $this->allowedJenisUsaha($user->akses_tipe_usaha);
 
-        $allowedJenisUsaha = $this->allowedJenisUsaha($user->akses_tipe_usaha);
+    $query = UnitUsaha::query()
+        ->with(['laporanSlhs', 'sasaranManfaat', 'kelurahan', 'puskesmas'])
+        ->where('id_kecamatan', $user->id_kecamatan)
+        ->whereIn('jenis_usaha', $allowedJenisUsaha);
 
-        $items = UnitUsaha::query()
-            ->with(['laporanSlhs', 'sasaranManfaat', 'kelurahan', 'puskesmas'])
-            ->where('id_kecamatan', $user->id_kecamatan)
-            ->whereIn('jenis_usaha', $allowedJenisUsaha)
-            ->orderByDesc('created_at')
-            ->paginate(10);
-
-        return view('kecamatan.kelayakan', [
-            'items' => $items,
-        ]);
+    if ($nama = $request->query('nama')) {
+        $query->where('nama_unit_usaha', 'like', '%' . $nama . '%');
     }
+
+    if ($statusIkl = $request->query('status_ikl')) {
+        $query->whereHas('laporanSlhs', function ($q) use ($statusIkl) {
+            $q->where('status_ikl', $statusIkl);
+        });
+    }
+    
+    if ($statusSlhs = $request->query('status_slhs')) {
+        if (in_array($statusSlhs, ['belum_mengajukan', 'sudah_mengajukan', 'selesai'], true)) {
+            $query->whereHas('laporanSlhs', function ($q) use ($statusSlhs) {
+                $q->where('status_slhs', $statusSlhs);
+            });
+        } elseif ($statusSlhs === 'ada') {
+            $query->whereHas('laporanSlhs', function ($q) {
+                $q->whereNotNull('status_slhs');
+            });
+        } elseif ($statusSlhs === 'tidak') {
+            $query->whereDoesntHave('laporanSlhs', function ($q) {
+                $q->whereNotNull('status_slhs');
+            });
+        }
+    }
+
+    $items = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
+
+    return view('kecamatan.kelayakan', [
+        'items' => $items,
+    ]);
+}
 
     public function showKelayakan(UnitUsaha $unit): View
     {

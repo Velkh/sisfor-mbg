@@ -29,6 +29,15 @@
             <h5 class="mb-0">Daftar Unit Usaha</h5>
         </div>
         <div class="card-body">
+            <form method="GET" class="row g-2 mb-3">
+                <div class="col-md-4">
+                    <input type="text" name="nama" class="form-control" placeholder="Cari nama unit..." value="{{ request('nama') }}">
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary">Filter</button>
+                    <a href="{{ route('kecamatan.laporan-unit.index') }}" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>            
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead>
@@ -64,6 +73,9 @@
                                 <td>
                                     <a href="{{ route('kecamatan.laporan-unit.show', $item->id_unit_usaha) }}" class="btn btn-sm btn-outline-info" title="Detail">
                                         <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('kecamatan.laporan-unit.edit', $item->id_unit_usaha) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                        <i class="fas fa-pen"></i>
                                     </a>
                                 </td>
                             </tr>

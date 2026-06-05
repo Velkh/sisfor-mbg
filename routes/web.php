@@ -68,7 +68,8 @@ Route::middleware('admin_kecamatan')->prefix('kecamatan')->name('kecamatan.')->g
     Route::post('/laporan-unit', [LaporanUnitController::class, 'store'])->name('laporan-unit.store');
     Route::get('laporan-unit/ikl/search', [LaporanUnitController::class, 'searchIkl'])->name('laporan-unit.ikl.search');
     Route::get('/laporan-unit/{unit}', [LaporanUnitController::class, 'show'])->name('laporan-unit.show');
-
+    Route::get('/laporan-unit/{unit}/edit', [LaporanUnitController::class, 'edit'])->name('laporan-unit.edit');
+    Route::put('/laporan-unit/{unit}',[LaporanUnitController::class, 'update'])->name('laporan-unit.update');
     Route::get('/kelayakan',[SlhsController::class, 'index'])->name('kelayakan.index');
     Route::get('/kelayakan/{unit}', [SlhsController::class, 'showKelayakan'])->name('kelayakan.show');
 

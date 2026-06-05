@@ -71,6 +71,11 @@
                         <div class="input-group">
                             <input type="text" id="searchUnitInput" class="form-control" placeholder="Cari nama SPPG, contoh: SPPG tapos">
                             <button type="button" id="btnCariUnit" class="btn btn-outline-primary">Cari</button>
+                            @if ($isEdit)
+                                <button type="button" id="btnResyncFromApi" class="btn btn-outline-success">
+                                    <i class="fas fa-sync-alt me-1"></i>Resync
+                                </button>
+                            @endif
                         </div>
                         <div id="searchResults" class="list-group mt-2"></div>
                         <input type="hidden" name="api_unit_id" id="apiUnitId" value="{{ $oldApiId }}">
@@ -353,6 +358,55 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnCariUnit = document.getElementById('btnCariUnit');
     const searchResults = document.getElementById('searchResults');
     const apiUnitId = document.getElementById('apiUnitId');
+    const btnResyncFromApi = document.getElementById('btnResyncFromApi');
+
+    if (btnResyncFromApi) {
+        btnResyncFromApi.addEventListener('click', async function (e) {
+            e.preventDefault();
+
+            const namaUnit = document.getElementById('namaUnitUsaha')?.value.trim();
+            if (!namaUnit) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: 'Nama unit usaha belum diisi'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route('kecamatan.laporan-unit.ikl.search') }}?search=' + encodeURIComponent(namaUnit));
+                const payload = await response.json();
+
+                if (!payload.success || !Array.isArray(payload.data) || payload.data.length === 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Data tidak ditemukan di API'
+                    });
+                    return;
+                }
+
+                const item = payload.data[0];
+                fillFormFromApiData(item);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Data berhasil di-resync dari API',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } catch (err) {
+                console.error('Resync error:', err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Kesalahan',
+                    text: 'Terjadi kesalahan saat resync'
+                });
+            }
+        });
+    }
 
     async function searchUnit() {
         const keyword = searchUnitInput.value.trim();

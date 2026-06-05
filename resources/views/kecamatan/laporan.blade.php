@@ -3,6 +3,16 @@
 @section('title', 'Rekap Laporan')
 
 @section('content')
+<style>
+    .form-control,
+    .form-select,
+    .btn {
+        min-height: 42px;
+    }
+    .modal-detail-laporan {
+        max-width: 95vw;
+    }
+</style>
 <link rel="stylesheet" href="{{ asset('css/kecamatan/kelayakan.css') }}">
 
     <div class="container-fluid civic civic-fade">
@@ -12,29 +22,32 @@
             </div>
 
             <div class="card-body">
-                <form method="GET" action="{{ route('kecamatan.sasaran.index') }}">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Cari Unit Usaha / Puskesmas</label>
-                            <input type="text" name="q" class="form-control" value="{{ $filters['q'] }}" placeholder="Cari...">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Kategori Sasaran</label>
-                            <select name="kategori" class="form-select">
-                                <option value="all" @selected($filters['kategori'] === 'all')>Semua</option>
-                                <option value="Sekolah" @selected($filters['kategori'] === 'Sekolah')>Sekolah</option>
-                                <option value="B3" @selected($filters['kategori'] === 'B3')>B3</option>
-                                <option value="Umum" @selected($filters['kategori'] === 'Umum')>Umum</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end gap-2">
-                            <button class="btn btn-primary w-100" type="submit">
-                                <i class="fas fa-search me-2"></i>Tampilkan
-                            </button>
-                            <a href="{{ route('kecamatan.sasaran.index') }}" class="btn btn-outline-secondary">Reset</a>
-                        </div>
+            <form method="GET" action="{{ route('kecamatan.sasaran.index') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Cari Unit SPPG</label>
+                        <input type="text" name="q" class="form-control" value="{{ $filters['q'] }}" placeholder="Cari...">
                     </div>
-                </form>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Kategori Sasaran</label>
+                        <select name="kategori" class="form-select">
+                            <option value="all" @selected($filters['kategori'] === 'all')>Semua</option>
+                            <option value="Sekolah" @selected($filters['kategori'] === 'Sekolah')>Sekolah</option>
+                            <option value="B3" @selected($filters['kategori'] === 'B3')>B3</option>
+                            <option value="Umum" @selected($filters['kategori'] === 'Umum')>Umum</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">Tampilkan</button>
+                    </div>
+
+                    <div class="col-md-3">
+                        <a href="{{ route('kecamatan.sasaran.index') }}" class="btn btn-outline-secondary w-100">Reset</a>
+                    </div>
+                </div>
+            </form>
             </div>
         </div>
 
@@ -70,7 +83,12 @@
                                             'kategori' => $row->kategori ?? '-',
                                             'tipe' => $row->tipe_instansi ?? '-',
                                             'status' => $row->status ? ucfirst((string) $row->status) : '-',
-                                            'jumlah_penerima' => $jumlah,
+                                            'jumlah_siswa' => (int) $row->jumlah_siswa,
+                                            'jumlah_bumil' => (int) $row->jumlah_bumil,
+                                            'jumlah_busui' => (int) $row->jumlah_busui,
+                                            'jumlah_balita' => (int) $row->jumlah_balita,
+                                            'jumlah_jiwa' => (int) $row->jumlah_jiwa,
+                                            'total_penerima' => $jumlah,
                                             'kelurahan' => $item->kelurahan?->nama_kelurahan ?? '-',
                                             'kecamatan' => $item->kecamatan?->nama_kecamatan ?? '-',
                                             'puskesmas' => $item->puskesmas?->nama_puskesmas ?? '-',
@@ -116,8 +134,7 @@
     </div>
 
     <div class="modal fade" id="detailDistribusiModal" tabindex="-1" aria-labelledby="detailDistribusiModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-detail-laporan">            <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fas fa-list-alt me-2"></i>Detail Distribusi - <span id="modalUnitName">Unit Usaha</span>
@@ -134,7 +151,12 @@
                                     <th>Kategori</th>
                                     <th>Tipe</th>
                                     <th>Status</th>
-                                    <th>Jumlah Penerima</th>
+                                    <th>Siswa</th>
+                                    <th>Bumil</th>
+                                    <th>Busui</th>
+                                    <th>Balita</th>
+                                    <th>Jiwa</th>
+                                    <th>Total</th>
                                     <th>Kelurahan</th>
                                     <th>Kecamatan</th>
                                     <th>Puskesmas</th>
@@ -176,7 +198,12 @@
                         <td>${row.kategori ?? '-'}</td>
                         <td>${row.tipe ?? '-'}</td>
                         <td>${row.status ?? '-'}</td>
-                        <td>${row.jumlah_penerima ?? 0}</td>
+                        <td>${row.jumlah_siswa ?? 0}</td>
+                        <td>${row.jumlah_bumil ?? 0}</td>
+                        <td>${row.jumlah_busui ?? 0}</td>
+                        <td>${row.jumlah_balita ?? 0}</td>
+                        <td>${row.jumlah_jiwa ?? 0}</td>
+                        <td>${row.total_penerima ?? 0}</td>
                         <td>${row.kelurahan ?? '-'}</td>
                         <td>${row.kecamatan ?? '-'}</td>
                         <td>${row.puskesmas ?? '-'}</td>

@@ -10,8 +10,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('unit_usahas', function (Blueprint $table) {
-            // Ubah jenis_usaha dari ENUM ke STRING
-            // Perlu raw SQL untuk MySQL
             DB::statement("ALTER TABLE unit_usahas MODIFY jenis_usaha VARCHAR(50) NOT NULL");
         });
 
@@ -27,7 +25,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('unit_usahas', function (Blueprint $table) {
-            // Revert jenis_usaha ke ENUM
             DB::statement("ALTER TABLE unit_usahas MODIFY jenis_usaha ENUM('sppg', 'tpp', 'dam', 'kantin') NOT NULL");
         });
 

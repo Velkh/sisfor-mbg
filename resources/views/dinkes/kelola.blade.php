@@ -185,11 +185,7 @@
                         <div class="mb-0">
                             <label class="form-label">Akses Tipe Usaha</label>
                             <select name="akses_tipe_usaha" class="form-select @error('akses_tipe_usaha') is-invalid @enderror" required>
-                                <option value="">Pilih Jenis Usaha</option>
                                 <option value="sppg">SPPG</option>
-                                <option value="tpp">TPP</option>
-                                <option value="dam">DAM</option>
-                                <option value="kantin">Kantin</option>
                             </select>
                             @error('akses_tipe_usaha') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -296,86 +292,138 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.getElementById('filterForm');
-            const qInput = document.getElementById('q');
-            const kecamatanSelect = document.getElementById('kecamatan_id');
-            let typingTimer = null;
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filterForm');
+    const qInput = document.getElementById('q');
+    const kecSelect = document.getElementById('kecamatan_id');
+    let typingTimer = null;
 
-            if (qInput && sessionStorage.getItem('refocusSearch') === '1') {
-                qInput.focus();
-                const len = qInput.value.length;
-                qInput.setSelectionRange(len, len);
-                sessionStorage.removeItem('refocusSearch');
-            }
+    function getTableCard() {
+        // kartu kedua berisi tabel (pertama = filter)
+        return document.querySelectorAll('.card')[1] || document.querySelector('.card');
+    }
 
-            if (qInput) {
-                qInput.addEventListener('input', function () {
-                    clearTimeout(typingTimer);
-                    typingTimer = setTimeout(function () {
-                        sessionStorage.setItem('refocusSearch', '1');
-                        form.requestSubmit();
-                    }, 400);
-                });
-            }
+    async function fetchAndReplace(url) {
+        try {
+            const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const text = await res.text();
+            const doc = new DOMParser().parseFromString(text, 'text/html');
 
-            if (kecamatanSelect) {
-                kecamatanSelect.addEventListener('change', function () {
-                    form.requestSubmit();
-                });
-            }
+            const newTableResponsive = doc.querySelector('.table-responsive');
+            const newPagination = doc.querySelector('.mt-3');
 
-            document.addEventListener('keydown', function (event) {
-                if (event.key === '/' && document.activeElement !== qInput) {
-                    event.preventDefault();
-                    qInput.focus();
-                }
-            });
+            const tableCard = getTableCard();
+            if (!tableCard) return;
 
-            const detailModal = document.getElementById('detailOperatorModal');
-            const editModal = document.getElementById('editOperatorModal');
-            const deleteModal = document.getElementById('deleteOperatorModal');
+            const oldTableResponsive = tableCard.querySelector('.table-responsive');
+            if (newTableResponsive && oldTableResponsive) oldTableResponsive.replaceWith(newTableResponsive);
 
-            if (detailModal) {
-                detailModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    document.getElementById('detailUsername').textContent = button.getAttribute('data-username') || '-';
-                    document.getElementById('detailAkses').textContent = (button.getAttribute('data-akses') || '-').toUpperCase();
-                    document.getElementById('detailKecamatan').textContent = button.getAttribute('data-kecamatan') || '-';
-                    document.getElementById('detailCreated').textContent = button.getAttribute('data-created') || '-';
-                });
-            }
+            const oldPagination = tableCard.querySelector('.mt-3');
+            if (newPagination && oldPagination) oldPagination.replaceWith(newPagination);
 
-            if (editModal) {
-                editModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    const updateUrl = button.getAttribute('data-update-url');
-                    const username = button.getAttribute('data-username');
-                    const kecamatanId = button.getAttribute('data-kecamatan-id') || '';
-                    const aksesType = button.getAttribute('data-akses-type') || '';
+            history.replaceState(null, '', url);
+        } catch (err) {
+            console.error('AJAX fetch error:', err);
+        }
+    }
 
-                    document.getElementById('editOperatorForm').setAttribute('action', updateUrl);
-                    document.getElementById('editOperatorUsername').textContent = username || '-';
+    function submitAjax() {
+        const params = new URLSearchParams(new FormData(form));
+        const url = form.action + '?' + params.toString();
+        fetchAndReplace(url);
+    }
 
-                    const kecSelect = document.getElementById('edit_id_kecamatan');
-                    if (kecSelect) kecSelect.value = kecamatanId;
+    if (qInput && sessionStorage.getItem('refocusSearch') === '1') {
+        qInput.focus();
+        const len = qInput.value.length;
+        qInput.setSelectionRange(len, len);
+        sessionStorage.removeItem('refocusSearch');
+    }
 
-                    const aksesSelect = document.getElementById('edit_akses_tipe_usaha');
-                    if (aksesSelect) aksesSelect.value = aksesType;
-                });
-            }
+    // hijack normal submit
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitAjax();
+    });
 
-            if (deleteModal) {
-                deleteModal.addEventListener('show.bs.modal', function (event) {
-                    const button = event.relatedTarget;
-                    const deleteUrl = button.getAttribute('data-delete-url');
-                    const username = button.getAttribute('data-username');
-
-                    document.getElementById('deleteOperatorForm').setAttribute('action', deleteUrl);
-                    document.getElementById('deleteOperatorUsername').textContent = username || '-';
-                });
-            }
+    if (qInput) {
+        qInput.addEventListener('input', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function () {
+                sessionStorage.setItem('refocusSearch', '1');
+                submitAjax();
+            }, 400);
         });
-    </script>
+    }
+
+    if (kecSelect) {
+        kecSelect.addEventListener('change', function () {
+            submitAjax();
+        });
+    }
+
+    // keyboard shortcut to focus
+    document.addEventListener('keydown', function (event) {
+        if (event.key === '/' && document.activeElement !== qInput) {
+            event.preventDefault();
+            qInput.focus();
+        }
+    });
+
+    // modal detail/edit/delete handlers (tetap sama)
+    const detailModal = document.getElementById('detailOperatorModal');
+    const editModal = document.getElementById('editOperatorModal');
+    const deleteModal = document.getElementById('deleteOperatorModal');
+
+    if (detailModal) {
+        detailModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            document.getElementById('detailUsername').textContent = button.getAttribute('data-username') || '-';
+            document.getElementById('detailAkses').textContent = (button.getAttribute('data-akses') || '-').toUpperCase();
+            document.getElementById('detailKecamatan').textContent = button.getAttribute('data-kecamatan') || '-';
+            document.getElementById('detailCreated').textContent = button.getAttribute('data-created') || '-';
+        });
+    }
+
+    if (editModal) {
+        editModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const updateUrl = button.getAttribute('data-update-url');
+            const username = button.getAttribute('data-username');
+            const kecamatanId = button.getAttribute('data-kecamatan-id') || '';
+            const aksesType = button.getAttribute('data-akses-type') || '';
+
+            document.getElementById('editOperatorForm').setAttribute('action', updateUrl);
+            document.getElementById('editOperatorUsername').textContent = username || '-';
+
+            const kecSelectEl = document.getElementById('edit_id_kecamatan');
+            if (kecSelectEl) kecSelectEl.value = kecamatanId;
+
+            const aksesSelect = document.getElementById('edit_akses_tipe_usaha');
+            if (aksesSelect) aksesSelect.value = aksesType;
+        });
+    }
+
+    if (deleteModal) {
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const deleteUrl = button.getAttribute('data-delete-url');
+            const username = button.getAttribute('data-username');
+
+            document.getElementById('deleteOperatorForm').setAttribute('action', deleteUrl);
+            document.getElementById('deleteOperatorUsername').textContent = username || '-';
+        });
+    }
+
+    // intercept pagination link clicks (AJAX)
+    document.addEventListener('click', function (e) {
+        const a = e.target.closest('.pagination a');
+        if (a && a.href) {
+            e.preventDefault();
+            fetchAndReplace(a.href);
+        }
+    });
+});
+</script>
 @endsection
