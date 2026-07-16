@@ -52,6 +52,8 @@ app/
 │   │       ├── LaporanSasaranController.php
 │   │       └── SlhsController.php
 │   └── Middleware/
+│       ├── AdminDinkesMiddleware.php
+│       └── AdminKecamatanMiddleware.php
 ├── Models/
 │   ├── FotoUnit.php
 │   ├── Kecamatan.php
@@ -87,6 +89,19 @@ database/
 ├── factories/
 │   └── UserFactory.php
 ├── migrations/
+│   ├── 0001_01_01_000000_create_users_table.php
+│   ├── 0001_01_01_000001_create_cache_table.php
+│   ├── 0001_01_01_000002_create_jobs_table.php
+│   ├── 0001_01_01_000003_create_table_kecamatan.php
+│   ├── 2024_04_05_create_sessions_table.php
+│   ├── 2026_04_13_062658_create_table_puskesmas.php
+│   ├── 2026_04_13_062930_create_table_kelurahan.php
+│   ├── 2026_04_30_172219_unit_usahas.php
+│   ├── 2026_04_30_172727_sasaran_manfaat.php
+│   ├── 2026_04_30_173835_laporan_slhs.php
+│   ├── 2026_05_01_170908_add_idkecamatan_to_users.php
+│   ├── 2026_05_06_125017_add_jumlah_penjamah_terlatih_to_unit_usahas_table.php
+│   └── 2026_05_11_101251_create_foto_usaha_table.php
 └── seeders/
 
 public/
@@ -118,6 +133,10 @@ storage/
 
 tests/
 ├── Feature/
+│   ├── Dinkes/
+│   ├── Kecamatan/
+│   ├── GuestControllerTest.php
+│   └── LoginControllerTest.php
 └── Unit/
 
 ## ⚙️ Langkah Instalasi Lokal
