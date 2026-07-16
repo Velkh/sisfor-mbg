@@ -10,7 +10,7 @@ Aplikasi berbasis **Laravel 12** untuk memonitor dan mengevaluasi kelayakan sani
 - **Dashboard Komprehensif:** Tersedia untuk ringkasan Dinkes (makro), Kecamatan (mikro), dan Publik (tanpa login).
 - **Peringatan Dini SLHS:** Notifikasi untuk sertifikat yang hampir/telah kedaluwarsa.
 - **Rekap & Ekspor:** Pelaporan ekspor data ke Excel.
-- **Resiliensi API:** Penanganan galat otomatis (retry/503/timeout) jika API Lalapan Depok sedang *down*.
+- **Resiliensi API:** Penanganan galat otomatis (retry/503/timeout) jika API Dsimfoniku sedang *down*.
 - **Isolasi Data Otomatis:** Filter *middleware* berbasis wilayah kerja dan kewenangan admin.
 
 ## 👥 Peran dan Akses
