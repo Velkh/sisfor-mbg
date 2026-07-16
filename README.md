@@ -1,59 +1,166 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Monev TPP — Web Dashboard SLHS
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi berbasis **Laravel 12** untuk memonitor dan mengevaluasi kelayakan sanitasi Tempat Pengelolaan Pangan (TPP) di Kota Depok. Sistem ini secara otomatis mengintegrasikan hasil Inspeksi Kesehatan Lingkungan (IKL) dari **Lalapan Depok** dan menghasilkan status kelayakan Sertifikat Laik Higiene Sanitasi (SLHS) berbasis aturan (*rule-based*).
 
-## About Laravel
+## 🌟 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Manajemen Unit Usaha TPP:** Dikelola per kecamatan dengan pembagian akses spesifik per jenis usaha (SPPG, TPP, DAM, Kantin).
+- **Sinkronisasi Otomatis IKL:** Menarik data hasil IKL dari API eksternal **Lalapan Depok** (termasuk *name matching*).
+- **Evaluasi Kelayakan Otomatis:** Skor IKL ≥ 80 = "Memenuhi Syarat" (otomatis *real-time*).
+- **Dashboard Komprehensif:** Tersedia untuk ringkasan Dinkes (makro), Kecamatan (mikro), dan Publik (tanpa login).
+- **Peringatan Dini SLHS:** Notifikasi untuk sertifikat yang hampir/telah kedaluwarsa.
+- **Rekap & Ekspor:** Pelaporan ekspor data ke Excel.
+- **Resiliensi API:** Penanganan galat otomatis (retry/503/timeout) jika API Lalapan Depok sedang *down*.
+- **Isolasi Data Otomatis:** Filter *middleware* berbasis wilayah kerja dan kewenangan admin.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 👥 Peran dan Akses
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Admin Dinkes:** Akses lintas kecamatan, monitoring makro, kelola operator/admin kecamatan, rekap pelaporan pimpinan, dan pantau log sinkronisasi API.
+2. **Admin Kecamatan:** Mengelola data unit usaha di wilayah kerjanya. **Catatan Akses:** Hak akses admin kecamatan dipecah dan diisolasi per jenis usaha spesifik (Admin SPPG, Admin TPP, Admin DAM, Admin Kantin) untuk masing-masing kecamatan.
+3. **Publik / Guest:** Akses pantau data kelayakan TPP tanpa autentikasi (Read-only).
 
-## Learning Laravel
+## 🚀 Lingkungan Pengembangan & Prasyarat
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Sistem ini dikembangkan dan dioptimalkan untuk lingkungan berikut:
+- **PHP** 8.3.x
+- **Laravel** 12.x
+- **Composer** 2.x
+- **Node.js** & npm
+- **Database:** MySQL / MariaDB
+- **Local Development:** Direkomendasikan menggunakan **Laragon**
+- **Production Environment:** Disiapkan untuk *deployment* pada **cPanel**
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Struktur Folder
 
-## Laravel Sponsors
+```text
+app/
+├── Exports/
+│   └── KelayakanExport.php
+├── Http/
+│   ├── Controllers/
+│   │   ├── GuestController.php
+│   │   ├── LoginController.php
+│   │   ├── Dinkes/
+│   │   │   ├── DashboardController.php
+│   │   │   ├── EvaluationController.php
+│   │   │   ├── ManageOperatorsController.php
+│   │   │   ├── ReportsController.php
+│   │   │   └── ReportingController.php
+│   │   └── Kecamatan/
+│   │       ├── DashboardController.php
+│   │       ├── LaporanUnitController.php
+│   │       ├── LaporanSasaranController.php
+│   │       └── SlhsController.php
+│   └── Middleware/
+├── Models/
+│   ├── FotoUnit.php
+│   ├── Kecamatan.php
+│   ├── Kelurahan.php
+│   ├── LaporanPenerima.php
+│   ├── LaporanSlhs.php
+│   ├── MenuSppg.php
+│   ├── Puskesmas.php
+│   ├── SasaranManfaat.php
+│   ├── Sppg.php
+│   ├── UnitUsaha.php
+│   └── User.php
+└── Providers/
+    └── AppServiceProvider.php
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+bootstrap/
+├── app.php
+└── providers.php
 
-### Premium Partners
+config/
+├── app.php
+├── auth.php
+├── cache.php
+├── database.php
+├── filesystems.php
+├── logging.php
+├── mail.php
+├── queue.php
+├── services.php
+└── session.php
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+database/
+├── factories/
+│   └── UserFactory.php
+├── migrations/
+└── seeders/
 
-## Contributing
+public/
+├── css/
+├── images/
+├── js/
+├── storage/
+├── index.php
+└── robots.txt
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+resources/
+├── css/
+├── js/
+└── views/
+    ├── layout/
+    ├── dinkes/
+    ├── kecamatan/
+    ├── rekapdaerah.blade.php
+    └── homepage.blade.php
 
-## Code of Conduct
+routes/
+├── web.php
+└── console.php
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+storage/
+├── app/
+├── framework/
+└── logs/
 
-## Security Vulnerabilities
+tests/
+├── Feature/
+└── Unit/
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## ⚙️ Langkah Instalasi Lokal
 
-## License
+1. **Clone repositori**
+   ```bash
+   git clone <repository-url>
+   cd monev-tpp-slhs
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+2. **Install dependency PHP & Node**
+   ```bash
+   composer install
+   npm install
+   ```
+
+3. **Konfigurasi Environment**
+   Salin file konfigurasi:
+   ```bash
+   cp .env.example .env
+   ```
+   Sesuaikan koneksi database di `.env`. Tambahkan kredensial API integrasi:
+   ```env
+   LALAPAN_DEPOK_BASE_URL="https://api.domain.com"
+   LALAPAN_DEPOK_API_KEY="your-api-key"
+   ```
+
+4. **Generate Key & Migrasi Database**
+   ```bash
+   php artisan key:generate
+   php artisan migrate --seed
+   ```
+
+5. **Jalankan Aplikasi**
+   Jika tidak mengakses langsung melalui *virtual host* (misal `.test` di Laragon), jalankan internal server:
+   ```bash
+   php artisan serve
+   npm run dev
+   ```
+
+## 📜 Panduan Kontribusi / Commit
+
+Untuk menjaga kerapian riwayat repositori, gunakan format *commit message* yang ringkas dan spesifik pada *scope* perubahan. Contoh:
+- `feat(api): integrasi endpoint Lalapan Depok`
+- `fix(role): pemisahan akses DAM dan Kantin per kecamatan`
+- `refactor(db): rombak struktur tabel dashboard SLHS`

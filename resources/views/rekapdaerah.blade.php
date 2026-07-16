@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/rekap.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ asset('js/rekap.js') }}"></script>
 </head>
 <body>
@@ -25,8 +26,29 @@
             <div class="card-head">
                 <h2>Data Pengawasan SLHS</h2>
                 <h2>Kota Depok</h2>
-            </div>
             <div class="card-body">
+                <!-- BLOK VISUALISASI DATA (PIE CHART) -->
+                <div class="group-block" style="margin-bottom: 30px;">
+                    <div class="group-pill">Visualisasi Data</div>
+                    <div class="pie-grid" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                        
+                        <div class="pie-card" style="flex: 1 1 50%; min-width: 0; background: #fff; padding: 15px 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; border: 1px solid #eee;">
+                            <h3 style="font-size: 13px; margin-bottom: 10px; color: #374151; min-height: 40px; display: flex; align-items: center; justify-content: center;">TPP vs Lulus IKL</h3>
+                            <div style="position: relative; height: 160px; width: 100%; display: flex; justify-content: center;">
+                                <canvas id="pieTppVsIkl"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="pie-card" style="flex: 1 1 50%; min-width: 0; background: #fff; padding: 15px 10px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; border: 1px solid #eee;">
+                            <h3 style="font-size: 13px; margin-bottom: 10px; color: #374151; min-height: 40px; display: flex; align-items: center; justify-content: center;">Lulus IKL vs BerSLHS</h3>
+                            <div style="position: relative; height: 160px; width: 100%; display: flex; justify-content: center;">
+                                <canvas id="pieIklVsSlhs"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- AKHIR BLOK VISUALISASI DATA -->
                 <div class="summary-wrap">
                      <div class="group-block">
                     <div class="group-pill">Ringkasan</div>
@@ -497,6 +519,62 @@
                 const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
                 return String(value ?? '').replace(/[&<>"']/g, (char) => map[char]);
             }
+
+            const chartData = {
+                totalTpp: {{ (int) ($summaryTotals['total_units'] ?? 0) }},
+                totalLulusIkl: {{ (int) ($summaryTotals['total_lulus_ikl'] ?? 0) }},
+                totalBerSlhs: {{ (int) ($summaryTotals['total_slhs'] ?? 0) }}
+            };
+
+            function initPieCharts() {
+                if (typeof Chart === 'undefined') return;
+
+                const pieTppVsIkl = document.getElementById('pieTppVsIkl');
+                if (pieTppVsIkl) {
+                    new Chart(pieTppVsIkl.getContext('2d'), {
+                        type: 'pie',
+                        data: {
+                            labels: ['Jumlah TPP', 'TPP Lulus IKL'],
+                            datasets: [{
+                                data: [chartData.totalTpp, chartData.totalLulusIkl],
+                                backgroundColor: ['#1d4ed8', '#16a34a'],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false, 
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+
+                const pieIklVsSlhs = document.getElementById('pieIklVsSlhs');
+                if (pieIklVsSlhs) {
+                    new Chart(pieIklVsSlhs.getContext('2d'), {
+                        type: 'pie',
+                        data: {
+                            labels: ['TPP Lulus IKL', 'BerSLHS / HSP'],
+                            datasets: [{
+                                data: [chartData.totalLulusIkl, chartData.totalBerSlhs],
+                                backgroundColor: ['#16a34a', '#0ea5e9'],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false, 
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+                }
+            }
+
+            initPieCharts();
             
             loadRekapTable('sppg');
             toggleResetButton();

@@ -12,10 +12,11 @@
 <div class="container-fluid civic civic-fade">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0"><i class="fas fa-building me-2"></i>Data Unit Usaha</h4>
-        <a href="{{ route('admin.reporting.create') }}" class="btn btn-primary">
+        <a href="{{ route('admin.reporting.create') }}" class="btn text-white" style="background-color: #009DE0; border-color: #009DE0;">
             <i class="fas fa-plus me-2"></i>Tambah Data
         </a>
     </div>
+</div>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

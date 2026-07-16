@@ -22,6 +22,5 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
-        URL::forceScheme('https');
     }
 }

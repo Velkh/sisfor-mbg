@@ -14,8 +14,8 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Daftar Admin Kecamatan</h5>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createOperatorModal">
-                        <i class="fas fa-plus me-2"></i>Tambah Admin Kecamatan
+                    <button type="button" class="btn text-white" style="background-color: #009DE0; border-color: #009DE0;" data-bs-toggle="modal" data-bs-target="#createOperatorModal">
+                        <i class="fas fa-plus me-2"></i>Tambah Koordinator Kecamatan
                     </button>
                 </div>
             </div>
@@ -192,7 +192,7 @@
                     </div>
                     <div class="modal-footer justify-content-center">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn text-white" style="background-color: #009DE0; border-color: #009DE0;">Simpan</button>                    
                     </div>
                 </form>
             </div>

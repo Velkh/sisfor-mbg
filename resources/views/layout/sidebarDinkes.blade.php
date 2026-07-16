@@ -1,5 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+<!-- ================= TOP BAR ================= -->
 <div class="top-bar">
     <div class="top-bar-left">
         <button id="sidebar-toggle" class="mobile-toggle-btn">
@@ -11,7 +12,14 @@
         <div class="user-info-top">
             <div class="user-details-top">
                 <p class="user-name-top">{{ Auth::user()->nama_lengkap ?? 'Admin' }}</p>
-                <span class="user-role-top">Admin Dinkes</span>
+                <!-- Menampilkan Role secara dinamis (Dinkes / Korwil / Korcam) -->
+                <span class="user-role-top">
+                    @if(isset(Auth::user()->role))
+                        {{ ucwords(str_replace('_', ' ', Auth::user()->role)) }}
+                    @else
+                        Admin Dinkes
+                    @endif
+                </span>
             </div>
             <div class="user-avatar-top">
                 <i class="fas fa-user-circle"></i>
@@ -20,6 +28,7 @@
     </div>
 </div>
 
+<!-- ================= SIDEBAR ================= -->
 <div class="sidebar">
     <div class="sidebar-header">
         <div class="logo-section">
@@ -33,6 +42,7 @@
 
     <nav class="sidebar-nav">
         <ul class="nav-menu">
+            <!-- Menu Dashboard: Bisa diakses Dinkes & Korwil -->
             <li class="nav-item">
                 <a href="{{ route('admin.dashboard') }}" class="nav-link {{ Route::is('admin.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-home"></i>
@@ -40,13 +50,17 @@
                 </a>
             </li>
 
+            <!-- Menu Kelola Admin: HANYA untuk Admin Dinkes -->
+            @if(Auth::user() && Auth::user()->role === 'admin_dinkes')
             <li class="nav-item">
                 <a href="{{ route('admin.manage.index') }}" class="nav-link {{ Route::is('admin.manage*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     <span>Kelola Admin</span>
                 </a>
             </li>
+            @endif
 
+            <!-- Menu Input Data: Dinkes & Korwil (Korwil hanya akses SPPG di logic controllernya) -->
             <li class="nav-item">
                 <a href="{{ route('admin.reporting.index') }}" class="nav-link {{ Route::is('admin.reporting*') ? 'active' : '' }}">
                     <i class="fas fa-plus-circle"></i>
@@ -54,6 +68,7 @@
                 </a>
             </li>
 
+            <!-- Menu Data Kelayakan: Dinkes & Korwil -->
             <li class="nav-item">
                 <a href="{{ route('admin.data') }}" class="nav-link {{ Route::is('admin.data*') ? 'active' : '' }}">
                     <i class="fas fa-folder"></i>
@@ -61,6 +76,7 @@
                 </a>
             </li>
 
+            <!-- Menu Rekap Laporan: Dinkes & Korwil -->
             <li class="nav-item">
                 <a href="{{ route('admin.laporan') }}" class="nav-link {{ Route::is('admin.laporan*') ? 'active' : '' }}">
                     <i class="fas fa-file-alt"></i>
@@ -81,6 +97,7 @@
     </div>
 </div>
 
+<!-- ================= CSS STYLES ================= -->
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -92,16 +109,14 @@
         margin-top: 0;
     }
 
-    /* --- TOP BAR STYLES (HIJAU) --- */
+    /* --- TOP BAR STYLES (BIRU MUDA) --- */
     .top-bar {
         position: fixed;
         top: 0;
         left: 260px; 
         right: 0;
         height: 70px;
-        /* Latar belakang hijau Dinkes dengan efek transparan tipis */
-        background: rgba(0, 104, 3, 0.98);
-        backdrop-filter: blur(10px);
+        background: #009DE0; /* Biru Muda */
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         display: flex;
@@ -137,13 +152,13 @@
         margin: 0;
         font-size: 14px;
         font-weight: 600;
-        color: #ffffff; /* Teks nama putih */
+        color: #ffffff;
     }
 
     .user-role-top {
         font-size: 12px;
         font-weight: 500;
-        color: rgba(255, 255, 255, 0.8); /* Teks abu-abu terang */
+        color: rgba(255, 255, 255, 0.9);
     }
 
     .user-avatar-top i {
@@ -154,7 +169,6 @@
         justify-content: center;
     }
 
-    /* Tombol Hamburger Mobile (Putih) */
     .mobile-toggle-btn {
         display: none;
         background: transparent;
@@ -170,15 +184,14 @@
         color: rgba(255, 255, 255, 0.7);
     }
 
-    /* --- SIDEBAR STYLES (HIJAU) --- */
+    /* --- SIDEBAR STYLES (BIRU MUDA) --- */
     .sidebar {
         position: fixed;
         left: 0;
         top: 0;
         width: 260px;
         height: 100vh;
-        /* Gradien hijau gelap khas Dinkes */
-        background: linear-gradient(180deg, #006803 0%, #004202 100%); 
+        background: #009DE0; /* Biru Muda, sama dengan top-bar */
         display: flex;
         flex-direction: column;
         color: white;
@@ -221,7 +234,7 @@
     .app-title p {
         margin: 4px 0 0 0;
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(255, 255, 255, 0.9);
         font-weight: 500;
     }
 
@@ -245,7 +258,7 @@
         align-items: center;
         gap: 14px;
         padding: 12px 16px;
-        color: rgba(255, 255, 255, 0.85);
+        color: #ffffff;
         text-decoration: none;
         border-radius: 10px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -254,15 +267,14 @@
     }
 
     .nav-link:hover:not(.active) {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.2);
         color: #ffffff;
         transform: translateX(5px);
     }
 
     .nav-link.active {
-        /* Background putih dan teks hijau agar sangat kontras dengan background sidebar */
         background-color: #ffffff; 
-        color: #006803;
+        color: #009DE0; /* Teks menu aktif menyesuaikan warna biru muda */
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -275,7 +287,7 @@
     }
 
     .nav-link.active i {
-        color: #006803;
+        color: #009DE0; /* Icon aktif menyesuaikan warna biru muda */
     }
 
     .nav-link span {
@@ -285,7 +297,7 @@
     .sidebar-footer {
         padding: 16px;
         border-top: 1px solid rgba(255, 255, 255, 0.15);
-        background: rgba(0, 0, 0, 0.1);
+        background: rgba(0, 0, 0, 0.05);
     }
 
     .logout-form {
@@ -299,20 +311,20 @@
         border: none;
         cursor: pointer;
         font-family: inherit;
-        color: #fca5a5; /* Merah muda lembut agar tetap terlihat di bg hijau */
+        color: #ffe4e6; 
     }
 
     .logout-btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #fef2f2;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
         transform: translateX(5px);
     }
 
     /* Scrollbar Styling */
     .sidebar::-webkit-scrollbar { width: 5px; }
     .sidebar::-webkit-scrollbar-track { background: transparent; }
-    .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
 
     /* --- Responsive Design --- */
     @media (max-width: 992px) {
@@ -343,6 +355,7 @@
     }
 </style>
 
+<!-- ================= JAVASCRIPT ================= -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const toggleBtn = document.getElementById('sidebar-toggle');

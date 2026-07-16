@@ -115,6 +115,10 @@ class GuestController extends Controller
 
         $summaryTotals = [
             'total_units' => UnitUsaha::count(),
+            'total_lulus_ikl' => UnitUsaha::whereHas('laporanSlhs', function ($q) {
+                $q->where('status_ikl', 'selesai')
+                ->where('nilai_ikl', '>=', 80);
+            })->count(),
             'total_slhs' => LaporanSlhs::where('status_slhs', 'selesai')->count(),
         ];
 
@@ -382,7 +386,6 @@ class GuestController extends Controller
             $units = UnitUsaha::where('id_kecamatan', $kec->id_kecamatan)->get();
 
             $sppg = $units->where('jenis_usaha', 'sppg')->count();
-            $tpp = $units->where('jenis_usaha', 'tpp')->count();
             $catering = $units->where('jenis_usaha','catering')->count();
             $restoran = $units->where('jenis_usaha','restoran')->count();
             $dam = $units->where('jenis_usaha', 'dam')->count();
@@ -397,7 +400,6 @@ class GuestController extends Controller
             return [
                 'kecamatan' => $kec->nama_kecamatan,
                 'sppg' => $sppg,
-                'tpp' => $tpp,
                 'restoran'=>$restoran,
                 'catering'=>$catering,
                 'dam' => $dam,
