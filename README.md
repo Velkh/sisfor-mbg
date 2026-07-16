@@ -138,6 +138,8 @@ tests/
 │   ├── GuestControllerTest.php
 │   └── LoginControllerTest.php
 └── Unit/
+    └── ExampleTest.php
+```
 
 ## ⚙️ Langkah Instalasi Lokal
 
