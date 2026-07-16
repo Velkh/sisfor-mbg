@@ -1,11 +1,11 @@
 # Monev TPP — Web Dashboard SLHS
 
-Aplikasi berbasis **Laravel 12** untuk memonitor dan mengevaluasi kelayakan sanitasi Tempat Pengelolaan Pangan (TPP) di Kota Depok. Sistem ini secara otomatis mengintegrasikan hasil Inspeksi Kesehatan Lingkungan (IKL) dari **Lalapan Depok** dan menghasilkan status kelayakan Sertifikat Laik Higiene Sanitasi (SLHS) berbasis aturan (*rule-based*).
+Aplikasi berbasis **Laravel 12** untuk memonitor dan mengevaluasi kelayakan sanitasi Tempat Pengelolaan Pangan (TPP) di Kota Depok. Sistem ini secara otomatis mengintegrasikan hasil Inspeksi Kesehatan Lingkungan (IKL) dari **Dsimfoniku** dan menghasilkan status kelayakan Sertifikat Laik Higiene Sanitasi (SLHS) berbasis aturan (*rule-based*).
 
 ## 🌟 Fitur Utama
 
 - **Manajemen Unit Usaha TPP:** Dikelola per kecamatan dengan pembagian akses spesifik per jenis usaha (SPPG, TPP, DAM, Kantin).
-- **Sinkronisasi Otomatis IKL:** Menarik data hasil IKL dari API eksternal **Lalapan Depok** (termasuk *name matching*).
+- **Sinkronisasi Otomatis IKL:** Menarik data hasil IKL dari API eksternal **Dsimfoniku** (termasuk *name matching*).
 - **Evaluasi Kelayakan Otomatis:** Skor IKL ≥ 80 = "Memenuhi Syarat" (otomatis *real-time*).
 - **Dashboard Komprehensif:** Tersedia untuk ringkasan Dinkes (makro), Kecamatan (mikro), dan Publik (tanpa login).
 - **Peringatan Dini SLHS:** Notifikasi untuk sertifikat yang hampir/telah kedaluwarsa.
