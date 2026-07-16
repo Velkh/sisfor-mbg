@@ -160,8 +160,8 @@ tests/
    ```
    Sesuaikan koneksi database di `.env`. Tambahkan kredensial API integrasi:
    ```env
-   LALAPAN_DEPOK_BASE_URL="https://api.domain.com"
-   LALAPAN_DEPOK_API_KEY="your-api-key"
+   DSIMFONIKU_BASE_URL="https://api.domain.com"
+   DSIMFONIKU_DEPOK_API_KEY="your-api-key"
    ```
 
 4. **Generate Key & Migrasi Database**
@@ -180,6 +180,6 @@ tests/
 ## 📜 Panduan Kontribusi / Commit
 
 Untuk menjaga kerapian riwayat repositori, gunakan format *commit message* yang ringkas dan spesifik pada *scope* perubahan. Contoh:
-- `feat(api): integrasi endpoint Lalapan Depok`
+- `feat(api): integrasi endpoint Dsimfoniku`
 - `fix(role): pemisahan akses DAM dan Kantin per kecamatan`
 - `refactor(db): rombak struktur tabel dashboard SLHS`
