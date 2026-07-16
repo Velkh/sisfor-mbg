@@ -16,7 +16,7 @@ Aplikasi berbasis **Laravel 12** untuk memonitor dan mengevaluasi kelayakan sani
 ## 👥 Peran dan Akses
 
 1. **Admin Dinkes:** Akses lintas kecamatan, monitoring makro, kelola operator/admin kecamatan, rekap pelaporan pimpinan, dan pantau log sinkronisasi API.
-2. **Admin Kecamatan:** Mengelola data unit usaha di wilayah kerjanya. **Catatan Akses:** Hak akses admin kecamatan dipecah dan diisolasi per jenis usaha spesifik (Admin SPPG, Admin TPP, Admin DAM, Admin Kantin) untuk masing-masing kecamatan.
+2. **Admin Kecamatan:** Mengelola data unit usaha di wilayah kerjanya. **Catatan Akses:** Hak akses admin kecamatan dipecah dan diisolasi spesifik SPPG untuk masing-masing kecamatan.
 3. **Publik / Guest:** Akses pantau data kelayakan TPP tanpa autentikasi (Read-only).
 
 ## 🚀 Lingkungan Pengembangan & Prasyarat
