@@ -163,7 +163,6 @@ tests/
    Sesuaikan koneksi database di `.env`. Tambahkan kredensial API integrasi:
    ```env
    DSIMFONIKU_BASE_URL="https://api.domain.com"
-   DSIMFONIKU_DEPOK_API_KEY="your-api-key"
    ```
 
 4. **Generate Key & Migrasi Database**
