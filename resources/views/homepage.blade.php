@@ -23,16 +23,11 @@
 
     <nav class="navbar">
         <a href="{{ route('guest.index') }}" class="navbar-brand">
-            <div class="logo-pill">
-                <div class="logo-circle gold-c">
-                    <img src="{{ asset('images/images.jpeg') }}"  alt="Pemkot Depok" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                    <span style="display:none;">DPK</span>
-                </div>
-            </div>
-            <div class="brand-text">
-                Dashboard SLHS
-                <small>Kota Depok</small>
-            </div>
+            <img
+                src="{{ asset('images/smart-healthy-city.png') }}"
+                alt="Dashboard SLHS Kota Depok"
+                class="navbar-logo"
+            >
         </a>
 
         <ul class="nav-links">

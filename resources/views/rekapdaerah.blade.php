@@ -279,7 +279,7 @@
         </div>
         
         <div class="footer-bottom">
-            <span><strong>Dinas Kesehatan & Diskominfo</strong> Kota Depok</span>
+            <span><strong>Dinas Kesehatan</strong> Kota Depok</span>
             <span>Copyright &copy; {{ date('Y') }}</span>
         </div>
     </footer>
